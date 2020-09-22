@@ -1,0 +1,22 @@
+body{
+  min-height: 25vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.test{
+  color:black;
+}
+
+#spreadsheet{
+  color:green;
+  padding-bottom: 5vh;
+  align-self:center;
+  margin-top:0px;
+}
+#webpageInstructions{
+  max-width: 500px;
+  border: solid 2px #ccc;
+  padding: 10px;
+}
