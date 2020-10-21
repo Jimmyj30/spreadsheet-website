@@ -1,0 +1,15 @@
+{
+  "name": "spreadsheet_graphs-website",
+  "version": "1.0.0",
+  "description": "a microsoft-excel type website for doing basic lab work",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "handsontable": "^8.0.0",
+    "uniq": "^1.0.1"
+  }
+}

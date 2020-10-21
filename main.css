@@ -1,0 +1,35 @@
+body{
+  min-height: 25vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.test{
+  color:black;
+}
+
+
+#spreadsheet_1{
+  color:green;
+  padding-bottom: 5vh;
+  align-self:center;
+  margin-top:0px;
+}
+
+#spreadsheet_2{
+  padding-bottom: 5vh;
+  align-self:center;
+  margin-top:0px;
+}
+
+#webpageInstructions{
+  max-width: 500px;
+  border: solid 2px #ccc;
+  padding: 10px;
+}
+
+#generalText{
+  max-width: 500px;
+  padding: 10px;
+}
