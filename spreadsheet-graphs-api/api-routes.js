@@ -13,6 +13,7 @@ router.get("/", function (req, res) {
 var dataPointController = require("./dataController");
 
 // data point routes
+// relate GET, POST, etc to the functions in dataController.js
 router
   .route("/data-points")
   .get(dataPointController.index)

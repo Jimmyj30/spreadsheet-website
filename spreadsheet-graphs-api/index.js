@@ -4,7 +4,7 @@ let express = require("express");
 let bodyParser = require("body-parser");
 // Import Mongoose
 let mongoose = require("mongoose");
-// Initialise the app
+// Initialize the app
 let app = express();
 
 // Import routes
