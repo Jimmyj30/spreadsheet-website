@@ -9,22 +9,22 @@ router.get("/", function (req, res) {
   });
 });
 
-// Import data point controller
-var dataPointController = require("./dataController");
+// Import data table controller
+var dataTableController = require("./dataController");
 
-// data point routes
+// data table routes
 // relate GET, POST, etc to the functions in dataController.js
 router
-  .route("/data-points")
-  .get(dataPointController.index)
-  .post(dataPointController.new);
+  .route("/data-tables")
+  .get(dataTableController.index)
+  .post(dataTableController.new);
 
 router
-  .route("/data-points/:dataPoint_id")
-  .get(dataPointController.view)
-  .patch(dataPointController.update)
-  .put(dataPointController.update)
-  .delete(dataPointController.delete);
+  .route("/data-tables/:dataTable_id")
+  .get(dataTableController.view)
+  .patch(dataTableController.update)
+  .put(dataTableController.update)
+  .delete(dataTableController.delete);
 
 // Export API routes
 module.exports = router;

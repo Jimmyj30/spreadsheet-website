@@ -1,11 +1,11 @@
 // dataController.js
 
 // Import data model
-DataPoint = require("./dataPointModel");
+DataTable = require("./dataTableModel");
 
 // Handle index actions
 exports.index = function (req, res) {
-  DataPoint.get(function (err, dataPoints) {
+  DataTable.get(function (err, dataTables) {
     if (err) {
       res.json({
         status: "error",
@@ -16,91 +16,92 @@ exports.index = function (req, res) {
     res.json({
       status: "success",
       message: "Data retrieved successfully",
-      data: dataPoints,
+      data: dataTables,
     });
   });
 };
 
-// Handle create data point actions
+// Handle create data table actions
 exports.new = function (req, res) {
-  var dataPoint = new DataPoint();
-  dataPoint.name = req.body.name ? req.body.name : dataPoint.name;
-  dataPoint.gender = req.body.gender;
-  dataPoint.email = req.body.email;
-  dataPoint.phone = req.body.phone;
-  // save the data point and check for errors
-  dataPoint.save(function (err) {
+  var dataTable = new DataTable();
+  // dataTable.name = req.body.name ? req.body.name : dataTable.name;
+  dataTable.xCoords = req.body.xCoords ? req.body.xCoords : dataTable.xCoords;
+  dataTable.yCoords = req.body.yCoords;
+  dataTable.xUncertainties = req.body.xUncertainties;
+  dataTable.yUncertainties = req.body.yUncertainties;
+  // save the data table and check for errors
+  dataTable.save(function (err) {
     if (err) res.json(err);
     else {
     }
     res.json({
-      message: "New data point created!",
-      data: dataPoint,
+      message: "New data table created!",
+      data: dataTable,
     });
   });
 };
 
-// Handle view data point info
+// Handle view data table info
 exports.view = function (req, res) {
-  DataPoint.findById(req.params.dataPoint_id, function (err, dataPoint) {
+  DataTable.findById(req.params.dataTable_id, function (err, dataTable) {
     if (err) res.send(err);
     res.json({
-      message: "data point details loading..",
-      data: dataPoint,
+      message: "data table details loading..",
+      data: dataTable,
     });
   });
 };
 
-// Handle update data point info
+// Handle update data table info
 exports.update = function (req, res) {
-  DataPoint.findById(req.params.dataPoint_id, function (err, dataPoint) {
+  DataTable.findById(req.params.dataTable_id, function (err, dataTable) {
     if (err) res.send(err);
     else {
     }
 
-    dataPoint.name = req.body.name ? req.body.name : dataPoint.name;
-    dataPoint.gender = req.body.gender;
-    dataPoint.email = req.body.email;
-    dataPoint.phone = req.body.phone;
-    // save the data point and check for errors
-    dataPoint.save(function (err) {
+    dataTable.xCoords = req.body.xCoords ? req.body.xCoords : dataTable.xCoords;
+    dataTable.yCoords = req.body.yCoords;
+    dataTable.xUncertainties = req.body.xUncertainties;
+    dataTable.yUncertainties = req.body.yUncertainties;
+    // save the data table and check for errors
+    dataTable.save(function (err) {
       if (err) res.json(err);
       else {
       }
 
       res.json({
-        message: "data point Info updated",
-        data: dataPoint,
+        message: "data table info updated",
+        data: dataTable,
       });
     });
   });
 };
 
-// Handle delete data point
+// Handle delete data table
 exports.delete = function (req, res) {
-  DataPoint.remove(
+  DataTable.remove(
     {
-      _id: req.params.dataPoint_id,
+      _id: req.params.dataTable_id,
     },
-    function (err, dataPoint) {
+    function (err, dataTable) {
       if (err) res.send(err);
       else {
       }
 
       res.json({
         status: "success",
-        message: "data point deleted",
+        message: "data table deleted",
       });
     }
   );
 };
 
 // Commands...
-// GET /api/data-points will list all data points
-// POST /api/data-points will make a new data point
-// GET /api/data-points/{id} will list a single data point
-// PUT /api/data-points/{id} update a single data point
-// DELETE /data-points/contacts/{id} will delete a single data point
+// GET /api/data-tables will list all data tables
+// POST /api/data-tables will make a new data table
+// GET /api/data-tables/{id} will list a single data table
+// PUT /api/data-tables/{id} update a single data table
+// DELETE /data-tables/{id} will delete a single data table
 
 // - req and res mean...
 //
