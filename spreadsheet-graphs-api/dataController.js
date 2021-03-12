@@ -29,6 +29,15 @@ exports.new = function (req, res) {
   dataTable.yCoords = req.body.yCoords;
   dataTable.xUncertainties = req.body.xUncertainties;
   dataTable.yUncertainties = req.body.yUncertainties;
+  dataTable.xLabel = req.body.xLabel;
+  dataTable.yLabel = req.body.yLabel;
+
+  dataTable.xCurveStraighteningInstructions =
+    req.body.xCurveStraighteningInstructions;
+
+  dataTable.yCurveStraighteningInstructions =
+    req.body.yCurveStraighteningInstructions;
+
   // save the data table and check for errors
   dataTable.save(function (err) {
     if (err) res.json(err);
