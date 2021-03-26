@@ -7,7 +7,7 @@ import * as Handsontable from 'handsontable';
   styleUrls: ['./data-tables.component.css'],
 })
 export class DataTablesComponent implements OnInit {
-  rawData: any[] = Handsontable.default.helper.createSpreadsheetData(5, 2);
+  rawData: any[] = Handsontable.default.helper.createSpreadsheetData(10, 4);
   rawDataTableSettings: Handsontable.default.GridSettings;
   processedDataTableSettings: Handsontable.default.GridSettings;
   processedData: any[];
@@ -15,7 +15,13 @@ export class DataTablesComponent implements OnInit {
   constructor() {
     this.rawDataTableSettings = {
       rowHeaders: true,
-      colHeaders: ['Manipulated', 'Responding'],
+      colHeaders: [
+        'Uncertainties for Manipulated',
+        'Manipulated',
+        'Responding',
+        'Uncertainties for Responding',
+      ],
+
       filters: true,
       dropdownMenu: true,
       fillHandle: {
@@ -24,7 +30,8 @@ export class DataTablesComponent implements OnInit {
       },
       manualColumnResize: true,
       manualRowResize: true,
-      maxCols: 2,
+      wordWrap: true,
+      maxCols: 4,
       licenseKey: 'non-commercial-and-evaluation',
     };
 
