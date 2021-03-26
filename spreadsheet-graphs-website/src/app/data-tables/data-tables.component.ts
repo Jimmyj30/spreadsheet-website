@@ -14,6 +14,7 @@ export class DataTablesComponent implements OnInit {
 
   constructor() {
     this.rawDataTableSettings = {
+      data: this.rawData,
       rowHeaders: true,
       colHeaders: [
         'Uncertainties for Manipulated',
@@ -21,6 +22,7 @@ export class DataTablesComponent implements OnInit {
         'Responding',
         'Uncertainties for Responding',
       ],
+      columns: [{ data: 0 }, { data: 1 }, { data: 2 }, { data: 3 }],
 
       filters: true,
       dropdownMenu: true,
@@ -41,6 +43,21 @@ export class DataTablesComponent implements OnInit {
     };
   }
 
+  private generateArrayColumns(array) {
+    if (array && array[0]) {
+      let columnsArray = [];
+      for (let i = 0; i < array[0].length; i++) {
+        if (!columnsArray[i]) {
+          columnsArray.push([]);
+        }
+        for (let j = 0; j < array.length; j++) {
+          columnsArray[i].push(array[j][i]);
+        }
+      }
+      return columnsArray;
+    }
+  }
+
   ngOnInit(): void {
     console.log(this.rawDataTableSettings);
   }
@@ -48,5 +65,8 @@ export class DataTablesComponent implements OnInit {
   onSubmit() {
     console.log('raw data: ');
     console.log(this.rawData);
+    console.log('---------------');
+    console.log('columns');
+    console.log(this.generateArrayColumns(this.rawData));
   }
 }
