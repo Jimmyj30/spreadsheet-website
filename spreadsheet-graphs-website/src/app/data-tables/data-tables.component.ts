@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import * as Handsontable from 'handsontable';
 
+import { DataTable } from './data-table.model';
+
 @Component({
   selector: 'app-data-tables',
   templateUrl: './data-tables.component.html',
@@ -68,5 +70,7 @@ export class DataTablesComponent implements OnInit {
     console.log('---------------');
     console.log('columns');
     console.log(this.generateArrayColumns(this.rawData));
+
+    //
   }
 }
