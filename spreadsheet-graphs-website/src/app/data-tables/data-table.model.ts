@@ -1,5 +1,5 @@
 export class DataTable {
-  public id?: any;
+  public _id?: any;
   public xCoords: number[];
   public yCoords: number[];
   public xUncertainties: number[];
