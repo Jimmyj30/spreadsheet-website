@@ -1,3 +1,5 @@
+// Import CORS
+const cors = require("cors");
 // Import express
 let express = require("express");
 // Import Body parser
@@ -6,6 +8,7 @@ let bodyParser = require("body-parser");
 let mongoose = require("mongoose");
 // Initialize the app
 let app = express();
+app.use(cors());
 
 // Import routes
 let apiRoutes = require("./api-routes");

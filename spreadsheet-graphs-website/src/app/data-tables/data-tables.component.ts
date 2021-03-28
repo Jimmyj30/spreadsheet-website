@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import * as Handsontable from 'handsontable';
 
+import { DataTableService } from '../shared/data-table.service';
 import { DataTable } from './data-table.model';
 
 @Component({
@@ -9,12 +10,20 @@ import { DataTable } from './data-table.model';
   styleUrls: ['./data-tables.component.css'],
 })
 export class DataTablesComponent implements OnInit {
+  // https://handsontable.com/docs/8.3.2/tutorial-data-sources.html
+  // (Object data source with custom data schema section)
+
+  // https://stackoverflow.com/questions/46007985/refresh-handsontable-angular-4
+  // use @ViewChild and refresh the new handsontable....
+
+  // to run locally: ng serve --proxy-config proxy.conf.json
+
   rawData: any[] = Handsontable.default.helper.createSpreadsheetData(10, 4);
   rawDataTableSettings: Handsontable.default.GridSettings;
   processedDataTableSettings: Handsontable.default.GridSettings;
   processedData: any[];
 
-  constructor() {
+  constructor(private readonly dataTableService: DataTableService) {
     this.rawDataTableSettings = {
       data: this.rawData,
       rowHeaders: true,
@@ -65,12 +74,20 @@ export class DataTablesComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log('raw data: ');
-    console.log(this.rawData);
-    console.log('---------------');
-    console.log('columns');
-    console.log(this.generateArrayColumns(this.rawData));
+    const rawDataColumnsArray = this.generateArrayColumns(this.rawData);
+    const rawDataTable = new DataTable({
+      xUncertainties: rawDataColumnsArray[0],
+      xCoords: rawDataColumnsArray[1],
+      yCoords: rawDataColumnsArray[2],
+      yUncertainties: rawDataColumnsArray[3],
+    });
+    console.log(rawDataTable);
 
-    //
+    this.dataTableService
+      .createDataTable(rawDataTable)
+      .subscribe((response) => {
+        console.log('response: ');
+        console.log(response);
+      });
   }
 }

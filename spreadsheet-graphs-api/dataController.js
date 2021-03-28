@@ -112,5 +112,5 @@ exports.delete = function (req, res) {
 // PUT /api/data-tables/{id} update a single data table
 // DELETE /data-tables/{id} will delete a single data table
 
-// - req and res mean...
+// - req and res mean request and response...
 //

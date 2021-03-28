@@ -29,13 +29,12 @@ export class DataStorageService {
         return this.handleError(error);
       })
       // response of this function will be a json object...
-      // have the response of this function be a formatted data table... ?
     );
   }
 
   public updateDataTable(dataTable: DataTable) {
     return this.http
-      .put(API_URL + '/api/data-tables' + dataTable.id, dataTable)
+      .put(API_URL + '/api/data-tables/' + dataTable.id, dataTable)
       .pipe(
         catchError((error) => {
           return this.handleError(error);
