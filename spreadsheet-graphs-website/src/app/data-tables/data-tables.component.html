@@ -12,6 +12,9 @@
     <button type="submit" (click)="onSubmit()">Submit</button>
   </div>
   <div *ngIf="processedDataTable" class="vertical-margin">
-    <hot-table [settings]="processedDataTableSettings"></hot-table>
+    <hot-table
+      #processedDataTableRef
+      [settings]="processedDataTableSettings"
+    ></hot-table>
   </div>
 </div>

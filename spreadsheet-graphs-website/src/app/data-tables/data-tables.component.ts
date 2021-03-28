@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { HotTableComponent } from '@handsontable/angular';
 import * as Handsontable from 'handsontable';
 
 import { DataTableService } from '../shared/data-table.service';
@@ -25,6 +26,9 @@ export class DataTablesComponent implements OnInit {
   processedData: any[];
   processedDataTableSettings: Handsontable.default.GridSettings;
   processedDataTable: DataTable;
+
+  @ViewChild('processedDataTableRef', { static: false })
+  processedDataTableRef: HotTableComponent;
 
   constructor(private readonly dataTableService: DataTableService) {
     this.rawDataTableSettings = {
@@ -145,8 +149,13 @@ export class DataTablesComponent implements OnInit {
     this.processedDataTableSettings.data = this.flipArrayOrientation(
       arrayOfColumns
     );
+    this.updateProcessedDataTable(this.processedDataTableSettings);
 
     console.log('updated data table: ');
     console.log(this.processedDataTableSettings);
+  }
+
+  private updateProcessedDataTable(settings) {
+    this.processedDataTableRef.updateHotTable(settings);
   }
 }
