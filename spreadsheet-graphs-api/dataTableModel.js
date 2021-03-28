@@ -1,5 +1,6 @@
 // dataTablesModel.js
 var mongoose = require("mongoose");
+// https://mongoosejs.com/docs/schematypes.html#arrays
 
 const Instruction = new mongoose.Schema({
   //"type" of function -- eg: LOG_BASE_E, LOG_BASE_10, TO_CONST_POWER, MULTIPLIED_BY_CONSTANT_VARIABLE...
