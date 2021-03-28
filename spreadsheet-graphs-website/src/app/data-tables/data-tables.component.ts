@@ -20,6 +20,7 @@ export class DataTablesComponent implements OnInit {
 
   rawData: any[] = Handsontable.default.helper.createSpreadsheetData(10, 4);
   rawDataTableSettings: Handsontable.default.GridSettings;
+  rawDataTable: DataTable;
 
   processedData: any[];
   processedDataTableSettings: Handsontable.default.GridSettings;
@@ -49,11 +50,6 @@ export class DataTablesComponent implements OnInit {
       maxCols: 4,
       licenseKey: 'non-commercial-and-evaluation',
     };
-
-    this.processedDataTableSettings = {
-      // settings for the procesed data table
-      // after processed data is changed: reload data
-    };
   }
 
   ngOnInit(): void {
@@ -62,23 +58,25 @@ export class DataTablesComponent implements OnInit {
 
   onSubmit() {
     let rawDataColumnsArray = this.flipArrayOrientation(this.rawData);
-    let rawDataTable = new DataTable({
-      xUncertainties: rawDataColumnsArray[0],
-      xCoords: rawDataColumnsArray[1],
-      yCoords: rawDataColumnsArray[2],
-      yUncertainties: rawDataColumnsArray[3],
+    this.rawDataTable = new DataTable({
+      yUncertainties: rawDataColumnsArray[0],
+      yCoords: rawDataColumnsArray[1],
+      xCoords: rawDataColumnsArray[2],
+      xUncertainties: rawDataColumnsArray[3],
       _id: this.processedDataTable ? this.processedDataTable._id : undefined,
     });
     console.log('rawDataTable: ');
-    console.log(rawDataTable);
+    console.log(this.rawDataTable);
 
     // update this to better reflect how the responses should be organized...
     // if rawDataTable has an ID, then update the table in question
     // and display the affected rawDataTable as the processedDataTable...
 
     if (this.processedDataTable && this.processedDataTable._id) {
+      // we are updating processedDataTable based on the ID of the rawDataTable...
+      // we could have the API return a processedDataTable along with the ID of the raw data table...
       this.dataTableService
-        .updateDataTable(rawDataTable)
+        .updateDataTable(this.rawDataTable)
         .subscribe((response: any) => {
           console.log('response: ');
           console.log(response);
@@ -86,10 +84,14 @@ export class DataTablesComponent implements OnInit {
         });
     } else {
       this.dataTableService
-        .createDataTable(rawDataTable)
+        .createDataTable(this.rawDataTable)
         .subscribe((response: any) => {
           console.log('response: ');
           console.log(response);
+
+          // add an ID to the raw data table to indicate it is now stored in the database
+          // return a processed data table as the response....
+
           this.processedDataTable = response.data;
           this.createProcessedDataTableSettings(this.processedDataTable);
         });
@@ -115,10 +117,10 @@ export class DataTablesComponent implements OnInit {
 
   private createProcessedDataTableSettings(dataTable: DataTable) {
     let arrayOfColumns = [
-      dataTable.xUncertainties,
-      dataTable.xCoords,
-      dataTable.yCoords,
       dataTable.yUncertainties,
+      dataTable.yCoords,
+      dataTable.xCoords,
+      dataTable.xUncertainties,
     ];
 
     this.processedDataTableSettings = this.rawDataTableSettings;
@@ -135,10 +137,10 @@ export class DataTablesComponent implements OnInit {
 
   private updateProcessedDataTableSettings(dataTable: DataTable) {
     let arrayOfColumns = [
-      dataTable.xUncertainties,
-      dataTable.xCoords,
-      dataTable.yCoords,
       dataTable.yUncertainties,
+      dataTable.yCoords,
+      dataTable.xCoords,
+      dataTable.xUncertainties,
     ];
     this.processedDataTableSettings.data = this.flipArrayOrientation(
       arrayOfColumns
