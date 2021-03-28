@@ -43,6 +43,14 @@ export class DataStorageService {
       );
   }
 
+  public deleteDataTable(dataTable: DataTable) {
+    return this.http.delete(API_URL + '/api/data-tables/' + dataTable._id).pipe(
+      catchError((error) => {
+        return this.handleError(error);
+      })
+    );
+  }
+
   private handleError(error: Response | any) {
     console.error('ApiService::handleError', error);
     return throwError(error.message);

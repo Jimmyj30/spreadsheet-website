@@ -14,4 +14,8 @@ export class DataTableService {
   updateDataTable(dataTable: DataTable) {
     return this.api.updateDataTable(dataTable);
   }
+
+  deleteDataTable(dataTable: DataTable) {
+    return this.api.deleteDataTable(dataTable);
+  }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { HotTableComponent } from '@handsontable/angular';
 import * as Handsontable from 'handsontable';
 
@@ -72,9 +72,11 @@ export class DataTablesComponent implements OnInit {
     console.log('rawDataTable: ');
     console.log(this.rawDataTable);
 
-    // update this to better reflect how the responses should be organized...
-    // if rawDataTable has an ID, then update the table in question
-    // and display the affected rawDataTable as the processedDataTable...
+    // we send the raw data table using the API, and the API will store that raw data table (giving it an ID), and
+    // will also send a processed data table in the response as well...
+    // response might contain a message, a processedDataTable, and a rawDataTable id (_id) ...
+    // we could then display the processedDataTable and give the rawDataTable an id
+    // that will need to be used if we want update the processed data table...
 
     if (this.processedDataTable && this.processedDataTable._id) {
       // we are updating processedDataTable based on the ID of the rawDataTable...
@@ -100,6 +102,15 @@ export class DataTablesComponent implements OnInit {
           this.createProcessedDataTableSettings(this.processedDataTable);
         });
     }
+  }
+
+  onFinish() {
+    this.dataTableService
+      .deleteDataTable(this.processedDataTable)
+      .subscribe(() => {
+        console.log('data table deleted');
+        window.location.reload();
+      });
   }
 
   private flipArrayOrientation(array) {

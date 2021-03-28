@@ -17,4 +17,7 @@
       [settings]="processedDataTableSettings"
     ></hot-table>
   </div>
+  <div *ngIf="processedDataTable">
+    <button type="button" (click)="onFinish()">Done</button>
+  </div>
 </div>
