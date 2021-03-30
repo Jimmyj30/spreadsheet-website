@@ -11,6 +11,22 @@
   <div class="vertical-margin">
     <button type="submit" (click)="onSubmit()">Submit</button>
   </div>
+  <div class="vertical-margin">
+    <form
+      [formGroup]="curveStraighteningInstructionsForm"
+      (ngSubmit)="onSubmit()"
+    >
+      <select
+        class="custom-select"
+        (change)="changeOption($event)"
+        formControlName="xCurveStraighteningInstructions"
+      >
+        <option *ngFor="let option of options" [ngValue]="option">
+          {{ option }}
+        </option>
+      </select>
+    </form>
+  </div>
   <div *ngIf="processedDataTable" class="vertical-margin">
     <hot-table
       #processedDataTableRef

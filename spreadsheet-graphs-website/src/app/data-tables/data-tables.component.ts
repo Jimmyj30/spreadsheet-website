@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { HotTableComponent } from '@handsontable/angular';
+import { FormGroup, FormControl, FormArray, FormBuilder } from '@angular/forms';
 import * as Handsontable from 'handsontable';
 
 import { DataTableService } from '../shared/data-table.service';
@@ -17,6 +18,8 @@ export class DataTablesComponent implements OnInit {
   // https://stackoverflow.com/questions/46007985/refresh-handsontable-angular-4
   // use @ViewChild and refresh the new handsontable....
 
+  // https://www.positronx.io/angular-7-select-dropdown-examples-with-reactive-forms/
+
   // to run locally: ng serve --proxy-config proxy.conf.json
 
   rawData: any[] = Handsontable.default.helper.createSpreadsheetData(10, 4);
@@ -27,10 +30,19 @@ export class DataTablesComponent implements OnInit {
   processedDataTableSettings: Handsontable.default.GridSettings;
   processedDataTable: DataTable;
 
+  options: any = ['x', 'ln(x)', 'log_10(x)', 'x^a'];
+  curveStraighteningInstructionsForm = this.fb.group({
+    xCurveStraighteningInstructions: new FormControl(this.options[0]),
+    yCurveStraighteningInstructions: new FormControl(this.options[0]),
+  });
+
   @ViewChild('processedDataTableRef', { static: false })
   processedDataTableRef: HotTableComponent;
 
-  constructor(private readonly dataTableService: DataTableService) {
+  constructor(
+    private readonly dataTableService: DataTableService,
+    private readonly fb: FormBuilder
+  ) {
     this.rawDataTableSettings = {
       data: this.rawData,
       rowHeaders: true,
@@ -60,7 +72,22 @@ export class DataTablesComponent implements OnInit {
     console.log(this.rawDataTableSettings);
   }
 
+  get xCurveStraighteningInstructions() {
+    return this.curveStraighteningInstructionsForm.get(
+      'xCurveStraighteningInstructions'
+    );
+  }
+
+  changeOption(event) {
+    this.xCurveStraighteningInstructions.setValue(event.target.value, {
+      onlySelf: true,
+    });
+  }
+
   onSubmit() {
+    // form instructions...
+    console.log(this.curveStraighteningInstructionsForm.value);
+
     let rawDataColumnsArray = this.flipArrayOrientation(this.rawData);
     this.rawDataTable = new DataTable({
       yUncertainties: rawDataColumnsArray[0],
