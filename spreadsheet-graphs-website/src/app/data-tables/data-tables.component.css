@@ -9,3 +9,15 @@
   margin-top: 10px;
   margin-bottom: 10px;
 }
+
+.left-margin {
+  margin-left: 10px;
+}
+
+.right-margin {
+  margin-right: 10px;
+}
+
+.number-input {
+  width: 50px;
+}

@@ -30,11 +30,17 @@ export class DataTablesComponent implements OnInit {
   processedDataTableSettings: Handsontable.default.GridSettings;
   processedDataTable: DataTable;
 
-  options: any = ['x', 'ln(x)', 'log_10(x)', 'x^a'];
+  showXToConstantPower: boolean;
+  showYToConstantPower: boolean;
+  xOptions: any = ['x', 'ln(x)', 'log_10(x)', 'x^a'];
+  yOptions: any = ['y', 'ln(y)', 'log_10(y)', 'y^a'];
   curveStraighteningInstructionsForm = this.fb.group({
-    xCurveStraighteningInstructions: new FormControl(this.options[0]),
-    yCurveStraighteningInstructions: new FormControl(this.options[0]),
+    xCurveStraighteningInstructions: new FormControl(this.xOptions[0]),
+    xToConstantPower: new FormControl(''),
+    yCurveStraighteningInstructions: new FormControl(this.yOptions[0]),
+    yToConstantPower: new FormControl(''),
   });
+  // add validators for xToConstantPower and yToConstantPower
 
   @ViewChild('processedDataTableRef', { static: false })
   processedDataTableRef: HotTableComponent;
@@ -78,15 +84,54 @@ export class DataTablesComponent implements OnInit {
     );
   }
 
-  changeOption(event) {
+  get yCurveStraighteningInstructions() {
+    return this.curveStraighteningInstructionsForm.get(
+      'yCurveStraighteningInstructions'
+    );
+  }
+
+  changeXOption(event) {
+    if (this.removeFirstWord(event.target.value) === 'x^a') {
+      // event.target.value will either equal "3: x^a" or "x^a"
+      this.showXToConstantPower = true;
+    } else {
+      this.showXToConstantPower = false;
+      this.curveStraighteningInstructionsForm.value.xToConstantPower = undefined;
+    }
+
     this.xCurveStraighteningInstructions.setValue(event.target.value, {
+      onlySelf: true,
+    });
+  }
+
+  changeYOption(event) {
+    if (this.removeFirstWord(event.target.value) === 'y^a') {
+      // event.target.value will either equal "3: y^a" or "y^a"
+      this.showYToConstantPower = true;
+    } else {
+      this.showYToConstantPower = false;
+      this.curveStraighteningInstructionsForm.value.yToConstantPower = undefined;
+    }
+
+    this.yCurveStraighteningInstructions.setValue(event.target.value, {
       onlySelf: true,
     });
   }
 
   onSubmit() {
     // form instructions...
-    console.log(this.curveStraighteningInstructionsForm.value);
+    console.log(
+      this.removeFirstWord(
+        this.curveStraighteningInstructionsForm.value
+          .xCurveStraighteningInstructions
+      )
+    );
+    console.log(
+      this.removeFirstWord(
+        this.curveStraighteningInstructionsForm.value
+          .yCurveStraighteningInstructions
+      )
+    );
 
     let rawDataColumnsArray = this.flipArrayOrientation(this.rawData);
     this.rawDataTable = new DataTable({
@@ -94,7 +139,29 @@ export class DataTablesComponent implements OnInit {
       yCoords: rawDataColumnsArray[1],
       xCoords: rawDataColumnsArray[2],
       xUncertainties: rawDataColumnsArray[3],
+      xCurveStraighteningInstructions: {
+        functionClass: this.removeFirstWord(
+          this.curveStraighteningInstructionsForm.value
+            .xCurveStraighteningInstructions
+        ),
+        constantPower: this.curveStraighteningInstructionsForm.value
+          .xToConstantPower
+          ? this.curveStraighteningInstructionsForm.value.xToConstantPower
+          : undefined,
+      },
+      yCurveStraighteningInstructions: {
+        functionClass: this.removeFirstWord(
+          this.curveStraighteningInstructionsForm.value
+            .yCurveStraighteningInstructions
+        ),
+        constantPower: this.curveStraighteningInstructionsForm.value
+          .yToConstantPower
+          ? this.curveStraighteningInstructionsForm.value.yToConstantPower
+          : undefined,
+      },
+
       _id: this.processedDataTable ? this.processedDataTable._id : undefined,
+      // this.rawDataTable._id...
     });
     console.log('rawDataTable: ');
     console.log(this.rawDataTable);
@@ -127,6 +194,7 @@ export class DataTablesComponent implements OnInit {
 
           this.processedDataTable = response.data;
           this.createProcessedDataTableSettings(this.processedDataTable);
+          // this.updateRawDataTableSettings... (gives raw data table an ID)
         });
     }
   }
@@ -187,13 +255,17 @@ export class DataTablesComponent implements OnInit {
     this.processedDataTableSettings.data = this.flipArrayOrientation(
       arrayOfColumns
     );
-    this.updateProcessedDataTable(this.processedDataTableSettings);
+    this.refreshProcessedDataTable(this.processedDataTableSettings);
 
     console.log('updated data table: ');
     console.log(this.processedDataTableSettings);
   }
 
-  private updateProcessedDataTable(settings) {
+  private refreshProcessedDataTable(settings) {
     this.processedDataTableRef.updateHotTable(settings);
+  }
+
+  private removeFirstWord(string: string) {
+    return string.substr(string.indexOf(' ') + 1);
   }
 }
