@@ -1,6 +1,12 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { HotTableComponent } from '@handsontable/angular';
-import { FormGroup, FormControl, FormArray, FormBuilder } from '@angular/forms';
+import {
+  FormGroup,
+  FormControl,
+  FormArray,
+  FormBuilder,
+  Validators,
+} from '@angular/forms';
 import * as Handsontable from 'handsontable';
 
 import { DataTableService } from '../shared/data-table.service';
@@ -19,6 +25,7 @@ export class DataTablesComponent implements OnInit {
   // use @ViewChild and refresh the new handsontable....
 
   // https://www.positronx.io/angular-7-select-dropdown-examples-with-reactive-forms/
+  // https://angular.io/guide/form-validation#defining-custom-validators
 
   // to run locally: ng serve --proxy-config proxy.conf.json
 
@@ -34,11 +41,12 @@ export class DataTablesComponent implements OnInit {
   showYToConstantPower: boolean;
   xOptions: any = ['x', 'ln(x)', 'log_10(x)', 'x^a'];
   yOptions: any = ['y', 'ln(y)', 'log_10(y)', 'y^a'];
+
   curveStraighteningInstructionsForm = this.fb.group({
-    xCurveStraighteningInstructions: new FormControl(this.xOptions[0]),
-    xToConstantPower: new FormControl(''),
-    yCurveStraighteningInstructions: new FormControl(this.yOptions[0]),
-    yToConstantPower: new FormControl(''),
+    xCurveStraighteningInstructions: new FormControl(this.xOptions[0], []),
+    xToConstantPower: new FormControl('', []),
+    yCurveStraighteningInstructions: new FormControl(this.yOptions[0], []),
+    yToConstantPower: new FormControl('', []),
   });
   // add validators for xToConstantPower and yToConstantPower
 
@@ -94,9 +102,17 @@ export class DataTablesComponent implements OnInit {
     if (this.removeFirstWord(event.target.value) === 'x^a') {
       // event.target.value will either equal "3: x^a" or "x^a"
       this.showXToConstantPower = true;
+      this.curveStraighteningInstructionsForm.controls.xToConstantPower.setValidators(
+        [Validators.required] // more validators here..
+      );
+      this.curveStraighteningInstructionsForm.controls.xToConstantPower.updateValueAndValidity();
     } else {
       this.showXToConstantPower = false;
-      this.curveStraighteningInstructionsForm.value.xToConstantPower = undefined;
+      this.curveStraighteningInstructionsForm.patchValue({
+        xToConstantPower: undefined,
+      });
+      this.curveStraighteningInstructionsForm.controls.xToConstantPower.clearValidators();
+      this.curveStraighteningInstructionsForm.controls.xToConstantPower.updateValueAndValidity();
     }
 
     this.xCurveStraighteningInstructions.setValue(event.target.value, {
@@ -108,9 +124,17 @@ export class DataTablesComponent implements OnInit {
     if (this.removeFirstWord(event.target.value) === 'y^a') {
       // event.target.value will either equal "3: y^a" or "y^a"
       this.showYToConstantPower = true;
+      this.curveStraighteningInstructionsForm.controls.yToConstantPower.setValidators(
+        [Validators.required] // more validators here..
+      );
+      this.curveStraighteningInstructionsForm.controls.yToConstantPower.updateValueAndValidity();
     } else {
       this.showYToConstantPower = false;
-      this.curveStraighteningInstructionsForm.value.yToConstantPower = undefined;
+      this.curveStraighteningInstructionsForm.patchValue({
+        yToConstantPower: undefined,
+      });
+      this.curveStraighteningInstructionsForm.controls.yToConstantPower.clearValidators();
+      this.curveStraighteningInstructionsForm.controls.yToConstantPower.updateValueAndValidity();
     }
 
     this.yCurveStraighteningInstructions.setValue(event.target.value, {
@@ -120,19 +144,6 @@ export class DataTablesComponent implements OnInit {
 
   onSubmit() {
     // form instructions...
-    console.log(
-      this.removeFirstWord(
-        this.curveStraighteningInstructionsForm.value
-          .xCurveStraighteningInstructions
-      )
-    );
-    console.log(
-      this.removeFirstWord(
-        this.curveStraighteningInstructionsForm.value
-          .yCurveStraighteningInstructions
-      )
-    );
-
     let rawDataColumnsArray = this.flipArrayOrientation(this.rawData);
     this.rawDataTable = new DataTable({
       yUncertainties: rawDataColumnsArray[0],

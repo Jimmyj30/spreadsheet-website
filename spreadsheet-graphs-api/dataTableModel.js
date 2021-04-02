@@ -9,7 +9,7 @@ const Instruction = new mongoose.Schema({
     required: true,
   },
   constantPower: {
-    type: Number,
+    type: String, // will get processed as a number in the backend
   },
   constantVariableValue: {
     type: Number,
