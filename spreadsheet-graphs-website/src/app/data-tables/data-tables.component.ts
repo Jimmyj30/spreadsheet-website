@@ -11,6 +11,7 @@ import * as Handsontable from 'handsontable';
 
 import { DataTableService } from '../shared/data-table.service';
 import { DataTable } from './data-table.model';
+import { numberFractionValidator } from '../shared/number-fraction.directive';
 
 @Component({
   selector: 'app-data-tables',
@@ -48,7 +49,6 @@ export class DataTablesComponent implements OnInit {
     yCurveStraighteningInstructions: new FormControl(this.yOptions[0], []),
     yToConstantPower: new FormControl('', []),
   });
-  // add validators for xToConstantPower and yToConstantPower
 
   @ViewChild('processedDataTableRef', { static: false })
   processedDataTableRef: HotTableComponent;
@@ -103,7 +103,7 @@ export class DataTablesComponent implements OnInit {
       // event.target.value will either equal "3: x^a" or "x^a"
       this.showXToConstantPower = true;
       this.curveStraighteningInstructionsForm.controls.xToConstantPower.setValidators(
-        [Validators.required] // more validators here..
+        [Validators.required, numberFractionValidator()]
       );
       this.curveStraighteningInstructionsForm.controls.xToConstantPower.updateValueAndValidity();
     } else {
@@ -125,7 +125,7 @@ export class DataTablesComponent implements OnInit {
       // event.target.value will either equal "3: y^a" or "y^a"
       this.showYToConstantPower = true;
       this.curveStraighteningInstructionsForm.controls.yToConstantPower.setValidators(
-        [Validators.required] // more validators here..
+        [Validators.required, numberFractionValidator()]
       );
       this.curveStraighteningInstructionsForm.controls.yToConstantPower.updateValueAndValidity();
     } else {

@@ -15,6 +15,7 @@
       [formGroup]="curveStraighteningInstructionsForm"
       (ngSubmit)="onSubmit()"
     >
+      <!-- "y" curve straightening instructions -->
       <span>Plot </span>
       <select
         class="custom-select"
@@ -31,9 +32,11 @@
         formControlName="yToConstantPower"
         *ngIf="showYToConstantPower"
         class="number-input"
+        placeholder="eg: 1.23 or -5/3"
       />
 
       <span> vs </span>
+      <!-- "x" curve straightening instructions -->
       <select
         class="custom-select"
         (change)="changeXOption($event)"
@@ -49,6 +52,7 @@
         formControlName="xToConstantPower"
         *ngIf="showXToConstantPower"
         class="number-input"
+        placeholder="eg: 1.23 or -5/3"
       />
     </form>
   </div>
