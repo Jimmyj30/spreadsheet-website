@@ -43,17 +43,36 @@ exports.new = function (req, res) {
   processedDataTable = processData(dataTable);
 
   // save the data table and check for errors
+
+  // DataTable.insertMany([processedDataTable, dataTable], function (err) {
+  //   res.json({
+  //     message: "New data table created!",
+  //     rawDataTableID: dataTable._id,
+  //     processedDataTable: processedDataTable,
+  //   });
+  // });
+
+  processedDataTable.save();
   dataTable.save(function (err) {
     if (err) res.json(err);
     else {
-      processedDataTable.save();
-    }
+      // processedDataTable.save(function (err) {
+      //   if (err) res.json(err);
+      //   else {
+      //     res.json({
+      //       message: "New data table created!",
+      //       rawDataTableID: dataTable._id,
+      //       processedDataTable: processedDataTable,
+      //     });
+      //   }
+      // });
 
-    res.json({
-      message: "New data table created!",
-      rawDataTableID: dataTable._id,
-      processedDataTable: processedDataTable,
-    });
+      res.json({
+        message: "New data table created!",
+        rawDataTableID: dataTable._id,
+        processedDataTable: processedDataTable,
+      });
+    }
   });
 };
 // NOTE: try asynchronous calls...
