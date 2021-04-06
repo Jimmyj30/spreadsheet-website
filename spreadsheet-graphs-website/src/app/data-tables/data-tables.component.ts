@@ -61,10 +61,10 @@ export class DataTablesComponent implements OnInit {
       data: this.rawData,
       rowHeaders: true,
       colHeaders: [
-        'Uncertainties for Manipulated',
-        'Manipulated',
-        'Responding',
         'Uncertainties for Responding',
+        'Responding',
+        'Manipulated',
+        'Uncertainties for Manipulated',
       ],
       columns: [{ data: 0 }, { data: 1 }, { data: 2 }, { data: 3 }],
 
@@ -171,8 +171,7 @@ export class DataTablesComponent implements OnInit {
           : undefined,
       },
 
-      _id: this.processedDataTable ? this.processedDataTable._id : undefined,
-      // this.rawDataTable._id...
+      _id: this.rawDataTable ? this.rawDataTable._id : undefined, // this.rawDataTable._id...
     });
     console.log('rawDataTable: ');
     console.log(this.rawDataTable);
@@ -202,10 +201,11 @@ export class DataTablesComponent implements OnInit {
 
           // add an ID to the raw data table to indicate it is now stored in the database
           // return a processed data table as the response....
-
-          this.processedDataTable = response.data;
+          this.processedDataTable = response.processedDataTable;
           this.createProcessedDataTableSettings(this.processedDataTable);
-          // this.updateRawDataTableSettings... (gives raw data table an ID)
+
+          //(gives raw data table an ID)
+          this.rawDataTable._id = response.rawDataTableID;
         });
     }
   }
