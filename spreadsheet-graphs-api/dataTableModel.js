@@ -64,7 +64,9 @@ var dataTableSchema = mongoose.Schema({
     default: Date.now,
   },
 });
+
 // Export data table model
+// Mongoose automatically looks for the plural, lowercased version of your model name as the collection name
 var DataTable = (module.exports = mongoose.model("dataTable", dataTableSchema));
 
 module.exports.get = function (callback, limit) {

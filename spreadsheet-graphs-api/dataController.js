@@ -24,7 +24,6 @@ exports.index = function (req, res) {
 // Handle create data table actions
 exports.new = function (req, res) {
   var dataTable = new DataTable();
-  var processedDataTable = new DataTable();
 
   // dataTable.name = req.body.name ? req.body.name : dataTable.name;
   dataTable.xCoords = req.body.xCoords ? req.body.xCoords : dataTable.xCoords;
@@ -36,47 +35,41 @@ exports.new = function (req, res) {
 
   dataTable.xCurveStraighteningInstructions =
     req.body.xCurveStraighteningInstructions;
-
   dataTable.yCurveStraighteningInstructions =
     req.body.yCurveStraighteningInstructions;
 
-  processedDataTable = processData(dataTable);
+  var processedDataTable = generateProcessedDataTable(dataTable);
+  console.log(dataTable._id);
+  console.log(processedDataTable._id);
 
   // save the data table and check for errors
-
-  // DataTable.insertMany([processedDataTable, dataTable], function (err) {
-  //   res.json({
-  //     message: "New data table created!",
-  //     rawDataTableID: dataTable._id,
-  //     processedDataTable: processedDataTable,
-  //   });
-  // });
-
-  processedDataTable.save();
   dataTable.save(function (err) {
     if (err) res.json(err);
     else {
-      // processedDataTable.save(function (err) {
-      //   if (err) res.json(err);
-      //   else {
-      //     res.json({
-      //       message: "New data table created!",
-      //       rawDataTableID: dataTable._id,
-      //       processedDataTable: processedDataTable,
-      //     });
-      //   }
-      // });
-
-      res.json({
-        message: "New data table created!",
-        rawDataTableID: dataTable._id,
-        processedDataTable: processedDataTable,
+      processedDataTable.save(function (err) {
+        if (err) res.json(err);
+        else {
+          res.json({
+            message: "New data table created!",
+            rawDataTableID: dataTable._id,
+            processedDataTable: processedDataTable,
+          });
+        }
       });
     }
   });
+
+  // DataTable.insertMany([processedDataTable, dataTable], function (err) {
+  //   if (err) res.json(err);
+  //   else {
+  //     res.json({
+  //       message: "New data table created!",
+  //       rawDataTableID: dataTable._id,
+  //       processedDataTable: processedDataTable,
+  //     });
+  //   }
+  // });
 };
-// NOTE: try asynchronous calls...
-// (https://stackoverflow.com/questions/31349382/saving-multiple-documents-with-mongoose-and-doing-something-when-last-one-is-sav)
 
 // Handle view data table info
 exports.view = function (req, res) {
@@ -151,23 +144,27 @@ exports.delete = function (req, res) {
 // - req and res mean request and response...
 //
 
-function processData(dataTable) {
-  let processedDataTable = dataTable;
+function generateProcessedDataTable(dataTable) {
+  processedDataTable = new DataTable();
+
+  processedDataTable.xCoords = dataTable.xCoords;
+  processedDataTable.yCoords = dataTable.yCoords;
+  processedDataTable.xUncertainties = dataTable.xUncertainties;
+  processedDataTable.yUncertainties = dataTable.yUncertainties;
 
   for (var i = 0; i < dataTable.xCoords.length; ++i) {
     if (
       dataTable.xCoords[i] &&
       dataTable.xUncertainties[i] &&
-      processedDataTable.xCurveStraighteningInstructions.constantPower
+      dataTable.xCurveStraighteningInstructions.constantPower
     ) {
       // test calculation (raising "x" to the power of some constant "a")...
       // will add a math library after I change the dataTableModel...
       processedDataTable.xCoords[i] =
         processedDataTable.xCoords[i] **
-        processedDataTable.xCurveStraighteningInstructions.constantPower;
+        dataTable.xCurveStraighteningInstructions.constantPower;
     }
   }
-  console.log(processedDataTable);
 
   return processedDataTable;
 }
