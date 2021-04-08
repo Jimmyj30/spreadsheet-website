@@ -10,7 +10,7 @@ import {
 import * as Handsontable from 'handsontable';
 
 import { DataTableService } from '../shared/data-table.service';
-import { DataTable } from './data-table.model';
+import { DataTable } from './models/data-table.model';
 import { numberFractionValidator } from '../shared/number-fraction.directive';
 
 @Component({
@@ -30,7 +30,9 @@ export class DataTablesComponent implements OnInit {
 
   // to run locally: ng serve --proxy-config proxy.conf.json
 
-  rawData: any[] = Handsontable.default.helper.createSpreadsheetData(10, 4);
+  rawData: any[] = this.generateDefaultDataTable(
+    Handsontable.default.helper.createSpreadsheetData(10, 4)
+  );
   rawDataTableSettings: Handsontable.default.GridSettings;
   rawDataTable: DataTable;
 
@@ -144,12 +146,13 @@ export class DataTablesComponent implements OnInit {
 
   onSubmit() {
     // form instructions...
-    let rawDataColumnsArray = this.flipArrayOrientation(this.rawData);
+    let rawDataColumnsArray = [];
     this.rawDataTable = new DataTable({
       yUncertainties: rawDataColumnsArray[0],
       yCoords: rawDataColumnsArray[1],
       xCoords: rawDataColumnsArray[2],
       xUncertainties: rawDataColumnsArray[3],
+
       xCurveStraighteningInstructions: {
         functionClass: this.removeFirstWord(
           this.curveStraighteningInstructionsForm.value
@@ -219,35 +222,16 @@ export class DataTablesComponent implements OnInit {
       });
   }
 
-  private flipArrayOrientation(array) {
-    // turns a 2D array of rows into a 2D array of columns, and
-    // turns a 2D array of columns into a 2D array of rows
-    if (array && array[0]) {
-      let flippedArray = [];
-      for (let i = 0; i < array[0].length; i++) {
-        if (!flippedArray[i]) {
-          flippedArray.push([]);
-        }
-        for (let j = 0; j < array.length; j++) {
-          flippedArray[i].push(array[j][i]);
-        }
-      }
-      return flippedArray;
-    }
-  }
-
   private createProcessedDataTableSettings(dataTable: DataTable) {
-    let arrayOfColumns = [
-      dataTable.yUncertainties,
-      dataTable.yCoords,
-      dataTable.xCoords,
-      dataTable.xUncertainties,
-    ];
+    // let arrayOfColumns = [
+    //   dataTable.yUncertainties,
+    //   dataTable.yCoords,
+    //   dataTable.xCoords,
+    //   dataTable.xUncertainties,
+    // ];
 
     this.processedDataTableSettings = this.rawDataTableSettings;
-    this.processedDataTableSettings.data = this.flipArrayOrientation(
-      arrayOfColumns
-    );
+
     this.processedDataTableSettings.colHeaders = [
       'Uncertainties for Manipulated',
       'Manipulated',
@@ -257,15 +241,7 @@ export class DataTablesComponent implements OnInit {
   }
 
   private updateProcessedDataTableSettings(dataTable: DataTable) {
-    let arrayOfColumns = [
-      dataTable.yUncertainties,
-      dataTable.yCoords,
-      dataTable.xCoords,
-      dataTable.xUncertainties,
-    ];
-    this.processedDataTableSettings.data = this.flipArrayOrientation(
-      arrayOfColumns
-    );
+    // update for new data schema
     this.refreshProcessedDataTable(this.processedDataTableSettings);
 
     console.log('updated data table: ');
@@ -279,4 +255,25 @@ export class DataTablesComponent implements OnInit {
   private removeFirstWord(string: string) {
     return string.substr(string.indexOf(' ') + 1);
   }
+
+  private generateDefaultDataTable(dataTableArray: any[]) {
+    return dataTableArray;
+  }
+
+  // private flipArrayOrientation(array) {
+  //   // turns a 2D array of rows into a 2D array of columns, and
+  //   // turns a 2D array of columns into a 2D array of rows
+  //   if (array && array[0]) {
+  //     let flippedArray = [];
+  //     for (let i = 0; i < array[0].length; i++) {
+  //       if (!flippedArray[i]) {
+  //         flippedArray.push([]);
+  //       }
+  //       for (let j = 0; j < array.length; j++) {
+  //         flippedArray[i].push(array[j][i]);
+  //       }
+  //     }
+  //     return flippedArray;
+  //   }
+  // }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { DataTable } from '../data-tables/data-table.model';
+import { DataTable } from '../data-tables/models/data-table.model';
 import { DataStorageService } from './data-storage.service';
 
 @Injectable({ providedIn: 'root' })

@@ -26,12 +26,7 @@ exports.new = function (req, res) {
   var dataTable = new DataTable();
 
   // dataTable.name = req.body.name ? req.body.name : dataTable.name;
-  dataTable.xCoords = req.body.xCoords ? req.body.xCoords : dataTable.xCoords;
-  dataTable.yCoords = req.body.yCoords;
-  dataTable.xUncertainties = req.body.xUncertainties;
-  dataTable.yUncertainties = req.body.yUncertainties;
-  dataTable.xLabel = req.body.xLabel;
-  dataTable.yLabel = req.body.yLabel;
+  dataTable.dataTableData = req.body.dataTableData;
 
   dataTable.xCurveStraighteningInstructions =
     req.body.xCurveStraighteningInstructions;
@@ -91,10 +86,7 @@ exports.update = function (req, res) {
     else {
     }
 
-    dataTable.xCoords = req.body.xCoords ? req.body.xCoords : dataTable.xCoords;
-    dataTable.yCoords = req.body.yCoords;
-    dataTable.xUncertainties = req.body.xUncertainties;
-    dataTable.yUncertainties = req.body.yUncertainties;
+    dataTable.dataTableData = req.body.dataTableData;
 
     dataTable.xCurveStraighteningInstructions =
       req.body.xCurveStraighteningInstructions;
@@ -147,21 +139,18 @@ exports.delete = function (req, res) {
 function generateProcessedDataTable(dataTable) {
   processedDataTable = new DataTable();
 
-  processedDataTable.xCoords = dataTable.xCoords;
-  processedDataTable.yCoords = dataTable.yCoords;
-  processedDataTable.xUncertainties = dataTable.xUncertainties;
-  processedDataTable.yUncertainties = dataTable.yUncertainties;
+  processedDataTable.dataTableData = dataTable.dataTableData;
 
-  for (var i = 0; i < dataTable.xCoords.length; ++i) {
+  for (var i = 0; i < dataTable.dataTableData.length; ++i) {
     if (
-      dataTable.xCoords[i] &&
-      dataTable.xUncertainties[i] &&
+      dataTable.dataTableData[i].xCoord &&
+      dataTable.dataTableData[i].xUncertainty &&
       dataTable.xCurveStraighteningInstructions.constantPower
     ) {
       // test calculation (raising "x" to the power of some constant "a")...
       // will add a math library after I change the dataTableModel...
-      processedDataTable.xCoords[i] =
-        processedDataTable.xCoords[i] **
+      processedDataTable.dataTableData[i].xCoord =
+        processedDataTable.dataTableData[i].xCoord **
         dataTable.xCurveStraighteningInstructions.constantPower;
     }
   }

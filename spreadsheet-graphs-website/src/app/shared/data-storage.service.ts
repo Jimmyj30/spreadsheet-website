@@ -4,7 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 
 import { environment } from 'src/environments/environment';
-import { DataTable } from '../data-tables/data-table.model';
+import { DataTable } from '../data-tables/models/data-table.model';
 
 const API_URL = environment.apiUrl;
 
