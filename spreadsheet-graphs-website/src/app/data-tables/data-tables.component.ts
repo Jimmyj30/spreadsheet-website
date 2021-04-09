@@ -11,6 +11,7 @@ import * as Handsontable from 'handsontable';
 
 import { DataTableService } from '../shared/data-table.service';
 import { DataTable } from './models/data-table.model';
+import { DataPoint } from './models/data-point.model';
 import { numberFractionValidator } from '../shared/number-fraction.directive';
 
 @Component({
@@ -68,7 +69,6 @@ export class DataTablesComponent implements OnInit {
         'Manipulated',
         'Uncertainties for Manipulated',
       ],
-      columns: [{ data: 0 }, { data: 1 }, { data: 2 }, { data: 3 }],
 
       filters: true,
       dropdownMenu: true,
@@ -146,12 +146,8 @@ export class DataTablesComponent implements OnInit {
 
   onSubmit() {
     // form instructions...
-    let rawDataColumnsArray = [];
     this.rawDataTable = new DataTable({
-      yUncertainties: rawDataColumnsArray[0],
-      yCoords: rawDataColumnsArray[1],
-      xCoords: rawDataColumnsArray[2],
-      xUncertainties: rawDataColumnsArray[3],
+      dataTableData: this.rawData,
 
       xCurveStraighteningInstructions: {
         functionClass: this.removeFirstWord(
@@ -257,7 +253,18 @@ export class DataTablesComponent implements OnInit {
   }
 
   private generateDefaultDataTable(dataTableArray: any[]) {
-    return dataTableArray;
+    let defaultDataTable = [];
+    for (var i = 0; i < dataTableArray.length; ++i) {
+      let row = new DataPoint({
+        yUncertainty: dataTableArray[i][0],
+        yCoord: dataTableArray[i][1],
+        xCoord: dataTableArray[i][2],
+        xUncertainty: dataTableArray[i][3],
+      });
+      defaultDataTable.push(row);
+    }
+    console.log(defaultDataTable);
+    return defaultDataTable;
   }
 
   // private flipArrayOrientation(array) {

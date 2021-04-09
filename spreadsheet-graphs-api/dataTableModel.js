@@ -23,19 +23,19 @@ const Instruction = new mongoose.Schema({
 // data points (one "row" of a data table)...
 const dataPoint = new mongoose.Schema({
   xCoord: {
-    type: Number,
+    type: String,
     required: true,
   },
   yCoord: {
-    type: Number,
+    type: String,
     required: true,
   },
   xUncertainty: {
-    type: Number,
+    type: String,
     required: true,
   },
   yUncertainty: {
-    type: Number,
+    type: String,
     required: true,
   },
 });

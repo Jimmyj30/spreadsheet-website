@@ -1,9 +1,9 @@
 import { Instruction } from './instruction.model';
-import { DataPointModel } from './data-point.model';
+import { DataPoint } from './data-point.model';
 
 export class DataTable {
   public _id?: any;
-  public data: DataPointModel[];
+  public dataTableData: DataPoint[];
   public xCurveStraighteningInstructions: Instruction;
   public yCurveStraighteningInstructions: Instruction;
 

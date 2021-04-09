@@ -157,3 +157,7 @@ function generateProcessedDataTable(dataTable) {
 
   return processedDataTable;
 }
+
+function updateProcessedDataTable(dataTable) {
+  //...
+}
