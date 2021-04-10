@@ -187,7 +187,7 @@ export class DataTablesComponent implements OnInit {
       this.dataTableService
         .updateDataTable(this.rawDataTable)
         .subscribe((response: any) => {
-          console.log('response: ');
+          console.log('update table response: ');
           console.log(response);
           this.updateProcessedDataTableSettings(response.data);
         });
@@ -195,13 +195,14 @@ export class DataTablesComponent implements OnInit {
       this.dataTableService
         .createDataTable(this.rawDataTable)
         .subscribe((response: any) => {
-          console.log('response: ');
+          console.log('create table response: ');
           console.log(response);
 
           // add an ID to the raw data table to indicate it is now stored in the database
           // return a processed data table as the response....
+          // response contains a processedDataTable and a rawDataTableID
           this.processedDataTable = response.processedDataTable;
-          this.createProcessedDataTableSettings(this.processedDataTable);
+          this.createProcessedDataTableSettings(response.processedDataTable);
 
           //(gives raw data table an ID)
           this.rawDataTable._id = response.rawDataTableID;
@@ -218,30 +219,32 @@ export class DataTablesComponent implements OnInit {
       });
   }
 
-  private createProcessedDataTableSettings(dataTable: DataTable) {
-    // let arrayOfColumns = [
-    //   dataTable.yUncertainties,
-    //   dataTable.yCoords,
-    //   dataTable.xCoords,
-    //   dataTable.xUncertainties,
-    // ];
-
+  private createProcessedDataTableSettings(processedDataTable: DataTable) {
     this.processedDataTableSettings = this.rawDataTableSettings;
+    this.processedDataTableSettings.data = processedDataTable.dataTableData;
 
-    this.processedDataTableSettings.colHeaders = [
-      'Uncertainties for Manipulated',
-      'Manipulated',
-      'Responding',
+    (this.processedDataTableSettings.colHeaders = [
       'Uncertainties for Responding',
-    ];
+      'Responding',
+      'Manipulated',
+      'Uncertainties for Manipulated',
+    ]),
+      (this.processedDataTableSettings.columns = [
+        { data: 'yUncertainty' },
+        { data: 'yCoord' },
+        { data: 'xCoord' },
+        { data: 'xUncertainty' }, // since the processed data table will have an _id attached to it
+      ]);
+    console.log(this.processedDataTableSettings);
   }
 
   private updateProcessedDataTableSettings(dataTable: DataTable) {
-    // update for new data schema
+    this.processedDataTableSettings.data = dataTable.dataTableData;
     this.refreshProcessedDataTable(this.processedDataTableSettings);
+    // changing the data of the processed data table based on the response...
 
     console.log('updated data table: ');
-    console.log(this.processedDataTableSettings);
+    console.log(this.processedDataTable);
   }
 
   private refreshProcessedDataTable(settings) {

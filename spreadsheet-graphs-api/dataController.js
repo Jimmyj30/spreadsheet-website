@@ -3,6 +3,9 @@
 // Import data model
 DataTable = require("./dataTableModel");
 
+// Import mongoose
+var mongoose = require("mongoose");
+
 // Handle index actions
 exports.index = function (req, res) {
   DataTable.get(function (err, dataTables) {
@@ -81,29 +84,29 @@ exports.view = function (req, res) {
 
 // Handle update data table info
 exports.update = function (req, res) {
+  console.log(req);
+  // req.query.parametername can be used to store information...
   DataTable.findById(req.params.dataTable_id, function (err, dataTable) {
     if (err) res.send(err);
     else {
-    }
+      dataTable.dataTableData = req.body.dataTableData;
 
-    dataTable.dataTableData = req.body.dataTableData;
+      dataTable.xCurveStraighteningInstructions =
+        req.body.xCurveStraighteningInstructions;
+      dataTable.yCurveStraighteningInstructions =
+        req.body.yCurveStraighteningInstructions;
 
-    dataTable.xCurveStraighteningInstructions =
-      req.body.xCurveStraighteningInstructions;
-    dataTable.yCurveStraighteningInstructions =
-      req.body.yCurveStraighteningInstructions;
-
-    // save the data table and check for errors
-    dataTable.save(function (err) {
-      if (err) res.json(err);
-      else {
-      }
-
-      res.json({
-        message: "data table info updated",
-        data: dataTable,
+      // save the data table and check for errors
+      dataTable.save(function (err) {
+        if (err) res.json(err);
+        else {
+          res.json({
+            message: "data table info updated",
+            data: dataTable,
+          });
+        }
       });
-    });
+    }
   });
 };
 
@@ -137,7 +140,7 @@ exports.delete = function (req, res) {
 //
 
 function generateProcessedDataTable(dataTable) {
-  processedDataTable = new DataTable();
+  let processedDataTable = new DataTable();
 
   processedDataTable.dataTableData = dataTable.dataTableData;
 
@@ -153,11 +156,26 @@ function generateProcessedDataTable(dataTable) {
         processedDataTable.dataTableData[i].xCoord **
         dataTable.xCurveStraighteningInstructions.constantPower;
     }
+    var id = mongoose.Types.ObjectId();
+    processedDataTable.dataTableData[i]._id = id;
   }
 
   return processedDataTable;
 }
 
 function updateProcessedDataTable(dataTable) {
-  //...
+  for (var i = 0; i < dataTable.dataTableData.length; ++i) {
+    if (
+      dataTable.dataTableData[i].xCoord &&
+      dataTable.dataTableData[i].xUncertainty &&
+      dataTable.xCurveStraighteningInstructions.constantPower
+    ) {
+      // test calculation (raising "x" to the power of some constant "a")...
+      // will add a math library after I change the dataTableModel...
+      processedDataTable.dataTableData[i].xCoord =
+        processedDataTable.dataTableData[i].xCoord **
+        dataTable.xCurveStraighteningInstructions.constantPower;
+    }
+  }
+  return dataTable;
 }

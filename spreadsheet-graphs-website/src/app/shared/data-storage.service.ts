@@ -34,7 +34,13 @@ export class DataStorageService {
 
   public updateDataTable(dataTable: DataTable) {
     return this.http
-      .put(API_URL + '/api/data-tables/' + dataTable._id, dataTable)
+      .put(API_URL + '/api/data-tables/' + dataTable._id, dataTable, {
+        params: {
+          hello: '2',
+          http: 'testtttt',
+          // test http parameters...
+        },
+      })
       .pipe(
         catchError((error) => {
           return this.handleError(error);
