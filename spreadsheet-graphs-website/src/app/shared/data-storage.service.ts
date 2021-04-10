@@ -32,13 +32,11 @@ export class DataStorageService {
     );
   }
 
-  public updateDataTable(dataTable: DataTable) {
+  public updateDataTable(dataTable: DataTable, processedDataTableID: string) {
     return this.http
       .put(API_URL + '/api/data-tables/' + dataTable._id, dataTable, {
         params: {
-          hello: '2',
-          http: 'testtttt',
-          // test http parameters...
+          processedDataTable_id: processedDataTableID,
         },
       })
       .pipe(

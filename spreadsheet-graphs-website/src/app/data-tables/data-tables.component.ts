@@ -8,11 +8,13 @@ import {
   Validators,
 } from '@angular/forms';
 import * as Handsontable from 'handsontable';
+import { mergeMap } from 'rxjs/operators';
 
 import { DataTableService } from '../shared/data-table.service';
 import { DataTable } from './models/data-table.model';
 import { DataPoint } from './models/data-point.model';
 import { numberFractionValidator } from '../shared/number-fraction.directive';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-data-tables',
@@ -185,7 +187,7 @@ export class DataTablesComponent implements OnInit {
       // we are updating processedDataTable based on the ID of the rawDataTable...
       // we could have the API return a processedDataTable along with the ID of the raw data table...
       this.dataTableService
-        .updateDataTable(this.rawDataTable)
+        .updateDataTable(this.rawDataTable, this.processedDataTable._id)
         .subscribe((response: any) => {
           console.log('update table response: ');
           console.log(response);
@@ -211,12 +213,23 @@ export class DataTablesComponent implements OnInit {
   }
 
   onFinish() {
-    this.dataTableService
-      .deleteDataTable(this.processedDataTable)
-      .subscribe(() => {
-        console.log('data table deleted');
-        window.location.reload();
-      });
+    if (this.processedDataTable && this.processedDataTable._id) {
+      this.dataTableService
+        .deleteDataTable(this.processedDataTable)
+        .pipe(
+          mergeMap(() => {
+            if (this.rawDataTable && this.rawDataTable._id) {
+              return this.dataTableService.deleteDataTable(this.rawDataTable);
+            } else {
+              return of(null);
+            }
+          })
+        )
+        .subscribe(() => {
+          console.log('data table(s) deleted');
+          window.location.reload();
+        });
+    }
   }
 
   private createProcessedDataTableSettings(processedDataTable: DataTable) {

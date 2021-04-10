@@ -37,8 +37,6 @@ exports.new = function (req, res) {
     req.body.yCurveStraighteningInstructions;
 
   var processedDataTable = generateProcessedDataTable(dataTable);
-  console.log(dataTable._id);
-  console.log(processedDataTable._id);
 
   // save the data table and check for errors
   dataTable.save(function (err) {
@@ -85,7 +83,10 @@ exports.view = function (req, res) {
 // Handle update data table info
 exports.update = function (req, res) {
   console.log(req);
+  console.log(req.query.processedDataTable_id);
+  console.log(req.params.dataTable_id);
   // req.query.parametername can be used to store information...
+  // req.params.dataTable_id refers to the _id of the raw data table
   DataTable.findById(req.params.dataTable_id, function (err, dataTable) {
     if (err) res.send(err);
     else {
@@ -100,10 +101,29 @@ exports.update = function (req, res) {
       dataTable.save(function (err) {
         if (err) res.json(err);
         else {
-          res.json({
-            message: "data table info updated",
-            data: dataTable,
-          });
+          // then find the existing processed data table by id
+          DataTable.findById(
+            req.query.processedDataTable_id,
+            function (err, dataTable) {
+              if (err) res.json(err);
+              else {
+                // dataTable here refers to the processed data table
+                // update the processed data table based on the raw data table in the request
+                dataTable = updateProcessedDataTable(dataTable, req.body);
+
+                // save the processed data table as well
+                dataTable.save(function (err) {
+                  if (err) res.json(err);
+                  else {
+                    res.json({
+                      message: "data table info updated",
+                      data: dataTable,
+                    });
+                  }
+                });
+              }
+            }
+          );
         }
       });
     }
@@ -112,7 +132,7 @@ exports.update = function (req, res) {
 
 // Handle delete data table
 exports.delete = function (req, res) {
-  DataTable.remove(
+  DataTable.deleteOne(
     {
       _id: req.params.dataTable_id,
     },
@@ -142,18 +162,19 @@ exports.delete = function (req, res) {
 function generateProcessedDataTable(dataTable) {
   let processedDataTable = new DataTable();
 
+  // copy over processedDataTable's data as the raw data table's data...
   processedDataTable.dataTableData = dataTable.dataTableData;
 
   for (var i = 0; i < dataTable.dataTableData.length; ++i) {
     if (
+      dataTable.xCurveStraighteningInstructions.constantPower &&
       dataTable.dataTableData[i].xCoord &&
-      dataTable.dataTableData[i].xUncertainty &&
-      dataTable.xCurveStraighteningInstructions.constantPower
+      dataTable.dataTableData[i].xUncertainty
     ) {
       // test calculation (raising "x" to the power of some constant "a")...
       // will add a math library after I change the dataTableModel...
       processedDataTable.dataTableData[i].xCoord =
-        processedDataTable.dataTableData[i].xCoord **
+        dataTable.dataTableData[i].xCoord **
         dataTable.xCurveStraighteningInstructions.constantPower;
     }
     var id = mongoose.Types.ObjectId();
@@ -163,19 +184,42 @@ function generateProcessedDataTable(dataTable) {
   return processedDataTable;
 }
 
-function updateProcessedDataTable(dataTable) {
-  for (var i = 0; i < dataTable.dataTableData.length; ++i) {
+function updateProcessedDataTable(processedDataTable, rawDataTable) {
+  // include rawDataTable as a parameter since it contains the curve straightening instructions
+  for (var i = 0; i < processedDataTable.dataTableData.length; ++i) {
     if (
-      dataTable.dataTableData[i].xCoord &&
-      dataTable.dataTableData[i].xUncertainty &&
-      dataTable.xCurveStraighteningInstructions.constantPower
+      rawDataTable.xCurveStraighteningInstructions.constantPower &&
+      processedDataTable.dataTableData[i].xCoord &&
+      processedDataTable.dataTableData[i].xUncertainty
     ) {
       // test calculation (raising "x" to the power of some constant "a")...
       // will add a math library after I change the dataTableModel...
       processedDataTable.dataTableData[i].xCoord =
-        processedDataTable.dataTableData[i].xCoord **
-        dataTable.xCurveStraighteningInstructions.constantPower;
+        rawDataTable.dataTableData[i].xCoord **
+        rawDataTable.xCurveStraighteningInstructions.constantPower;
+      processedDataTable.dataTableData[i].xUncertainty =
+        rawDataTable.dataTableData[i].xUncertainty;
+    }
+    if (
+      rawDataTable.xCurveStraighteningInstructions.functionClass === "x" &&
+      processedDataTable.dataTableData[i].xCoord &&
+      processedDataTable.dataTableData[i].xUncertainty
+    ) {
+      processedDataTable.dataTableData[i].xCoord =
+        rawDataTable.dataTableData[i].xCoord;
+      processedDataTable.dataTableData[i].xUncertainty =
+        rawDataTable.dataTableData[i].xUncertainty;
+    }
+    if (
+      rawDataTable.yCurveStraighteningInstructions.functionClass === "y" &&
+      processedDataTable.dataTableData[i].yCoord &&
+      processedDataTable.dataTableData[i].yUncertainty
+    ) {
+      processedDataTable.dataTableData[i].yCoord =
+        rawDataTable.dataTableData[i].yCoord;
+      processedDataTable.dataTableData[i].yUncertainty =
+        rawDataTable.dataTableData[i].yUncertainty;
     }
   }
-  return dataTable;
+  return processedDataTable;
 }
