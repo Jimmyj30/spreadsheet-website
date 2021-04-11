@@ -6,6 +6,10 @@ DataTable = require("./dataTableModel");
 // Import mongoose
 var mongoose = require("mongoose");
 
+// Import math.js
+// https://mathjs.org/examples/expressions.js.html
+var math = require("mathjs");
+
 // Handle index actions
 exports.index = function (req, res) {
   DataTable.get(function (err, dataTables) {
@@ -97,7 +101,7 @@ exports.update = function (req, res) {
       dataTable.yCurveStraighteningInstructions =
         req.body.yCurveStraighteningInstructions;
 
-      // save the data table and check for errors
+      // save the updated data table and check for errors
       dataTable.save(function (err) {
         if (err) res.json(err);
         else {
@@ -107,7 +111,7 @@ exports.update = function (req, res) {
             function (err, dataTable) {
               if (err) res.json(err);
               else {
-                // dataTable here refers to the processed data table
+                // "dataTable" here refers to the processed data table
                 // update the processed data table based on the raw data table in the request
                 dataTable = updateProcessedDataTable(dataTable, req.body);
 
@@ -168,15 +172,47 @@ function generateProcessedDataTable(dataTable) {
   for (var i = 0; i < dataTable.dataTableData.length; ++i) {
     if (
       dataTable.xCurveStraighteningInstructions.constantPower &&
-      dataTable.dataTableData[i].xCoord &&
-      dataTable.dataTableData[i].xUncertainty
+      dataTableFullXCoordinateExists(dataTable, i)
     ) {
-      // test calculation (raising "x" to the power of some constant "a")...
-      // will add a math library after I change the dataTableModel...
-      processedDataTable.dataTableData[i].xCoord =
-        dataTable.dataTableData[i].xCoord **
-        dataTable.xCurveStraighteningInstructions.constantPower;
+      processedDataTable.dataTableData[i].xCoord = returnRealValuesOnly(
+        math.pow(
+          dataTable.dataTableData[i].xCoord,
+          math.evaluate(dataTable.xCurveStraighteningInstructions.constantPower)
+        )
+      );
     }
+    if (
+      dataTable.yCurveStraighteningInstructions.constantPower &&
+      dataTableFullYCoordinateExists(dataTable, i)
+    ) {
+      processedDataTable.dataTableData[i].yCoord = returnRealValuesOnly(
+        math.pow(
+          dataTable.dataTableData[i].yCoord,
+          math.evaluate(dataTable.yCurveStraighteningInstructions.constantPower)
+        )
+      );
+    }
+    if (
+      dataTable.xCurveStraighteningInstructions.functionClass === "ln(x)" &&
+      dataTableFullXCoordinateExists(dataTable, i)
+    ) {
+      processedDataTable.dataTableData[i].xCoord = returnRealValuesOnly(
+        math.log(dataTable.dataTableData[i].xCoord)
+      );
+      processedDataTable.dataTableData[i].xUncertainty =
+        dataTable.dataTableData[i].xUncertainty;
+    }
+    if (
+      dataTable.yCurveStraighteningInstructions.functionClass === "ln(y)" &&
+      dataTableFullYCoordinateExists(dataTable, i)
+    ) {
+      processedDataTable.dataTableData[i].yCoord = returnRealValuesOnly(
+        math.log(dataTable.dataTableData[i].yCoord)
+      );
+      processedDataTable.dataTableData[i].yUncertainty =
+        dataTable.dataTableData[i].yUncertainty;
+    }
+
     var id = mongoose.Types.ObjectId();
     processedDataTable.dataTableData[i]._id = id;
   }
@@ -189,21 +225,37 @@ function updateProcessedDataTable(processedDataTable, rawDataTable) {
   for (var i = 0; i < processedDataTable.dataTableData.length; ++i) {
     if (
       rawDataTable.xCurveStraighteningInstructions.constantPower &&
-      processedDataTable.dataTableData[i].xCoord &&
-      processedDataTable.dataTableData[i].xUncertainty
+      dataTableFullXCoordinateExists(rawDataTable, i)
     ) {
-      // test calculation (raising "x" to the power of some constant "a")...
-      // will add a math library after I change the dataTableModel...
-      processedDataTable.dataTableData[i].xCoord =
-        rawDataTable.dataTableData[i].xCoord **
-        rawDataTable.xCurveStraighteningInstructions.constantPower;
+      processedDataTable.dataTableData[i].xCoord = returnRealValuesOnly(
+        math.pow(
+          rawDataTable.dataTableData[i].xCoord,
+          math.evaluate(
+            rawDataTable.xCurveStraighteningInstructions.constantPower
+          )
+        )
+      );
       processedDataTable.dataTableData[i].xUncertainty =
         rawDataTable.dataTableData[i].xUncertainty;
     }
     if (
+      rawDataTable.yCurveStraighteningInstructions.constantPower &&
+      dataTableFullYCoordinateExists(rawDataTable, i)
+    ) {
+      processedDataTable.dataTableData[i].yCoord = returnRealValuesOnly(
+        math.pow(
+          rawDataTable.dataTableData[i].yCoord,
+          math.evaluate(
+            rawDataTable.yCurveStraighteningInstructions.constantPower
+          )
+        )
+      );
+      processedDataTable.dataTableData[i].yUncertainty =
+        rawDataTable.dataTableData[i].yUncertainty;
+    }
+    if (
       rawDataTable.xCurveStraighteningInstructions.functionClass === "x" &&
-      processedDataTable.dataTableData[i].xCoord &&
-      processedDataTable.dataTableData[i].xUncertainty
+      dataTableFullXCoordinateExists(rawDataTable, i)
     ) {
       processedDataTable.dataTableData[i].xCoord =
         rawDataTable.dataTableData[i].xCoord;
@@ -212,14 +264,63 @@ function updateProcessedDataTable(processedDataTable, rawDataTable) {
     }
     if (
       rawDataTable.yCurveStraighteningInstructions.functionClass === "y" &&
-      processedDataTable.dataTableData[i].yCoord &&
-      processedDataTable.dataTableData[i].yUncertainty
+      dataTableFullYCoordinateExists(rawDataTable, i)
     ) {
       processedDataTable.dataTableData[i].yCoord =
         rawDataTable.dataTableData[i].yCoord;
       processedDataTable.dataTableData[i].yUncertainty =
         rawDataTable.dataTableData[i].yUncertainty;
     }
+    if (
+      rawDataTable.xCurveStraighteningInstructions.functionClass === "ln(x)" &&
+      dataTableFullXCoordinateExists(rawDataTable, i)
+    ) {
+      processedDataTable.dataTableData[i].xCoord = returnRealValuesOnly(
+        math.log(rawDataTable.dataTableData[i].xCoord)
+      );
+      processedDataTable.dataTableData[i].xUncertainty =
+        rawDataTable.dataTableData[i].xUncertainty;
+    }
+    if (
+      rawDataTable.yCurveStraighteningInstructions.functionClass === "ln(y)" &&
+      dataTableFullYCoordinateExists(rawDataTable, i)
+    ) {
+      processedDataTable.dataTableData[i].yCoord = returnRealValuesOnly(
+        math.log(rawDataTable.dataTableData[i].yCoord)
+      );
+      processedDataTable.dataTableData[i].yUncertainty =
+        rawDataTable.dataTableData[i].yUncertainty;
+    }
   }
   return processedDataTable;
+}
+
+function returnRealValuesOnly(value) {
+  if (math.im(value)) {
+    return NaN;
+  } else {
+    return value;
+  }
+}
+
+function dataTableFullXCoordinateExists(dataTable, index) {
+  // coordinateAxis is either "x" or "y"
+  if (
+    dataTable.dataTableData[index].xCoord &&
+    dataTable.dataTableData[index].xCoord
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function dataTableFullYCoordinateExists(dataTable, index) {
+  // coordinateAxis is either "x" or "y"
+  if (
+    dataTable.dataTableData[index].yCoord &&
+    dataTable.dataTableData[index].yCoord
+  ) {
+    return true;
+  }
+  return false;
 }
