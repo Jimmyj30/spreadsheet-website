@@ -40,9 +40,6 @@ const dataPoint = new mongoose.Schema({
   },
 });
 
-module.exports.Instruction = Instruction;
-module.exports.dataPoint = dataPoint;
-
 // Setup schema
 var dataTableSchema = mongoose.Schema({
   dataTableData: {
@@ -97,6 +94,11 @@ var dataTableSchema = mongoose.Schema({
 // Export data table model
 // Mongoose automatically looks for the plural, lowercased version of your model name as the collection name
 var DataTable = (module.exports = mongoose.model("dataTable", dataTableSchema));
+
+// https://stackoverflow.com/questions/58172762/how-to-export-multiple-schemas-in-same-file-in-mongoose
+
+// export dataPoint if it is needed later
+// module.exports.DataPoint = mongoose.model("dataPoint", dataPoint);
 
 module.exports.get = function (callback, limit) {
   DataTable.find(callback).limit(limit);

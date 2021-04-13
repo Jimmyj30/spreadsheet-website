@@ -2,6 +2,7 @@
 
 // Import data model
 DataTable = require("./dataTableModel");
+DataPoint = require("./dataTableModel");
 
 // Import mongoose
 var mongoose = require("mongoose");
@@ -86,11 +87,12 @@ exports.view = function (req, res) {
 
 // Handle update data table info
 exports.update = function (req, res) {
-  console.log(req);
-  console.log(req.query.processedDataTable_id);
-  console.log(req.params.dataTable_id);
+  // console.log(req);
+  // console.log(req.query.processedDataTable_id);
+  // console.log(req.params.dataTable_id);
   // req.query.parametername can be used to store information...
   // req.params.dataTable_id refers to the _id of the raw data table
+  // req.body is the latest version of the raw data table from the front-end
   DataTable.findById(req.params.dataTable_id, function (err, dataTable) {
     if (err) res.send(err);
     else {
@@ -108,20 +110,22 @@ exports.update = function (req, res) {
           // then find the existing processed data table by id
           DataTable.findById(
             req.query.processedDataTable_id,
-            function (err, dataTable) {
+            function (err, processedDataTable) {
               if (err) res.json(err);
               else {
-                // "dataTable" here refers to the processed data table
                 // update the processed data table based on the raw data table in the request
-                dataTable = updateProcessedDataTable(dataTable, req.body);
+                processedDataTable = updateProcessedDataTable(
+                  processedDataTable,
+                  req.body
+                );
 
                 // save the processed data table as well
-                dataTable.save(function (err) {
+                processedDataTable.save(function (err) {
                   if (err) res.json(err);
                   else {
                     res.json({
                       message: "data table info updated",
-                      data: dataTable,
+                      data: processedDataTable,
                     });
                   }
                 });
@@ -170,30 +174,18 @@ function generateProcessedDataTable(dataTable) {
   processedDataTable.dataTableData = dataTable.dataTableData;
 
   for (var i = 0; i < dataTable.dataTableData.length; ++i) {
-    if (
-      dataTable.xCurveStraighteningInstructions.constantPower &&
-      dataTableFullXCoordinateExists(dataTable, i)
-    ) {
-      processedDataTable.dataTableData[i].xCoord = returnRealValuesOnly(
-        math.pow(
-          dataTable.dataTableData[i].xCoord,
-          math.evaluate(dataTable.xCurveStraighteningInstructions.constantPower)
-        )
+    if (dataTableFullXCoordinateExists(dataTable, i)) {
+      processedDataTable.dataTableData[i].xCoord = processXCoordinate(
+        dataTable,
+        i
+      );
+      processedDataTable.dataTableData[i].xUncertainty = processXUncertainty(
+        dataTable,
+        i
       );
     }
-    if (
-      dataTable.xCurveStraighteningInstructions.functionClass === "ln(x)" &&
-      dataTableFullXCoordinateExists(dataTable, i)
-    ) {
-      processedDataTable.dataTableData[i].xCoord = returnRealValuesOnly(
-        math.log(dataTable.dataTableData[i].xCoord)
-      );
-      processedDataTable.dataTableData[i].xUncertainty =
-        dataTable.dataTableData[i].xUncertainty;
-    }
-
     if (dataTableFullYCoordinateExists(dataTable, i)) {
-      processedDataTable.dataTableData[i].yCoord = processYDataPoint(
+      processedDataTable.dataTableData[i].yCoord = processYCoordinate(
         dataTable,
         i
       );
@@ -212,39 +204,25 @@ function generateProcessedDataTable(dataTable) {
 
 function updateProcessedDataTable(processedDataTable, rawDataTable) {
   // include rawDataTable as a parameter since it contains the curve straightening instructions
-  for (var i = 0; i < processedDataTable.dataTableData.length; ++i) {
-    if (dataTableFullXCoordinateExists(rawDataTable, i)) {
-      if (rawDataTable.xCurveStraighteningInstructions.constantPower) {
-        processedDataTable.dataTableData[i].xCoord = returnRealValuesOnly(
-          math.pow(
-            rawDataTable.dataTableData[i].xCoord,
-            math.evaluate(
-              rawDataTable.xCurveStraighteningInstructions.constantPower
-            )
-          )
-        );
-        processedDataTable.dataTableData[i].xUncertainty =
-          rawDataTable.dataTableData[i].xUncertainty;
-      }
-      if (rawDataTable.xCurveStraighteningInstructions.functionClass === "x") {
-        processedDataTable.dataTableData[i].xCoord =
-          rawDataTable.dataTableData[i].xCoord;
-        processedDataTable.dataTableData[i].xUncertainty =
-          rawDataTable.dataTableData[i].xUncertainty;
-      }
-      if (
-        rawDataTable.xCurveStraighteningInstructions.functionClass === "ln(x)"
-      ) {
-        processedDataTable.dataTableData[i].xCoord = returnRealValuesOnly(
-          math.log(rawDataTable.dataTableData[i].xCoord)
-        );
-        processedDataTable.dataTableData[i].xUncertainty =
-          rawDataTable.dataTableData[i].xUncertainty;
-      }
+  for (var i = 0; i < rawDataTable.dataTableData.length; ++i) {
+    // if rawDataTable is now larger than the existing processedDataTable, we push a new dataPoint object to the processedDataTable's data
+    if (i >= processedDataTable.dataTableData.length) {
+      var newDataPoint = new DataPoint();
+      processedDataTable.dataTableData.push(newDataPoint);
     }
 
+    if (dataTableFullXCoordinateExists(rawDataTable, i)) {
+      processedDataTable.dataTableData[i].xCoord = processXCoordinate(
+        rawDataTable,
+        i
+      );
+      processedDataTable.dataTableData[i].xUncertainty = processXUncertainty(
+        rawDataTable,
+        i
+      );
+    }
     if (dataTableFullYCoordinateExists(rawDataTable, i)) {
-      processedDataTable.dataTableData[i].yCoord = processYDataPoint(
+      processedDataTable.dataTableData[i].yCoord = processYCoordinate(
         rawDataTable,
         i
       );
@@ -285,8 +263,27 @@ function dataTableFullYCoordinateExists(dataTable, index) {
   return false;
 }
 
+function processXCoordinate(dataTable, index) {
+  if (dataTable.xCurveStraighteningInstructions.constantPower) {
+    return returnRealValuesOnly(
+      math.pow(
+        dataTable.dataTableData[index].xCoord,
+        math.evaluate(dataTable.xCurveStraighteningInstructions.constantPower)
+      )
+    );
+  }
+  if (dataTable.xCurveStraighteningInstructions.functionClass === "x") {
+    return dataTable.dataTableData[index].xCoord;
+  }
+  if (dataTable.xCurveStraighteningInstructions.functionClass === "ln(x)") {
+    return returnRealValuesOnly(
+      math.log(dataTable.dataTableData[index].xCoord)
+    );
+  }
+}
+
 // process data point based on data table instructions
-function processYDataPoint(dataTable, index) {
+function processYCoordinate(dataTable, index) {
   if (dataTable.yCurveStraighteningInstructions.constantPower) {
     return returnRealValuesOnly(
       math.pow(
@@ -302,6 +299,14 @@ function processYDataPoint(dataTable, index) {
     return returnRealValuesOnly(
       math.log(dataTable.dataTableData[index].yCoord)
     );
+  }
+}
+
+// process uncertainty based on data table instructions
+function processXUncertainty(dataTable, index) {
+  // WIP
+  if (dataTable.dataTableData[index].xUncertainty) {
+    return dataTable.dataTableData[index].xUncertainty;
   }
 }
 
