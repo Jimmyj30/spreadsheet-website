@@ -34,7 +34,7 @@ export class DataTablesComponent implements OnInit {
   // to run locally: ng serve --proxy-config proxy.conf.json
 
   rawData: any[] = this.generateDefaultDataTable(
-    Handsontable.default.helper.createSpreadsheetData(10, 4)
+    Handsontable.default.helper.createSpreadsheetData(5, 4)
   );
   rawDataTableSettings: Handsontable.default.GridSettings;
   rawDataTable: DataTable;
@@ -58,10 +58,16 @@ export class DataTablesComponent implements OnInit {
   @ViewChild('processedDataTableRef', { static: false })
   processedDataTableRef: HotTableComponent;
 
+  @ViewChild('rawDataTableRef', { static: false })
+  rawDataTableRef: HotTableComponent;
+
+  errorMessage: string;
+
   constructor(
     private readonly dataTableService: DataTableService,
     private readonly fb: FormBuilder
   ) {
+    // add context menu for cells: https://handsontable.com/docs/8.3.2/demo-context-menu.html
     this.rawDataTableSettings = {
       data: this.rawData,
       rowHeaders: true,
@@ -71,6 +77,13 @@ export class DataTablesComponent implements OnInit {
         'Manipulated',
         'Uncertainties for Manipulated',
       ],
+      columns: [
+        { data: 'yUncertainty', type: 'numeric' },
+        { data: 'yCoord', type: 'numeric' },
+        { data: 'xCoord', type: 'numeric' },
+        { data: 'xUncertainty', type: 'numeric' },
+      ],
+      afterValidate: (isValid, value, row, prop, source) => {},
 
       filters: true,
       dropdownMenu: true,
@@ -81,6 +94,8 @@ export class DataTablesComponent implements OnInit {
       manualColumnResize: true,
       manualRowResize: true,
       wordWrap: true,
+      contextMenu: ['row_above', 'row_below', 'remove_row'],
+      minRows: 5,
       maxCols: 4,
       licenseKey: 'non-commercial-and-evaluation',
     };
@@ -103,6 +118,7 @@ export class DataTablesComponent implements OnInit {
   }
 
   changeXOption(event) {
+    console.log(this.rawDataTableRef);
     if (this.removeFirstWord(event.target.value) === 'x^a') {
       // event.target.value will either equal "3: x^a" or "x^a"
       this.showXToConstantPower = true;
@@ -235,6 +251,7 @@ export class DataTablesComponent implements OnInit {
   private createProcessedDataTableSettings(processedDataTable: DataTable) {
     this.processedDataTableSettings = this.rawDataTableSettings;
     this.processedDataTableSettings.data = processedDataTable.dataTableData;
+    this.processedDataTableSettings.contextMenu = false;
 
     (this.processedDataTableSettings.colHeaders = [
       'Uncertainties for Responding',
@@ -242,11 +259,13 @@ export class DataTablesComponent implements OnInit {
       'Manipulated',
       'Uncertainties for Manipulated',
     ]),
+      // the processed data table will have an _id attached to it that should
+      // not be displayed as a column, so we will specify which columns are displayed here
       (this.processedDataTableSettings.columns = [
         { data: 'yUncertainty' },
         { data: 'yCoord' },
         { data: 'xCoord' },
-        { data: 'xUncertainty' }, // since the processed data table will have an _id attached to it
+        { data: 'xUncertainty' },
       ]);
     console.log(this.processedDataTableSettings);
   }
@@ -283,20 +302,15 @@ export class DataTablesComponent implements OnInit {
     return defaultDataTable;
   }
 
-  // private flipArrayOrientation(array) {
-  //   // turns a 2D array of rows into a 2D array of columns, and
-  //   // turns a 2D array of columns into a 2D array of rows
-  //   if (array && array[0]) {
-  //     let flippedArray = [];
-  //     for (let i = 0; i < array[0].length; i++) {
-  //       if (!flippedArray[i]) {
-  //         flippedArray.push([]);
-  //       }
-  //       for (let j = 0; j < array.length; j++) {
-  //         flippedArray[i].push(array[j][i]);
-  //       }
-  //     }
-  //     return flippedArray;
-  //   }
-  // }
+  // https://handsontable.com/docs/8.3.2/frameworks-wrapper-for-angular-hot-reference.html
+  private isHandsontableValid(hotTableComponent): boolean {
+    const rowsCount = hotTableComponent;
+    for (let row = 0; row < rowsCount; row++) {
+      const metaCols = hotTableComponent.row;
+      if (metaCols.some((col) => !col.valid)) {
+        return false;
+      }
+    }
+    return true;
+  }
 }

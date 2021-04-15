@@ -232,6 +232,17 @@ function updateProcessedDataTable(processedDataTable, rawDataTable) {
       );
     }
   }
+
+  // if rawDataTable is smaller than the processedDataTable, we can get rid of the extra data points from the processedDataTable...
+  if (
+    processedDataTable.dataTableData.length > rawDataTable.dataTableData.length
+  ) {
+    processedDataTable.dataTableData = processedDataTable.dataTableData.slice(
+      0,
+      rawDataTable.dataTableData.length
+    );
+  }
+
   return processedDataTable;
 }
 

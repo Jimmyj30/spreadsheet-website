@@ -4,9 +4,14 @@
       Help: click on a cell and drag the blue square on the bottom right of the
       cell downwards in order to add new rows (identical to Excel autofill).
     </p>
+    <p>
+      Help: right click on a cell to display a context menu for a list of
+      possible interactions with the table.
+    </p>
+    <p>Note: the minimum number of rows for this data table is 5.</p>
   </div>
   <div class="vertical-margin">
-    <hot-table [settings]="rawDataTableSettings"></hot-table>
+    <hot-table #rawDataTableRef [settings]="rawDataTableSettings"></hot-table>
   </div>
   <div class="vertical-margin">
     <div>Curve straightening instructions for processed data table:</div>
@@ -60,10 +65,13 @@
     <button
       type="submit"
       (click)="onSubmit()"
-      [disabled]="!curveStraighteningInstructionsForm.valid"
+      [disabled]="!curveStraighteningInstructionsForm.valid || errorMessage"
     >
       Submit
     </button>
+    <span class="left-margin" *ngIf="errorMessage"
+      >error: {{ errorMessage }}
+    </span>
   </div>
   <div *ngIf="processedDataTable" class="vertical-margin">
     <hot-table
