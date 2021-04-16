@@ -316,15 +316,71 @@ function processYCoordinate(dataTable, index) {
 // process uncertainty based on data table instructions
 function processXUncertainty(dataTable, index) {
   // WIP
-  if (dataTable.dataTableData[index].xUncertainty) {
-    return dataTable.dataTableData[index].xUncertainty;
+  if (dataTable.xCurveStraighteningInstructions.constantPower) {
+    const processedXCoordinateValue = returnRealValuesOnly(
+      math.pow(
+        dataTable.dataTableData[index].xCoord,
+        math.evaluate(dataTable.xCurveStraighteningInstructions.constantPower)
+      )
+    );
+    return math.abs(
+      returnRealValuesOnly(
+        math
+          .chain(dataTable.dataTableData[index].xUncertainty)
+          .divide(dataTable.dataTableData[index].xCoord)
+          .multiply(dataTable.xCurveStraighteningInstructions.constantPower)
+          .multiply(processedXCoordinateValue)
+          .done()
+      )
+    );
+  }
+  if (dataTable.xCurveStraighteningInstructions.functionClass === "x") {
+    return math.abs(dataTable.dataTableData[index].xUncertainty);
+  }
+  if (dataTable.xCurveStraighteningInstructions.functionClass === "ln(x)") {
+    return math.abs(
+      returnRealValuesOnly(
+        math.divide(
+          dataTable.dataTableData[index].xUncertainty,
+          dataTable.dataTableData[index].xCoord
+        )
+      )
+    );
   }
 }
 
 // process uncertainty based on data table instructions
 function processYUncertainty(dataTable, index) {
   // WIP
-  if (dataTable.dataTableData[index].yUncertainty) {
-    return dataTable.dataTableData[index].yUncertainty;
+  if (dataTable.yCurveStraighteningInstructions.constantPower) {
+    const processedYCoordinateValue = returnRealValuesOnly(
+      math.pow(
+        dataTable.dataTableData[index].yCoord,
+        math.evaluate(dataTable.yCurveStraighteningInstructions.constantPower)
+      )
+    );
+    return returnRealValuesOnly(
+      math.abs(
+        math
+          .chain(dataTable.dataTableData[index].yUncertainty)
+          .divide(dataTable.dataTableData[index].yCoord)
+          .multiply(dataTable.yCurveStraighteningInstructions.constantPower)
+          .multiply(processedYCoordinateValue)
+          .done()
+      )
+    );
+  }
+  if (dataTable.yCurveStraighteningInstructions.functionClass === "y") {
+    return math.abs(dataTable.dataTableData[index].yUncertainty);
+  }
+  if (dataTable.yCurveStraighteningInstructions.functionClass === "ln(y)") {
+    return math.abs(
+      returnRealValuesOnly(
+        math.divide(
+          dataTable.dataTableData[index].yUncertainty,
+          dataTable.dataTableData[index].yCoord
+        )
+      )
+    );
   }
 }
