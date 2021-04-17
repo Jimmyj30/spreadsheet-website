@@ -61,7 +61,10 @@ export class DataTablesComponent implements OnInit {
   @ViewChild('rawDataTableRef', { static: false })
   rawDataTableRef: HotTableComponent;
 
+  // @ViewChild the graph component and refresh it when necessary
+
   errorMessage: string;
+  showGraph: boolean = false;
 
   constructor(
     private readonly dataTableService: DataTableService,
@@ -246,6 +249,10 @@ export class DataTablesComponent implements OnInit {
           window.location.reload();
         });
     }
+  }
+
+  onGenerateGraph() {
+    this.showGraph = true;
   }
 
   private createProcessedDataTableSettings(processedDataTable: DataTable) {
