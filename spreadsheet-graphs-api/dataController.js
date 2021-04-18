@@ -328,7 +328,11 @@ function processXUncertainty(dataTable, index) {
         math
           .chain(dataTable.dataTableData[index].xUncertainty)
           .divide(dataTable.dataTableData[index].xCoord)
-          .multiply(dataTable.xCurveStraighteningInstructions.constantPower)
+          .multiply(
+            math.evaluate(
+              dataTable.xCurveStraighteningInstructions.constantPower
+            )
+          )
           .multiply(processedXCoordinateValue)
           .done()
       )
@@ -364,7 +368,11 @@ function processYUncertainty(dataTable, index) {
         math
           .chain(dataTable.dataTableData[index].yUncertainty)
           .divide(dataTable.dataTableData[index].yCoord)
-          .multiply(dataTable.yCurveStraighteningInstructions.constantPower)
+          .multiply(
+            math.evaluate(
+              dataTable.yCurveStraighteningInstructions.constantPower
+            )
+          )
           .multiply(processedYCoordinateValue)
           .done()
       )

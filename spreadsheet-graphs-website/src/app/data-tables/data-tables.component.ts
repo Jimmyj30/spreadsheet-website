@@ -281,6 +281,7 @@ export class DataTablesComponent implements OnInit {
 
   private updateProcessedDataTableSettings(dataTable: DataTable): void {
     this.processedDataTableSettings.data = dataTable.dataTableData;
+    this.processedDataTable.dataTableData = dataTable.dataTableData; // updating the value of the processedDataTable object for the graph
     this.refreshProcessedDataTable(this.processedDataTableSettings);
     // changing the data of the processed data table based on the response...
 
