@@ -61,7 +61,7 @@ export class DataTablesComponent implements OnInit {
   @ViewChild('rawDataTableRef', { static: false })
   rawDataTableRef: HotTableComponent;
 
-  // @ViewChild the graph component and refresh it when necessary
+  // refresh the graph component with ngOnChanges when necessary
 
   errorMessage: string;
   showGraph: boolean = false;
@@ -121,7 +121,6 @@ export class DataTablesComponent implements OnInit {
   }
 
   changeXOption(event) {
-    console.log(this.rawDataTableRef);
     if (this.removeFirstWord(event.target.value) === 'x^a') {
       // event.target.value will either equal "3: x^a" or "x^a"
       this.showXToConstantPower = true;
@@ -165,7 +164,7 @@ export class DataTablesComponent implements OnInit {
     });
   }
 
-  onSubmit() {
+  onSubmit(): void {
     // form instructions...
     this.rawDataTable = new DataTable({
       dataTableData: this.rawData,
@@ -231,7 +230,7 @@ export class DataTablesComponent implements OnInit {
     }
   }
 
-  onFinish() {
+  onFinish(): void {
     if (this.processedDataTable && this.processedDataTable._id) {
       this.dataTableService
         .deleteDataTable(this.processedDataTable)
@@ -251,11 +250,13 @@ export class DataTablesComponent implements OnInit {
     }
   }
 
-  onGenerateGraph() {
+  onGenerateGraph(): void {
     this.showGraph = true;
   }
 
-  private createProcessedDataTableSettings(processedDataTable: DataTable) {
+  private createProcessedDataTableSettings(
+    processedDataTable: DataTable
+  ): void {
     this.processedDataTableSettings = this.rawDataTableSettings;
     this.processedDataTableSettings.data = processedDataTable.dataTableData;
     this.processedDataTableSettings.contextMenu = false;
@@ -274,10 +275,11 @@ export class DataTablesComponent implements OnInit {
         { data: 'xCoord' },
         { data: 'xUncertainty' },
       ]);
+    console.log('processed data table settings: ');
     console.log(this.processedDataTableSettings);
   }
 
-  private updateProcessedDataTableSettings(dataTable: DataTable) {
+  private updateProcessedDataTableSettings(dataTable: DataTable): void {
     this.processedDataTableSettings.data = dataTable.dataTableData;
     this.refreshProcessedDataTable(this.processedDataTableSettings);
     // changing the data of the processed data table based on the response...
@@ -286,15 +288,15 @@ export class DataTablesComponent implements OnInit {
     console.log(this.processedDataTable);
   }
 
-  private refreshProcessedDataTable(settings) {
+  private refreshProcessedDataTable(settings): void {
     this.processedDataTableRef.updateHotTable(settings);
   }
 
-  private removeFirstWord(string: string) {
+  private removeFirstWord(string: string): string {
     return string.substr(string.indexOf(' ') + 1);
   }
 
-  private generateDefaultDataTable(dataTableArray: any[]) {
+  private generateDefaultDataTable(dataTableArray: any[]): DataTable[] {
     let defaultDataTable = [];
     for (var i = 0; i < dataTableArray.length; ++i) {
       let row = new DataPoint({
@@ -305,6 +307,7 @@ export class DataTablesComponent implements OnInit {
       });
       defaultDataTable.push(row);
     }
+    console.log('default data table data');
     console.log(defaultDataTable);
     return defaultDataTable;
   }

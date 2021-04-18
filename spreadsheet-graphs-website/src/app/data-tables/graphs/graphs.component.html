@@ -1,1 +1,9 @@
-<p>graphs works!</p>
+<div class="graph" *ngIf="processedDataTableData">
+  <canvas
+    baseChart
+    [datasets]="scatterChartData"
+    [options]="scatterChartOptions"
+    [chartType]="scatterChartType"
+  >
+  </canvas>
+</div>

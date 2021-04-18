@@ -79,13 +79,14 @@
       [settings]="processedDataTableSettings"
     ></hot-table>
   </div>
-  <app-graphs *ngIf="showGraph"></app-graphs>
+  <app-graphs
+    *ngIf="showGraph && processedDataTable"
+    [processedDataTableData]="processedDataTable.dataTableData"
+  ></app-graphs>
   <div *ngIf="processedDataTable" fxLayout="column">
     <div><button type="button" (click)="onFinish()">Done</button></div>
     <div>
-      <button type="button" (click)="onGenerateGraph()" [disabled]="showGraph">
-        Generate Graph
-      </button>
+      <button type="button" (click)="onGenerateGraph()">Generate Graph</button>
     </div>
   </div>
 </div>
