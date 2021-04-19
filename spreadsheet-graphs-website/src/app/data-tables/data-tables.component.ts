@@ -102,6 +102,12 @@ export class DataTablesComponent implements OnInit {
       maxCols: 4,
       licenseKey: 'non-commercial-and-evaluation',
     };
+
+    window.onbeforeunload = function () {
+      console.log('before unload');
+      // this.onFinish();
+      return null;
+    };
   }
 
   ngOnInit(): void {

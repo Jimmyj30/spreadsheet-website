@@ -1,9 +1,15 @@
 <div class="graph" *ngIf="processedDataTableData">
-  <canvas
+  <!-- <canvas
     baseChart
     [datasets]="scatterChartData"
     [options]="scatterChartOptions"
     [chartType]="scatterChartType"
   >
-  </canvas>
+  </canvas> -->
+  <!-- now using plotly instead of chart.js for our graph -->
+  <plotly-plot
+    [data]="scatterChart.data"
+    [layout]="scatterChart.layout"
+    [useResizeHandler]="true"
+  ></plotly-plot>
 </div>
