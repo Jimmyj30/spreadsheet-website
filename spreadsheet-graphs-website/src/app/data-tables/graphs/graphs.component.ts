@@ -67,6 +67,7 @@ export class GraphsComponent implements OnInit, DoCheck {
             array: scatterChartData.errorYArray,
             visible: true,
           },
+          mode: 'markers',
           type: 'scatter',
         },
       ],
@@ -79,33 +80,51 @@ export class GraphsComponent implements OnInit, DoCheck {
 
     // comparison of equality between updatedProcessedDataTableData and this.scatterChartData
     // works, but we can try something else with the differs...
-    // let updatedProcessedDataTableData = this.createScatterChartData(
-    //   this.processedDataTableData
-    // );
-    // if (
-    //   updatedProcessedDataTableData.length !==
-    //   this.scatterChartData[0].data.length
-    // ) {
-    //   // if lengths are different, automatically update the data set
-    //   this.scatterChartData[0].data = this.createScatterChartData(
-    //     this.processedDataTableData
-    //   );
-    // } else {
-    //   for (var i = 0; i < updatedProcessedDataTableData.length; ++i) {
-    //     for (var element in updatedProcessedDataTableData[i]) {
-    //       if (
-    //         this.scatterChartData[0].data[i][element] !=
-    //         updatedProcessedDataTableData[i][element]
-    //       ) {
-    //         this.scatterChartData[0].data = this.createScatterChartData(
-    //           this.processedDataTableData
-    //         );
-    //         console.log('updated scatter chart data: ');
-    //         console.log(this.scatterChartData[0].data);
-    //       }
-    //     }
-    //   }
-    // }
+
+    // updated scatter chart data that we can compare against the existing
+    // scatter chart data
+    let updatedScatterChartData = this.createScatterChartData(
+      this.processedDataTableData
+    );
+    const currentScatterChartData = this.scatterChart.data[0];
+
+    // check if this.scatterChart and updatedScatterChartData exists
+    if (currentScatterChartData && updatedScatterChartData) {
+      if (this.compareScatterChartDataLengths(updatedScatterChartData)) {
+        // if the lengths of the arrays with the updated data table data are different
+        // update the data set
+        this.setScatterChartData(updatedScatterChartData);
+      } else {
+        // if the lengths of the arrays with the updated data table are the same
+        // check individual elements and update the data set if needed
+        for (var element in updatedScatterChartData) {
+          for (var i = 0; i < updatedScatterChartData[element].length; ++i) {
+            if (element === 'errorXArray') {
+              if (
+                currentScatterChartData.error_x.array[i] !==
+                updatedScatterChartData[element][i]
+              ) {
+                this.setScatterChartData(updatedScatterChartData);
+              }
+            } else if (element === 'errorYArray') {
+              if (
+                currentScatterChartData.error_y.array[i] !==
+                updatedScatterChartData[element][i]
+              ) {
+                this.setScatterChartData(updatedScatterChartData);
+              }
+            } else if (element === 'x' || element === 'y') {
+              if (
+                currentScatterChartData[element][i] !==
+                updatedScatterChartData[element][i]
+              ) {
+                this.setScatterChartData(updatedScatterChartData);
+              }
+            }
+          }
+        }
+      }
+    }
 
     // WIP:
     // check difference between the data table data...
@@ -155,5 +174,36 @@ export class GraphsComponent implements OnInit, DoCheck {
     console.log('scatterChartData: ');
     console.log(scatterChartData);
     return scatterChartData;
+  }
+
+  // update or set scatter chart data
+  private setScatterChartData(updatedProcessedDataTableData: PlotlyData): void {
+    const currentScatterChartData = this.scatterChart.data[0];
+
+    currentScatterChartData.x = updatedProcessedDataTableData.x;
+    currentScatterChartData.y = updatedProcessedDataTableData.y;
+    currentScatterChartData.error_x.array =
+      updatedProcessedDataTableData.errorXArray;
+    currentScatterChartData.error_y.array =
+      updatedProcessedDataTableData.errorYArray;
+  }
+
+  private compareScatterChartDataLengths(updatedScatterChartData: PlotlyData) {
+    // return true if the lengths of the scatter chart data arrays are all the same
+    // return false if the lengths of the scatter chart data arrays are all different
+    const currentScatterChartData = this.scatterChart.data[0];
+
+    if (
+      updatedScatterChartData.x.length === currentScatterChartData.x.length &&
+      updatedScatterChartData.y.length === currentScatterChartData.y.length &&
+      updatedScatterChartData.errorXArray.length ===
+        currentScatterChartData.error_x.array.length &&
+      updatedScatterChartData.errorYArray.length ===
+        currentScatterChartData.error_y.array.length
+    ) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
