@@ -23,6 +23,7 @@ export class GraphsComponent implements OnInit, DoCheck {
 
   // https://anotherdevblog.com/2019/06/30/when-ngonchanges-is-not-enough/
   // https://stackoverflow.com/questions/42962394/angular-2-how-to-detect-changes-in-an-array-input-property
+  // https://stackoverflow.com/questions/35748484/detect-changes-in-objects-inside-array-in-angular2
   // http://plnkr.co/edit/JV7xcMhAuupnSdwrd8XB?p=preview&preview
 
   // plotly:
@@ -32,21 +33,17 @@ export class GraphsComponent implements OnInit, DoCheck {
 
   // onChanges can't "see" if the stuff in the array has changed so we need to use IterableDiffers....
 
-  iterableDiffer: IterableDiffer<any>;
-  objDiffer: Object;
+  objDiffer: any;
+  differ: any;
   objDiffers: Array<KeyValueDiffer<string, any>>;
 
   scatterChart;
 
-  constructor(private differs: KeyValueDiffers) {}
+  constructor(private differs: KeyValueDiffers) {
+    this.differ = this.differs.find([]).create();
+  }
 
   ngOnInit(): void {
-    // create object containing many differs;
-    // this.objDiffers = new Array<KeyValueDiffer<string, any>>();
-    // this.processedDataTableData.forEach((itemGroup, index) => {
-    //   this.objDiffers[index] = this.differs.find(itemGroup).create();
-    // });
-    console.log(this.processedDataTableData);
     const scatterChartData = this.createScatterChartData(
       this.processedDataTableData
     );
@@ -73,11 +70,15 @@ export class GraphsComponent implements OnInit, DoCheck {
       ],
       layout: { title: 'Test Graph Title' },
     };
+
+    // create array containing many differs;
+    this.objDiffers = new Array<KeyValueDiffer<string, any>>();
+    this.processedDataTableData.forEach((dataPoint, index) => {
+      this.objDiffers[index] = this.differs.find(dataPoint).create();
+    });
   }
 
   ngDoCheck() {
-    console.log(this.processedDataTableData);
-
     // comparison of equality between updatedProcessedDataTableData and this.scatterChartData
     // works, but we can try something else with the differs...
 
@@ -128,15 +129,16 @@ export class GraphsComponent implements OnInit, DoCheck {
 
     // WIP:
     // check difference between the data table data...
-    // this.processedDataTableData.forEach((itemGroup, index) => {
-    //   const objDiffer = this.objDiffers[index];
-    //   const objChanges = objDiffer.diff(itemGroup);
-    //   if (objChanges) {
-    //     objChanges.forEachChangedItem((changedItem) => {
-    //       console.log(changedItem.key);
-    //     });
-    //   }
-    // });
+    this.processedDataTableData.forEach((dataPoint, index) => {
+      const objDiffer = this.objDiffers[index];
+      const objChanges = objDiffer.diff(dataPoint);
+      if (objChanges) {
+        objChanges.forEachChangedItem((changedItem) => {
+          console.log(changedItem.key);
+          console.log('differ detected change!');
+        });
+      }
+    });
     // if ('changes') {
     //   console.log('Changes detected!');
     //   if (this.scatterChartData) {
