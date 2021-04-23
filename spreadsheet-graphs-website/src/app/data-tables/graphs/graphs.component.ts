@@ -1,14 +1,11 @@
 import {
   Component,
   Input,
-  IterableDiffer,
   DoCheck,
   OnInit,
   KeyValueDiffers,
   KeyValueDiffer,
 } from '@angular/core';
-import { ChartDataSets, ChartType } from 'chart.js';
-import { ChartOptions } from 'chart.js';
 import { DataPoint } from '../models/data-point.model';
 import { DataTable } from '../models/data-table.model';
 import { PlotlyData } from '../models/plotly-data.model';
@@ -71,7 +68,8 @@ export class GraphsComponent implements OnInit, DoCheck {
       layout: { title: 'Test Graph Title' },
     };
 
-    // create array containing many differs;
+    // create array containing key-value differs
+    // for each dataPoint object in processedDataTableData;
     this.objDiffers = new Array<KeyValueDiffer<string, any>>();
     this.processedDataTableData.forEach((dataPoint, index) => {
       this.objDiffers[index] = this.differs.find(dataPoint).create();
@@ -79,76 +77,34 @@ export class GraphsComponent implements OnInit, DoCheck {
   }
 
   ngDoCheck() {
-    // comparison of equality between updatedProcessedDataTableData and this.scatterChartData
-    // works, but we can try something else with the differs...
-
     // updated scatter chart data that we can compare against the existing
     // scatter chart data
     let updatedScatterChartData = this.createScatterChartData(
       this.processedDataTableData
     );
     const currentScatterChartData = this.scatterChart.data[0];
+    var updateScatterChartData: boolean = false;
 
-    // check if this.scatterChart and updatedScatterChartData exists
+    // update differs array for each ngDoCheck
+    this.processedDataTableData.forEach((dataPoint, index) => {
+      this.objDiffers[index] = this.differs.find(dataPoint).create();
+    });
+
+    // check difference between the data table data using differs...
     if (currentScatterChartData && updatedScatterChartData) {
-      if (this.compareScatterChartDataLengths(updatedScatterChartData)) {
-        // if the lengths of the arrays with the updated data table data are different
-        // update the data set
-        this.setScatterChartData(updatedScatterChartData);
-      } else {
-        // if the lengths of the arrays with the updated data table are the same
-        // check individual elements and update the data set if needed
-        for (var element in updatedScatterChartData) {
-          for (var i = 0; i < updatedScatterChartData[element].length; ++i) {
-            if (element === 'errorXArray') {
-              if (
-                currentScatterChartData.error_x.array[i] !==
-                updatedScatterChartData[element][i]
-              ) {
-                this.setScatterChartData(updatedScatterChartData);
-              }
-            } else if (element === 'errorYArray') {
-              if (
-                currentScatterChartData.error_y.array[i] !==
-                updatedScatterChartData[element][i]
-              ) {
-                this.setScatterChartData(updatedScatterChartData);
-              }
-            } else if (element === 'x' || element === 'y') {
-              if (
-                currentScatterChartData[element][i] !==
-                updatedScatterChartData[element][i]
-              ) {
-                this.setScatterChartData(updatedScatterChartData);
-              }
-            }
-          }
+      this.processedDataTableData.forEach((dataPoint, index) => {
+        const objDiffer = this.objDiffers[index];
+        const objChanges = objDiffer.diff(dataPoint);
+        if (objChanges) {
+          updateScatterChartData = true;
+          console.log('differ detected changes here!');
         }
-      }
+      });
     }
 
-    // WIP:
-    // check difference between the data table data...
-    this.processedDataTableData.forEach((dataPoint, index) => {
-      const objDiffer = this.objDiffers[index];
-      const objChanges = objDiffer.diff(dataPoint);
-      if (objChanges) {
-        objChanges.forEachChangedItem((changedItem) => {
-          console.log(changedItem.key);
-          console.log('differ detected change!');
-        });
-      }
-    });
-    // if ('changes') {
-    //   console.log('Changes detected!');
-    //   if (this.scatterChartData) {
-    //     this.scatterChartData[0].data = this.createScatterChartData(
-    //       this.processedDataTableData
-    //     );
-    //     console.log('updated scatter chart data: ');
-    //     console.log(this.scatterChartData[0].data);
-    //   }
-    // }
+    if (updateScatterChartData) {
+      this.setScatterChartData(updatedScatterChartData);
+    }
   }
 
   private createScatterChartData(
@@ -188,24 +144,5 @@ export class GraphsComponent implements OnInit, DoCheck {
       updatedProcessedDataTableData.errorXArray;
     currentScatterChartData.error_y.array =
       updatedProcessedDataTableData.errorYArray;
-  }
-
-  private compareScatterChartDataLengths(updatedScatterChartData: PlotlyData) {
-    // return true if the lengths of the scatter chart data arrays are all the same
-    // return false if the lengths of the scatter chart data arrays are all different
-    const currentScatterChartData = this.scatterChart.data[0];
-
-    if (
-      updatedScatterChartData.x.length === currentScatterChartData.x.length &&
-      updatedScatterChartData.y.length === currentScatterChartData.y.length &&
-      updatedScatterChartData.errorXArray.length ===
-        currentScatterChartData.error_x.array.length &&
-      updatedScatterChartData.errorYArray.length ===
-        currentScatterChartData.error_y.array.length
-    ) {
-      return true;
-    } else {
-      return false;
-    }
   }
 }

@@ -254,10 +254,19 @@ function returnRealValuesOnly(value) {
   }
 }
 
+// check if the value passed to the function is a real number
+function isRealNumber(value) {
+  if (typeof value == "number" && !isNaN(value) && isFinite(value)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 function dataTableFullXCoordinateExists(dataTable, index) {
   if (
-    dataTable.dataTableData[index].xCoord &&
-    dataTable.dataTableData[index].xUncertainty
+    isRealNumber(dataTable.dataTableData[index].xCoord) &&
+    isRealNumber(dataTable.dataTableData[index].xUncertainty)
   ) {
     return true;
   }
@@ -266,8 +275,8 @@ function dataTableFullXCoordinateExists(dataTable, index) {
 
 function dataTableFullYCoordinateExists(dataTable, index) {
   if (
-    dataTable.dataTableData[index].yCoord &&
-    dataTable.dataTableData[index].yUncertainty
+    isRealNumber(dataTable.dataTableData[index].yCoord) &&
+    isRealNumber(dataTable.dataTableData[index].yUncertainty)
   ) {
     return true;
   }

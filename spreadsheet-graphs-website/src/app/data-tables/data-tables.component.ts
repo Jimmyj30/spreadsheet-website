@@ -104,7 +104,7 @@ export class DataTablesComponent implements OnInit {
     };
 
     window.onbeforeunload = function () {
-      console.log('before unload');
+      // console.log('before unload');
       // this.onFinish();
       return null;
     };
