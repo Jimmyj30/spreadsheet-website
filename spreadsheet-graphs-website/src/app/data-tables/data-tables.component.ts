@@ -1,12 +1,6 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { HotTableComponent } from '@handsontable/angular';
-import {
-  FormGroup,
-  FormControl,
-  FormArray,
-  FormBuilder,
-  Validators,
-} from '@angular/forms';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { HotTableComponent, HotTableRegisterer } from '@handsontable/angular';
+import { FormControl, FormBuilder, Validators } from '@angular/forms';
 import * as Handsontable from 'handsontable';
 import { mergeMap } from 'rxjs/operators';
 
@@ -15,6 +9,9 @@ import { DataTable } from './models/data-table.model';
 import { DataPoint } from './models/data-point.model';
 import { numberFractionValidator } from '../shared/number-fraction.directive';
 import { of } from 'rxjs';
+
+const FILL_OUT_SPREADSHEET_FULLY_MESSAGE =
+  'Please fully fill out the above spreadsheet with real numbers.';
 
 @Component({
   selector: 'app-data-tables',
@@ -33,11 +30,14 @@ export class DataTablesComponent implements OnInit {
 
   // to run locally: ng serve --proxy-config proxy.conf.json
 
+  private hotRegisterer = new HotTableRegisterer();
+
   rawData: any[] = this.generateDefaultDataTable(
     Handsontable.default.helper.createSpreadsheetData(5, 4)
   );
   rawDataTableSettings: Handsontable.default.GridSettings;
   rawDataTable: DataTable;
+  rawDataTableID = 'rawDataTable';
 
   processedData: any[];
   processedDataTableSettings: Handsontable.default.GridSettings;
@@ -61,9 +61,7 @@ export class DataTablesComponent implements OnInit {
   @ViewChild('rawDataTableRef', { static: false })
   rawDataTableRef: HotTableComponent;
 
-  // refresh the graph component with ngOnChanges when necessary
-
-  errorMessage: string;
+  errorMessage: string = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
   showGraph: boolean = false;
 
   constructor(
@@ -86,7 +84,18 @@ export class DataTablesComponent implements OnInit {
         { data: 'xCoord', type: 'numeric' },
         { data: 'xUncertainty', type: 'numeric' },
       ],
-      afterValidate: (isValid, value, row, prop, source) => {},
+      afterValidate: (isValid, value, row, prop, source) => {
+        let dataArray = this.hotRegisterer
+          .getInstance(this.rawDataTableID)
+          .getData();
+
+        if (this.isHandsontableValid(dataArray)) {
+          console.log('valid handsontable');
+          this.errorMessage = undefined;
+        } else {
+          this.errorMessage = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
+        }
+      },
 
       filters: true,
       dropdownMenu: true,
@@ -101,12 +110,6 @@ export class DataTablesComponent implements OnInit {
       minRows: 5,
       maxCols: 4,
       licenseKey: 'non-commercial-and-evaluation',
-    };
-
-    window.onbeforeunload = function () {
-      // console.log('before unload');
-      // this.onFinish();
-      return null;
     };
   }
 
@@ -320,14 +323,25 @@ export class DataTablesComponent implements OnInit {
   }
 
   // https://handsontable.com/docs/8.3.2/frameworks-wrapper-for-angular-hot-reference.html
-  private isHandsontableValid(hotTableComponent): boolean {
-    const rowsCount = hotTableComponent;
-    for (let row = 0; row < rowsCount; row++) {
-      const metaCols = hotTableComponent.row;
-      if (metaCols.some((col) => !col.valid)) {
-        return false;
+  // dataArray is a 2D array of strings
+  private isHandsontableValid(dataArray): boolean {
+    console.log(dataArray);
+    // go through all the entries....
+    if (dataArray[0][0]) {
+      const rowsCount = dataArray[0].length;
+      const colsCount = dataArray.length;
+      for (var i = 0; i < rowsCount; ++i) {
+        for (var j = 0; j < colsCount; ++j) {
+          // check if dataArray[i][j] is a string representation of a real number
+          let value = parseFloat(dataArray[i][j]);
+          console.log(dataArray[i][j]);
+          if (!(typeof value == 'number' && !isNaN(value) && isFinite(value))) {
+            return false;
+          }
+        }
       }
+      return true;
     }
-    return true;
+    return false;
   }
 }

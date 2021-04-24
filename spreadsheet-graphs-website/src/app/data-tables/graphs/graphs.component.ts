@@ -97,7 +97,7 @@ export class GraphsComponent implements OnInit, DoCheck {
         const objChanges = objDiffer.diff(dataPoint);
         if (objChanges) {
           updateScatterChartData = true;
-          console.log('differ detected changes here!');
+          // console.log('differ detected changes here!');
         }
       });
     }
@@ -129,8 +129,8 @@ export class GraphsComponent implements OnInit, DoCheck {
       errorYArray: errorYArray,
     });
 
-    console.log('scatterChartData: ');
-    console.log(scatterChartData);
+    // console.log('scatterChartData: ');
+    // console.log(scatterChartData);
     return scatterChartData;
   }
 

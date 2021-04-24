@@ -8,10 +8,18 @@
       Help: right click on a cell to display a context menu for a list of
       possible interactions with the table.
     </p>
+    <p>
+      Help: press control-z or command-z to undo recent changes to the
+      spreadsheets.
+    </p>
     <p>Note: the minimum number of rows for this data table is 5.</p>
   </div>
   <div class="vertical-margin">
-    <hot-table #rawDataTableRef [settings]="rawDataTableSettings"></hot-table>
+    <hot-table
+      #rawDataTableRef
+      [hotId]="rawDataTableID"
+      [settings]="rawDataTableSettings"
+    ></hot-table>
   </div>
   <div class="vertical-margin">
     <div>Curve straightening instructions for processed data table:</div>
@@ -69,9 +77,7 @@
     >
       Submit
     </button>
-    <span class="left-margin" *ngIf="errorMessage"
-      >error: {{ errorMessage }}
-    </span>
+    <span class="left-margin" *ngIf="errorMessage">{{ errorMessage }} </span>
   </div>
   <div *ngIf="processedDataTable" class="vertical-margin">
     <hot-table
