@@ -37,7 +37,7 @@ export class DataTablesComponent implements OnInit {
   );
   rawDataTableSettings: Handsontable.default.GridSettings;
   rawDataTable: DataTable;
-  rawDataTableID = 'rawDataTable';
+  rawDataTableHandsontableID = 'rawDataTable';
 
   processedData: any[];
   processedDataTableSettings: Handsontable.default.GridSettings;
@@ -84,15 +84,17 @@ export class DataTablesComponent implements OnInit {
         { data: 'xCoord', type: 'numeric' },
         { data: 'xUncertainty', type: 'numeric' },
       ],
-      afterValidate: (isValid, value, row, prop, source) => {
+
+      afterChange: (changes) => {
         let dataArray = this.hotRegisterer
-          .getInstance(this.rawDataTableID)
+          .getInstance(this.rawDataTableHandsontableID)
           .getData();
 
+        console.log(dataArray);
         if (this.isHandsontableValid(dataArray)) {
-          console.log('valid handsontable');
           this.errorMessage = undefined;
         } else {
+          // default value for table without anything filled in yet
           this.errorMessage = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
         }
       },
@@ -230,6 +232,10 @@ export class DataTablesComponent implements OnInit {
           // add an ID to the raw data table to indicate it is now stored in the database
           // return a processed data table as the response....
           // response contains a processedDataTable and a rawDataTableID
+
+          // this.processedDataTable only really needs to hold an ID since the data
+          // table data is stored in this.processedDataTableSettings so we don't have to
+          // update the data inside it...
           this.processedDataTable = response.processedDataTable;
           this.createProcessedDataTableSettings(response.processedDataTable);
 
@@ -290,7 +296,6 @@ export class DataTablesComponent implements OnInit {
 
   private updateProcessedDataTableSettings(dataTable: DataTable): void {
     this.processedDataTableSettings.data = dataTable.dataTableData;
-    this.processedDataTable.dataTableData = dataTable.dataTableData; // updating the value of the processedDataTable object for the graph
     this.refreshProcessedDataTable(this.processedDataTableSettings);
     // changing the data of the processed data table based on the response...
 
@@ -325,17 +330,18 @@ export class DataTablesComponent implements OnInit {
   // https://handsontable.com/docs/8.3.2/frameworks-wrapper-for-angular-hot-reference.html
   // dataArray is a 2D array of strings
   private isHandsontableValid(dataArray): boolean {
-    console.log(dataArray);
-    // go through all the entries....
-    if (dataArray[0][0]) {
-      const rowsCount = dataArray[0].length;
-      const colsCount = dataArray.length;
-      for (var i = 0; i < rowsCount; ++i) {
-        for (var j = 0; j < colsCount; ++j) {
-          // check if dataArray[i][j] is a string representation of a real number
-          let value = parseFloat(dataArray[i][j]);
-          console.log(dataArray[i][j]);
-          if (!(typeof value == 'number' && !isNaN(value) && isFinite(value))) {
+    // go through all the entries and determine if they are real numbers
+    if (dataArray) {
+      let rowCount = dataArray.length;
+      let colCount = dataArray[0].length;
+      for (var i = 0; i < rowCount; ++i) {
+        for (var j = 0; j < colCount; ++j) {
+          let value = parseInt(dataArray[i][j]);
+          // if value is not a real number
+          if (
+            !(typeof value === 'number' && !isNaN(value) && isFinite(value))
+          ) {
+            console.log(dataArray[i][j]);
             return false;
           }
         }

@@ -17,7 +17,7 @@
   <div class="vertical-margin">
     <hot-table
       #rawDataTableRef
-      [hotId]="rawDataTableID"
+      [hotId]="rawDataTableHandsontableID"
       [settings]="rawDataTableSettings"
     ></hot-table>
   </div>
@@ -87,7 +87,7 @@
   </div>
   <app-graphs
     *ngIf="showGraph && processedDataTable"
-    [processedDataTableData]="processedDataTable.dataTableData"
+    [processedDataTableData]="processedDataTableSettings.data"
   ></app-graphs>
   <div *ngIf="processedDataTable" fxLayout="column">
     <div><button type="button" (click)="onFinish()">Done</button></div>
