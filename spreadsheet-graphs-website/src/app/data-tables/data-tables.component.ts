@@ -90,7 +90,6 @@ export class DataTablesComponent implements OnInit {
           .getInstance(this.rawDataTableHandsontableID)
           .getData();
 
-        console.log(dataArray);
         if (this.isHandsontableValid(dataArray)) {
           this.errorMessage = undefined;
         } else {
@@ -285,11 +284,12 @@ export class DataTablesComponent implements OnInit {
       // the processed data table will have an _id attached to it that should
       // not be displayed as a column, so we will specify which columns are displayed here
       (this.processedDataTableSettings.columns = [
-        { data: 'yUncertainty' },
-        { data: 'yCoord' },
-        { data: 'xCoord' },
-        { data: 'xUncertainty' },
+        { data: 'yUncertainty', readOnly: true },
+        { data: 'yCoord', readOnly: true },
+        { data: 'xCoord', readOnly: true },
+        { data: 'xUncertainty', readOnly: true },
       ]);
+    this.processedDataTableSettings.dropdownMenu = false;
     console.log('processed data table settings: ');
     console.log(this.processedDataTableSettings);
   }
@@ -336,12 +336,11 @@ export class DataTablesComponent implements OnInit {
       let colCount = dataArray[0].length;
       for (var i = 0; i < rowCount; ++i) {
         for (var j = 0; j < colCount; ++j) {
-          let value = parseInt(dataArray[i][j]);
+          let value = Number(dataArray[i][j]);
           // if value is not a real number
           if (
             !(typeof value === 'number' && !isNaN(value) && isFinite(value))
           ) {
-            console.log(dataArray[i][j]);
             return false;
           }
         }

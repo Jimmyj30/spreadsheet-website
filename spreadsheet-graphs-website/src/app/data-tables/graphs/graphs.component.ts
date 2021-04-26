@@ -27,6 +27,7 @@ export class GraphsComponent implements OnInit, DoCheck {
   // https://plotly.com/javascript/error-bars/
   // https://plotly.com/javascript/line-and-scatter/
   // https://chart-studio.plotly.com/create/?fid=DashawnBrown%3A0
+  // https://chart-studio.plotly.com/create/?fid=liana.wang%3A103#/
 
   // onChanges can't "see" if the stuff in the array has changed so we need to use IterableDiffers....
 
