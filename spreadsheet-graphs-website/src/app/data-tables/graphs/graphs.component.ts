@@ -46,12 +46,14 @@ export class GraphsComponent implements OnInit, DoCheck {
       this.processedDataTableData
     );
 
+    // https://www.npmjs.com/package/regression
+    // https://plotly.com/javascript/legend/
+    // use this to get info about the line of best fit...
     this.scatterChart = {
       data: [
         {
           x: scatterChartData.x,
           y: scatterChartData.y,
-
           error_x: {
             type: 'data',
             array: scatterChartData.errorXArray,
@@ -64,9 +66,43 @@ export class GraphsComponent implements OnInit, DoCheck {
           },
           mode: 'markers',
           type: 'scatter',
+
+          name: 'Click Here to Edit<br>Trace Name',
         },
       ],
-      layout: { title: 'Test Graph Title' },
+      layout: {
+        title: 'Click Here to Edit Chart Title',
+        hovermode: 'closest',
+        xaxis: {
+          rangemode: 'tozero',
+          autorange: true,
+          ticks: 'outside',
+          hoverformat: '.2f',
+        },
+        yaxis: {
+          rangemode: 'tozero',
+          autorange: true,
+          ticks: 'outside',
+          hoverformat: '.2f',
+        },
+        shapes: [
+          // min gradient
+          {
+            type: 'line',
+            x0: 1,
+            y0: 0,
+            x1: 1,
+            y1: 2,
+            line: {
+              color: 'rgb(169,169,169)', //dark grey
+              width: 2,
+              dash: 'dot',
+            },
+          },
+        ],
+        showlegend: true,
+      },
+      config: { scrollZoom: true, editable: true },
     };
 
     // create array containing key-value differs
