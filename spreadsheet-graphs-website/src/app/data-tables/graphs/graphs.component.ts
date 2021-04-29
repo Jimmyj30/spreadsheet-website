@@ -6,6 +6,7 @@ import {
   KeyValueDiffers,
   KeyValueDiffer,
 } from '@angular/core';
+import { GraphUtilService } from 'src/app/shared/graph-util.service';
 import { DataPoint } from '../models/data-point.model';
 import { DataTable } from '../models/data-table.model';
 import { LineInfo } from '../models/line.model';
@@ -38,7 +39,10 @@ export class GraphsComponent implements OnInit, DoCheck {
 
   scatterChart;
 
-  constructor(private differs: KeyValueDiffers) {
+  constructor(
+    private differs: KeyValueDiffers,
+    private readonly graphUtilService: GraphUtilService
+  ) {
     this.differ = this.differs.find([]).create();
   }
 
@@ -129,6 +133,8 @@ export class GraphsComponent implements OnInit, DoCheck {
             x: scatterChartData.maxGradientInfo.x1,
             y: scatterChartData.maxGradientInfo.y1,
           },
+
+          // line of best fit
         ],
         showlegend: true,
       },
@@ -185,10 +191,10 @@ export class GraphsComponent implements OnInit, DoCheck {
 
     // double check type declarations...
     for (var i = 0; i < processedDataTableData.length; ++i) {
-      xArray.push(processedDataTableData[i].xCoord);
-      yArray.push(processedDataTableData[i].yCoord);
-      errorXArray.push(processedDataTableData[i].xUncertainty);
-      errorYArray.push(processedDataTableData[i].yUncertainty);
+      xArray.push(Number(processedDataTableData[i].xCoord));
+      yArray.push(Number(processedDataTableData[i].yCoord));
+      errorXArray.push(Number(processedDataTableData[i].xUncertainty));
+      errorYArray.push(Number(processedDataTableData[i].yUncertainty));
     }
 
     const scatterChartData = new PlotlyData({
@@ -196,13 +202,13 @@ export class GraphsComponent implements OnInit, DoCheck {
       y: yArray,
       errorXArray: errorXArray,
       errorYArray: errorYArray,
-      minGradientInfo: this.createMinGradientInfo(
+      minGradientInfo: this.graphUtilService.createMinGradientInfo(
         xArray,
         yArray,
         errorXArray,
         errorYArray
       ),
-      maxGradientInfo: this.createMaxGradientInfo(
+      maxGradientInfo: this.graphUtilService.createMaxGradientInfo(
         xArray,
         yArray,
         errorXArray,
@@ -248,69 +254,5 @@ export class GraphsComponent implements OnInit, DoCheck {
     annotations[1].text = maxGradientAnnotation;
     annotations[1].x = updatedProcessedDataTableData.maxGradientInfo.x1;
     annotations[1].y = updatedProcessedDataTableData.maxGradientInfo.y1;
-  }
-
-  private createMinGradientInfo(
-    xArray: number[],
-    yArray: number[],
-    errorXArray: number[],
-    errorYArray: number[]
-  ) {
-    // assuming that the input parameters are all sorted arrays in ascending order
-    // min gradient: top left of leftmost data point to bottom right of rightmost data point
-    let x0: number = Number(xArray[0]) - Number(errorXArray[0]);
-    let y0: number = Number(yArray[0]) + Number(errorYArray[0]);
-    let x1: number =
-      Number(xArray[xArray.length - 1]) +
-      Number(errorXArray[errorXArray.length - 1]);
-    let y1: number =
-      Number(yArray[yArray.length - 1]) -
-      Number(errorYArray[errorYArray.length - 1]);
-    let overflowFactor: number = 1.1; // axis wil go 10% beyond the rightmost data point
-
-    // y = mx + b  --> b = y - mx
-    let slope: number = (y0 - y1) / (x0 - x1);
-    let yIntercept: number = y0 - slope * x0;
-
-    return new LineInfo({
-      x0: 0,
-      y0: yIntercept,
-      x1: overflowFactor * x1,
-      y1: slope * (overflowFactor * x1) + yIntercept,
-      slope: Number(slope.toFixed(3)),
-      yIntercept: Number(yIntercept.toFixed(3)),
-    });
-  }
-
-  private createMaxGradientInfo(
-    xArray: number[],
-    yArray: number[],
-    errorXArray: number[],
-    errorYArray: number[]
-  ) {
-    // assuming that the input parameters are all sorted arrays in ascending order
-    // max gradient: bottom right of leftmost data point to top left of rightmost data point
-    let x0: number = Number(xArray[0]) + Number(errorXArray[0]);
-    let y0: number = Number(yArray[0]) - Number(errorYArray[0]);
-    let x1: number =
-      Number(xArray[xArray.length - 1]) -
-      Number(errorXArray[errorXArray.length - 1]);
-    let y1: number =
-      Number(yArray[yArray.length - 1]) +
-      Number(errorYArray[errorYArray.length - 1]);
-    let overflowFactor: number = 1.1; // axis wil go 10% beyond the rightmost data point
-
-    // y = mx + b  --> b = y - mx
-    let slope: number = (y0 - y1) / (x0 - x1);
-    let yIntercept: number = y0 - slope * x0;
-
-    return new LineInfo({
-      x0: 0,
-      y0: yIntercept,
-      x1: overflowFactor * x1,
-      y1: slope * (overflowFactor * x1) + yIntercept,
-      slope: Number(slope.toFixed(3)),
-      yIntercept: Number(yIntercept.toFixed(3)),
-    });
   }
 }
