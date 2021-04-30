@@ -123,7 +123,7 @@ export class GraphsComponent implements OnInit, DoCheck {
             type: 'line',
             x0: scatterChartData.lineOfBestFitInfo.x0,
             y0: scatterChartData.lineOfBestFitInfo.y0,
-            x1: scatterChartData.lineOfBestFitInfo.y1,
+            x1: scatterChartData.lineOfBestFitInfo.x1,
             y1: scatterChartData.lineOfBestFitInfo.y1,
             line: {
               color: 'rgb(0,120,177)', // ~cerulean blue (same colour as graph data points)
@@ -135,21 +135,21 @@ export class GraphsComponent implements OnInit, DoCheck {
         annotations: [
           // min gradient
           {
-            text: `y=${scatterChartData.minGradientInfo.slope}x+${scatterChartData.minGradientInfo.yIntercept}`,
+            text: this.generateMinGradientAnnotationText(scatterChartData),
             x: scatterChartData.minGradientInfo.x1,
             y: scatterChartData.minGradientInfo.y1,
           },
 
           // max gradient
           {
-            text: `y=${scatterChartData.maxGradientInfo.slope}x+${scatterChartData.maxGradientInfo.yIntercept}`,
+            text: this.generateMaxGradientAnnotationText(scatterChartData),
             x: scatterChartData.maxGradientInfo.x1,
             y: scatterChartData.maxGradientInfo.y1,
           },
 
           // line of best fit
           {
-            text: `y=${scatterChartData.lineOfBestFitInfo.slope}x+${scatterChartData.lineOfBestFitInfo.yIntercept}`,
+            text: this.generateLineOfBestFitAnnotationText(scatterChartData),
             x: scatterChartData.lineOfBestFitInfo.x1,
             y: scatterChartData.lineOfBestFitInfo.y1,
           },
@@ -191,7 +191,6 @@ export class GraphsComponent implements OnInit, DoCheck {
         const objDiffer = this.objDiffers[index];
         const objChanges = objDiffer.diff(dataPoint);
         if (objChanges) {
-          console.log(objChanges);
           updateScatterChartData = true;
         }
       });
@@ -256,10 +255,6 @@ export class GraphsComponent implements OnInit, DoCheck {
     let shapes = this.scatterChart.layout.shapes;
     let annotations = this.scatterChart.layout.annotations;
 
-    let minGradientAnnotation = `y=${updatedProcessedDataTableData.minGradientInfo.slope}x+(${updatedProcessedDataTableData.minGradientInfo.yIntercept})`;
-    let maxGradientAnnotation = `y=${updatedProcessedDataTableData.maxGradientInfo.slope}x+(${updatedProcessedDataTableData.maxGradientInfo.yIntercept})`;
-    let lineOfBestFitAnnotation = `y=${updatedProcessedDataTableData.lineOfBestFitInfo.slope}x+(${updatedProcessedDataTableData.lineOfBestFitInfo.yIntercept})`;
-
     currentScatterChartData.x = updatedProcessedDataTableData.x;
     currentScatterChartData.y = updatedProcessedDataTableData.y;
     currentScatterChartData.error_x.array =
@@ -286,18 +281,36 @@ export class GraphsComponent implements OnInit, DoCheck {
     shapes[2].y1 = updatedProcessedDataTableData.lineOfBestFitInfo.y1;
 
     // min gradient
-    annotations[0].text = minGradientAnnotation;
+    annotations[0].text = this.generateMinGradientAnnotationText(
+      updatedProcessedDataTableData
+    );
     annotations[0].x = updatedProcessedDataTableData.minGradientInfo.x1;
     annotations[0].y = updatedProcessedDataTableData.minGradientInfo.y1;
 
     // max gradient
-    annotations[1].text = maxGradientAnnotation;
+    annotations[1].text = this.generateMaxGradientAnnotationText(
+      updatedProcessedDataTableData
+    );
     annotations[1].x = updatedProcessedDataTableData.maxGradientInfo.x1;
     annotations[1].y = updatedProcessedDataTableData.maxGradientInfo.y1;
 
     // line of best fit
-    annotations[2].text = lineOfBestFitAnnotation;
+    annotations[2].text = this.generateLineOfBestFitAnnotationText(
+      updatedProcessedDataTableData
+    );
     annotations[2].x = updatedProcessedDataTableData.lineOfBestFitInfo.x1;
     annotations[2].y = updatedProcessedDataTableData.lineOfBestFitInfo.y1;
+  }
+
+  private generateMinGradientAnnotationText(plotlyData: PlotlyData) {
+    return `y=${plotlyData.minGradientInfo.slope}x+(${plotlyData.minGradientInfo.yIntercept})`;
+  }
+
+  private generateMaxGradientAnnotationText(plotlyData: PlotlyData) {
+    return `y=${plotlyData.maxGradientInfo.slope}x+(${plotlyData.maxGradientInfo.yIntercept})`;
+  }
+
+  private generateLineOfBestFitAnnotationText(plotlyData: PlotlyData) {
+    return `y=${plotlyData.lineOfBestFitInfo.slope}x+(${plotlyData.lineOfBestFitInfo.yIntercept})`;
   }
 }

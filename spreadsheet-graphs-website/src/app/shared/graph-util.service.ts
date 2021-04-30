@@ -83,7 +83,7 @@ export class GraphUtilService {
     });
 
     let overflowFactor: number = 1.1;
-    let x1 = this.findLargestIndex(xArray, xArray.length);
+    let x1 = xArray[this.findLargestIndex(xArray, xArray.length)];
 
     let slope = result.equation[0];
     let yIntercept = result.equation[1];
@@ -132,7 +132,6 @@ export class GraphUtilService {
         data.push(coordinatePair);
       }
     }
-    console.log(data);
     return data;
   }
 }
