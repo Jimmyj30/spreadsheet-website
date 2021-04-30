@@ -296,8 +296,8 @@ export class GraphsComponent implements OnInit, DoCheck {
     annotations[1].y = updatedProcessedDataTableData.maxGradientInfo.y1;
 
     // line of best fit
-    annotations[1].text = lineOfBestFitAnnotation;
-    annotations[1].x = updatedProcessedDataTableData.lineOfBestFitInfo.x1;
-    annotations[1].y = updatedProcessedDataTableData.lineOfBestFitInfo.y1;
+    annotations[2].text = lineOfBestFitAnnotation;
+    annotations[2].x = updatedProcessedDataTableData.lineOfBestFitInfo.x1;
+    annotations[2].y = updatedProcessedDataTableData.lineOfBestFitInfo.y1;
   }
 }
