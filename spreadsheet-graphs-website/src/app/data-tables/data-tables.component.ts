@@ -73,10 +73,10 @@ export class DataTablesComponent implements OnInit {
       data: this.rawData,
       rowHeaders: true,
       colHeaders: [
-        'Uncertainties for Responding',
-        'Responding',
-        'Manipulated',
-        'Uncertainties for Manipulated',
+        'Uncertainties for<br>Responding Variable',
+        'Responding Variable',
+        'Manipulated Variable',
+        'Uncertainties for<br>Manipulated Variable',
       ],
       columns: [
         { data: 'yUncertainty', type: 'numeric' },
@@ -276,10 +276,10 @@ export class DataTablesComponent implements OnInit {
     this.processedDataTableSettings.contextMenu = false;
 
     (this.processedDataTableSettings.colHeaders = [
-      'Uncertainties for Responding',
-      'Responding',
-      'Manipulated',
-      'Uncertainties for Manipulated',
+      'Uncertainties for Curve Straightened<br>Responding Variable',
+      'Curve Straightened<br>Responding Variable',
+      'Curve Straightened<br>Manipulated Variable',
+      'Uncertainties for Curve Straightened<br>Manipulated Variable',
     ]),
       // the processed data table will have an _id attached to it that should
       // not be displayed as a column, so we will specify which columns are displayed here

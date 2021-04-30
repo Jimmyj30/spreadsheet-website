@@ -9,6 +9,7 @@ export class PlotlyData {
 
   public minGradientInfo: LineInfo;
   public maxGradientInfo: LineInfo;
+  public lineOfBestFitInfo: LineInfo;
 
   constructor(values: Object = {}) {
     Object.assign(this, values);

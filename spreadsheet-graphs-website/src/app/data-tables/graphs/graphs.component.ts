@@ -8,8 +8,6 @@ import {
 } from '@angular/core';
 import { GraphUtilService } from 'src/app/shared/graph-util.service';
 import { DataPoint } from '../models/data-point.model';
-import { DataTable } from '../models/data-table.model';
-import { LineInfo } from '../models/line.model';
 import { PlotlyData } from '../models/plotly-data.model';
 
 @Component({
@@ -30,6 +28,7 @@ export class GraphsComponent implements OnInit, DoCheck {
   // https://plotly.com/javascript/line-and-scatter/
   // https://chart-studio.plotly.com/create/?fid=DashawnBrown%3A0
   // https://chart-studio.plotly.com/create/?fid=liana.wang%3A103#/
+  // https://github.com/plotly/plotly.js/blob/master/src/plot_api/plot_config.js#L90-L110
 
   // onChanges can't "see" if the stuff in the array has changed so we need to use IterableDiffers....
 
@@ -118,6 +117,20 @@ export class GraphsComponent implements OnInit, DoCheck {
               dash: 'dot',
             },
           },
+
+          // line of best fit
+          {
+            type: 'line',
+            x0: scatterChartData.lineOfBestFitInfo.x0,
+            y0: scatterChartData.lineOfBestFitInfo.y0,
+            x1: scatterChartData.lineOfBestFitInfo.y1,
+            y1: scatterChartData.lineOfBestFitInfo.y1,
+            line: {
+              color: 'rgb(0,120,177)', // ~cerulean blue (same colour as graph data points)
+              width: 2,
+              dash: 'dot',
+            },
+          },
         ],
         annotations: [
           // min gradient
@@ -135,10 +148,22 @@ export class GraphsComponent implements OnInit, DoCheck {
           },
 
           // line of best fit
+          {
+            text: `y=${scatterChartData.lineOfBestFitInfo.slope}x+${scatterChartData.lineOfBestFitInfo.yIntercept}`,
+            x: scatterChartData.lineOfBestFitInfo.x1,
+            y: scatterChartData.lineOfBestFitInfo.y1,
+          },
         ],
         showlegend: true,
       },
-      config: { scrollZoom: true, editable: true },
+      config: {
+        scrollZoom: true,
+        editable: true,
+        edits: {
+          annotationPosition: false,
+          shapePosition: false,
+        },
+      },
     };
 
     // create array containing key-value differs
@@ -166,18 +191,18 @@ export class GraphsComponent implements OnInit, DoCheck {
         const objDiffer = this.objDiffers[index];
         const objChanges = objDiffer.diff(dataPoint);
         if (objChanges) {
+          console.log(objChanges);
           updateScatterChartData = true;
         }
       });
     }
 
     if (updateScatterChartData) {
+      // console.log('differ detected changes here!');
       let updatedScatterChartData = this.createScatterChartData(
         this.processedDataTableData
       );
       this.setScatterChartData(updatedScatterChartData);
-      // console.log('differ detected changes here!');
-      // console.log(updatedScatterChartData);
     }
   }
 
@@ -214,6 +239,10 @@ export class GraphsComponent implements OnInit, DoCheck {
         errorXArray,
         errorYArray
       ),
+      lineOfBestFitInfo: this.graphUtilService.createLineOfBestFitInfo(
+        xArray,
+        yArray
+      ),
     });
 
     // console.log('scatterChartData: ');
@@ -229,6 +258,7 @@ export class GraphsComponent implements OnInit, DoCheck {
 
     let minGradientAnnotation = `y=${updatedProcessedDataTableData.minGradientInfo.slope}x+(${updatedProcessedDataTableData.minGradientInfo.yIntercept})`;
     let maxGradientAnnotation = `y=${updatedProcessedDataTableData.maxGradientInfo.slope}x+(${updatedProcessedDataTableData.maxGradientInfo.yIntercept})`;
+    let lineOfBestFitAnnotation = `y=${updatedProcessedDataTableData.lineOfBestFitInfo.slope}x+(${updatedProcessedDataTableData.lineOfBestFitInfo.yIntercept})`;
 
     currentScatterChartData.x = updatedProcessedDataTableData.x;
     currentScatterChartData.y = updatedProcessedDataTableData.y;
@@ -237,22 +267,37 @@ export class GraphsComponent implements OnInit, DoCheck {
     currentScatterChartData.error_y.array =
       updatedProcessedDataTableData.errorYArray;
 
+    // min gradient
     shapes[0].x0 = updatedProcessedDataTableData.minGradientInfo.x0;
     shapes[0].y0 = updatedProcessedDataTableData.minGradientInfo.y0;
     shapes[0].x1 = updatedProcessedDataTableData.minGradientInfo.x1;
     shapes[0].y1 = updatedProcessedDataTableData.minGradientInfo.y1;
 
+    // max gradient
     shapes[1].x0 = updatedProcessedDataTableData.maxGradientInfo.x0;
     shapes[1].y0 = updatedProcessedDataTableData.maxGradientInfo.y0;
     shapes[1].x1 = updatedProcessedDataTableData.maxGradientInfo.x1;
     shapes[1].y1 = updatedProcessedDataTableData.maxGradientInfo.y1;
 
+    // line of best fit
+    shapes[2].x0 = updatedProcessedDataTableData.lineOfBestFitInfo.x0;
+    shapes[2].y0 = updatedProcessedDataTableData.lineOfBestFitInfo.y0;
+    shapes[2].x1 = updatedProcessedDataTableData.lineOfBestFitInfo.x1;
+    shapes[2].y1 = updatedProcessedDataTableData.lineOfBestFitInfo.y1;
+
+    // min gradient
     annotations[0].text = minGradientAnnotation;
     annotations[0].x = updatedProcessedDataTableData.minGradientInfo.x1;
     annotations[0].y = updatedProcessedDataTableData.minGradientInfo.y1;
 
+    // max gradient
     annotations[1].text = maxGradientAnnotation;
     annotations[1].x = updatedProcessedDataTableData.maxGradientInfo.x1;
     annotations[1].y = updatedProcessedDataTableData.maxGradientInfo.y1;
+
+    // line of best fit
+    annotations[1].text = lineOfBestFitAnnotation;
+    annotations[1].x = updatedProcessedDataTableData.lineOfBestFitInfo.x1;
+    annotations[1].y = updatedProcessedDataTableData.lineOfBestFitInfo.y1;
   }
 }

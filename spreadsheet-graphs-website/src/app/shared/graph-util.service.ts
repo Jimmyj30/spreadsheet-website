@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { LineInfo } from '../data-tables/models/line.model';
-
+import * as regression from 'regression';
 @Injectable({ providedIn: 'root' })
 export class GraphUtilService {
   constructor() {}
@@ -75,6 +75,31 @@ export class GraphUtilService {
     });
   }
 
+  // line of best fit
+  createLineOfBestFitInfo(xArray: number[], yArray: number[]) {
+    const data = this.generateRegressionData(xArray, yArray);
+    const result = regression.linear(data, {
+      precision: 3,
+    });
+
+    let overflowFactor: number = 1.1;
+    let x1 = this.findLargestIndex(xArray, xArray.length);
+
+    let slope = result.equation[0];
+    let yIntercept = result.equation[1];
+
+    // result.equation[0] is the slope of the line of best fit
+    // result.equation[1] is the y intercept of the line of best fit
+    return new LineInfo({
+      x0: 0,
+      y0: yIntercept,
+      x1: overflowFactor * x1,
+      y1: slope * (overflowFactor * x1) + yIntercept,
+      slope: slope,
+      yIntercept: yIntercept,
+    });
+  }
+
   // finds the index associated with the largest element
   // for a "slice" of an array (going from index 0 to the "index" parameter)
   private findLargestIndex(array: any[], index: number) {
@@ -97,5 +122,17 @@ export class GraphUtilService {
       }
     }
     return smallestIndex;
+  }
+
+  private generateRegressionData(xArray: number[], yArray: number[]) {
+    const data = [];
+    if (xArray.length === yArray.length) {
+      for (var i = 0; i < xArray.length; ++i) {
+        let coordinatePair = [xArray[i], yArray[i]];
+        data.push(coordinatePair);
+      }
+    }
+    console.log(data);
+    return data;
   }
 }
