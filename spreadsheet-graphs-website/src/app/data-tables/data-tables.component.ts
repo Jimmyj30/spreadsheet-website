@@ -86,16 +86,15 @@ export class DataTablesComponent implements OnInit {
       ],
 
       afterChange: (changes) => {
-        let dataArray = this.hotRegisterer
-          .getInstance(this.rawDataTableHandsontableID)
-          .getData();
+        this.validateHandsontable();
+      },
 
-        if (this.isHandsontableValid(dataArray)) {
-          this.errorMessage = undefined;
-        } else {
-          // default value for table without anything filled in yet
-          this.errorMessage = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
-        }
+      afterRemoveRow: (changes) => {
+        this.validateHandsontable();
+      },
+
+      afterCreateRow: (changes) => {
+        this.validateHandsontable();
       },
 
       filters: true,
@@ -337,8 +336,9 @@ export class DataTablesComponent implements OnInit {
       for (var i = 0; i < rowCount; ++i) {
         for (var j = 0; j < colCount; ++j) {
           let value = Number(dataArray[i][j]);
-          // if value is not a real number
+          // if value is a falsy value except the number 0, or if value is not a real number
           if (
+            (dataArray[i][j] !== 0 && !dataArray[i][j]) ||
             !(typeof value === 'number' && !isNaN(value) && isFinite(value))
           ) {
             return false;
@@ -348,5 +348,19 @@ export class DataTablesComponent implements OnInit {
       return true;
     }
     return false;
+  }
+
+  private validateHandsontable() {
+    let dataArray = this.hotRegisterer
+      .getInstance(this.rawDataTableHandsontableID)
+      .getData();
+
+    let minRows = 5; // data table should only have 5+ rows
+    if (this.isHandsontableValid(dataArray) && dataArray.length >= minRows) {
+      this.errorMessage = undefined;
+    } else {
+      // default value for table without anything filled in yet
+      this.errorMessage = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
+    }
   }
 }

@@ -182,7 +182,10 @@ export class GraphsComponent implements OnInit, DoCheck {
 
     // update differs array for each ngDoCheck
     this.processedDataTableData.forEach((dataPoint, index) => {
-      this.objDiffers[index] = this.differs.find(dataPoint).create();
+      // if the index is originally of bounds
+      if (!this.objDiffers[index]) {
+        this.objDiffers[index] = this.differs.find(dataPoint).create();
+      }
     });
 
     // check difference between the data table data using differs...
@@ -191,6 +194,7 @@ export class GraphsComponent implements OnInit, DoCheck {
         const objDiffer = this.objDiffers[index];
         const objChanges = objDiffer.diff(dataPoint);
         if (objChanges) {
+          // console.log(objChanges);
           updateScatterChartData = true;
         }
       });
