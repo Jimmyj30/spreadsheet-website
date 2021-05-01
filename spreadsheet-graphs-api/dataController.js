@@ -300,6 +300,11 @@ function processXCoordinate(dataTable, index) {
       math.log(dataTable.dataTableData[index].xCoord)
     );
   }
+  if (dataTable.xCurveStraighteningInstructions.functionClass === "log_10(x)") {
+    return returnRealValuesOnly(
+      math.log10(dataTable.dataTableData[index].xCoord)
+    );
+  }
 }
 
 // process data point based on data table instructions
@@ -318,6 +323,11 @@ function processYCoordinate(dataTable, index) {
   if (dataTable.yCurveStraighteningInstructions.functionClass === "ln(y)") {
     return returnRealValuesOnly(
       math.log(dataTable.dataTableData[index].yCoord)
+    );
+  }
+  if (dataTable.yCurveStraighteningInstructions.functionClass === "log_10(y)") {
+    return returnRealValuesOnly(
+      math.log10(dataTable.dataTableData[index].yCoord)
     );
   }
 }
@@ -360,6 +370,16 @@ function processXUncertainty(dataTable, index) {
       )
     );
   }
+  if (dataTable.xCurveStraighteningInstructions.functionClass === "log_10(x)") {
+    return math.abs(
+      returnRealValuesOnly(
+        math.divide(
+          dataTable.dataTableData[index].xUncertainty,
+          math.multiply(dataTable.dataTableData[index].xCoord, math.log(10))
+        )
+      )
+    );
+  }
 }
 
 // process uncertainty based on data table instructions
@@ -396,6 +416,16 @@ function processYUncertainty(dataTable, index) {
         math.divide(
           dataTable.dataTableData[index].yUncertainty,
           dataTable.dataTableData[index].yCoord
+        )
+      )
+    );
+  }
+  if (dataTable.yCurveStraighteningInstructions.functionClass === "log_10(y)") {
+    return math.abs(
+      returnRealValuesOnly(
+        math.divide(
+          dataTable.dataTableData[index].yUncertainty,
+          math.multiply(dataTable.dataTableData[index].yCoord, math.log(10))
         )
       )
     );
