@@ -12,6 +12,7 @@ app.use(cors());
 let apiRoutes = require("./api-routes");
 
 // Deploy on Heroku: https://developer.mongodb.com/how-to/use-atlas-on-heroku/
+// https://devcenter.heroku.com/articles/deploying-nodejs
 
 // Body parser now depreciated: use "express" to handle requests instead
 app.use(express.json());
