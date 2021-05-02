@@ -22,7 +22,9 @@ app.use(
 );
 
 // Connect to Mongoose and set connection variable
-mongoose.connect("mongodb://localhost/spreadsheet-graphs-api", {
+const uri =
+  process.env.MONGODB_URI || "mongodb://localhost/spreadsheet-graphs-api";
+mongoose.connect(uri, {
   useNewUrlParser: true,
 });
 var db = mongoose.connection;
