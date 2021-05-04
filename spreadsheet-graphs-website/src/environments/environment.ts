@@ -6,6 +6,8 @@ export const environment = {
   production: false,
 
   // url for api
+  // heroku url: https://spreadsheet-graphs-api.herokuapp.com
+  // localhost url: http://localhost:8080
   apiUrl: 'http://localhost:8080',
 };
 

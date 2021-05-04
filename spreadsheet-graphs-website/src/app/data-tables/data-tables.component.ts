@@ -29,6 +29,7 @@ export class DataTablesComponent implements OnInit {
   // https://angular.io/guide/form-validation#defining-custom-validators
 
   // to run locally: ng serve --proxy-config proxy.conf.json
+  // https://medium.com/@ryanchenkie_40935/angular-cli-deployment-host-your-angular-2-app-on-heroku-3f266f13f352
 
   private hotRegisterer = new HotTableRegisterer();
 

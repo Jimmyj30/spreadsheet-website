@@ -90,12 +90,12 @@
     [processedDataTableData]="processedDataTableSettings.data"
   ></app-graphs>
   <div *ngIf="processedDataTable" fxLayout="column">
-    <div><button type="button" (click)="onFinish()">Done</button></div>
     <div>
       <!-- generate graph button will disappear once graph is generated -->
       <button type="button" (click)="onGenerateGraph()" *ngIf="!showGraph">
         Generate Graph
       </button>
     </div>
+    <div><button type="button" (click)="onFinish()">Done</button></div>
   </div>
 </div>

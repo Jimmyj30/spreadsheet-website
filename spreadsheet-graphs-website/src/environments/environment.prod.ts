@@ -2,5 +2,5 @@ export const environment = {
   production: true,
 
   // url for api
-  apiUrl: 'http://localhost:8080/',
+  apiUrl: 'https://spreadsheet-graphs-api.herokuapp.com',
 };
