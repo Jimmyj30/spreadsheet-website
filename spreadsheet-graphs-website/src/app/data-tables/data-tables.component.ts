@@ -115,7 +115,7 @@ export class DataTablesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log(this.rawDataTableSettings);
+    // console.log(this.rawDataTableSettings);
   }
 
   get xCurveStraighteningInstructions() {
@@ -202,8 +202,8 @@ export class DataTablesComponent implements OnInit {
 
       _id: this.rawDataTable ? this.rawDataTable._id : undefined, // this.rawDataTable._id...
     });
-    console.log('rawDataTable: ');
-    console.log(this.rawDataTable);
+    // console.log('rawDataTable: ');
+    // console.log(this.rawDataTable);
 
     // we send the raw data table using the API, and the API will store that raw data table (giving it an ID), and
     // will also send a processed data table in the response as well...
@@ -217,16 +217,16 @@ export class DataTablesComponent implements OnInit {
       this.dataTableService
         .updateDataTable(this.rawDataTable, this.processedDataTable._id)
         .subscribe((response: any) => {
-          console.log('update table response: ');
-          console.log(response);
+          // console.log('update table response: ');
+          // console.log(response);
           this.updateProcessedDataTableSettings(response.data);
         });
     } else {
       this.dataTableService
         .createDataTable(this.rawDataTable)
         .subscribe((response: any) => {
-          console.log('create table response: ');
-          console.log(response);
+          // console.log('create table response: ');
+          // console.log(response);
 
           // add an ID to the raw data table to indicate it is now stored in the database
           // return a processed data table as the response....
@@ -290,8 +290,8 @@ export class DataTablesComponent implements OnInit {
         { data: 'xUncertainty', readOnly: true },
       ]);
     this.processedDataTableSettings.dropdownMenu = false;
-    console.log('processed data table settings: ');
-    console.log(this.processedDataTableSettings);
+    // console.log('processed data table settings: ');
+    // console.log(this.processedDataTableSettings);
   }
 
   private updateProcessedDataTableSettings(dataTable: DataTable): void {
@@ -299,8 +299,8 @@ export class DataTablesComponent implements OnInit {
     this.refreshProcessedDataTable(this.processedDataTableSettings);
     // changing the data of the processed data table based on the response...
 
-    console.log('updated data table: ');
-    console.log(this.processedDataTable);
+    // console.log('updated data table: ');
+    // console.log(this.processedDataTable);
   }
 
   private refreshProcessedDataTable(settings): void {
@@ -322,8 +322,8 @@ export class DataTablesComponent implements OnInit {
       });
       defaultDataTable.push(row);
     }
-    console.log('default data table data');
-    console.log(defaultDataTable);
+    // console.log('default data table data');
+    // console.log(defaultDataTable);
     return defaultDataTable;
   }
 
