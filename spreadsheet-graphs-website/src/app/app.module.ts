@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HotTableModule } from '@handsontable/angular';
-import { ChartsModule } from 'ng2-charts';
 import * as PlotlyJS from 'plotly.js/dist/plotly.js';
 import { PlotlyModule } from 'angular-plotly.js';
 
@@ -21,7 +20,6 @@ PlotlyModule.plotlyjs = PlotlyJS;
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
-    ChartsModule,
     PlotlyModule,
   ],
   providers: [HttpClientModule],

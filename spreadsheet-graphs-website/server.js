@@ -1,16 +1,9 @@
 // server.js
 
-// Require Express.js and create Express.js app
+// Require Express.js server and create Express.js app
 const express = require("express");
-const app = express();
-
 const path = require("path");
-
-// For all GET requests (getting data that can be displayed on website),
-// send back index.html so that PathLocationStrategy can be used
-app.get("/*", function (req, res) {
-  res.sendFile(path.join(__dirname + "/dist/index.html"));
-});
+const app = express();
 
 // If an incoming request uses a protocol other than HTTPS,
 // redirect that request to the same url but with HTTPS
@@ -28,7 +21,15 @@ app.use(forceSSL());
 // Run the app by serving the static files in the dist directory
 // The dist directory will be made on postinstall, which will happen
 // when the spreadsheet-graphs-website app is getting deployed to Heroku
-app.use(express.static(__dirname + "/dist"));
+app.use(express.static(__dirname + "/dist/spreadsheet-graphs-website"));
+
+// For all GET requests (getting data that can be displayed on website),
+// send back index.html so that PathLocationStrategy can be used
+app.get("/*", function (req, res) {
+  res.sendFile(
+    path.join(__dirname + "/dist/spreadsheet-graphs-website/index.html")
+  );
+});
 
 // Start the app by listening on the default Heroku port
 app.listen(process.env.PORT || 8080);

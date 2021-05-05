@@ -8,7 +8,7 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "postinstall": "ng build --aot -prod"
+    "heroku-postbuild": "ng build --configuration=production"
   },
   "private": true,
   "dependencies": {
@@ -24,14 +24,13 @@
     "@handsontable/angular": "^7.0.0",
     "angular-plotly.js": "^3.1.0",
     "bootstrap": "^3.4.1",
-    "chart.js": "^2.9.3",
     "express": "^4.17.1",
     "handsontable": "^8.3.2",
-    "ng2-charts": "^2.2.3",
     "plotly.js": "^1.58.4",
     "regression": "^2.0.1",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
+    "typescript": "~4.1.5",
     "zone.js": "~0.11.3"
   },
   "devDependencies": {
@@ -41,6 +40,7 @@
     "@types/jasmine": "~3.6.0",
     "@types/node": "^12.11.1",
     "codelyzer": "^6.0.0",
+    "enhanced-resolve": "^3.3.0",
     "jasmine-core": "~3.6.0",
     "jasmine-spec-reporter": "~5.0.0",
     "karma": "~6.1.0",
