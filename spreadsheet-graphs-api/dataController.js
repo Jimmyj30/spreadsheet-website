@@ -256,7 +256,10 @@ function returnRealValuesOnly(value) {
 
 // check if the value passed to the function is a real number
 function isRealNumber(value) {
-  if (typeof value == "number" && !isNaN(value) && isFinite(value)) {
+  if (!(typeof value === "string" || typeof value === "number")) {
+    return false; // only process strings or numbers
+  }
+  if (!isNaN(value) && isFinite(value)) {
     return true;
   } else {
     return false;
