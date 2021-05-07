@@ -43,6 +43,7 @@ export class DataTablesComponent implements OnInit {
   processedData: any[];
   processedDataTableSettings: Handsontable.default.GridSettings;
   processedDataTable: DataTable;
+  processedDataTableHandsontableID = 'processedDataTable';
 
   showXToConstantPower: boolean;
   showYToConstantPower: boolean;
@@ -80,10 +81,38 @@ export class DataTablesComponent implements OnInit {
         'Uncertainties for<br>Manipulated Variable',
       ],
       columns: [
-        { data: 'yUncertainty', type: 'numeric' },
-        { data: 'yCoord', type: 'numeric' },
-        { data: 'xCoord', type: 'numeric' },
-        { data: 'xUncertainty', type: 'numeric' },
+        {
+          data: 'yUncertainty',
+          type: 'numeric',
+          numericFormat: {
+            pattern: '0,0.00',
+          },
+          allowEmpty: false,
+        },
+        {
+          data: 'yCoord',
+          type: 'numeric',
+          numericFormat: {
+            pattern: '0,0.00',
+          },
+          allowEmpty: false,
+        },
+        {
+          data: 'xCoord',
+          type: 'numeric',
+          numericFormat: {
+            pattern: '0,0.00',
+          },
+          allowEmpty: false,
+        },
+        {
+          data: 'xUncertainty',
+          type: 'numeric',
+          numericFormat: {
+            pattern: '0,0.00',
+          },
+          allowEmpty: false,
+        },
       ],
 
       afterChange: (changes) => {
@@ -99,7 +128,6 @@ export class DataTablesComponent implements OnInit {
       },
 
       filters: true,
-      dropdownMenu: true,
       fillHandle: {
         direction: 'vertical',
         autoInsertRow: true,
@@ -107,7 +135,33 @@ export class DataTablesComponent implements OnInit {
       manualColumnResize: true,
       manualRowResize: true,
       wordWrap: true,
+
       contextMenu: ['row_above', 'row_below', 'remove_row'],
+      dropdownMenu: {
+        items: {
+          clear_column: {},
+          alignment: {},
+          sp1: { name: '---------' },
+          shiftDecimalLeft: {
+            name: 'Increase column decimal places by one', // can be string or function...
+            callback: (key, selection, clickEvent) => {
+              // selection[0].end.col  and selection[0].start.col should be the same
+              // as this dropdown menu can only select an entire column
+              this.shiftDecimalPlaceLeft(selection[0].end.col);
+            },
+          },
+          shiftDecimalRight: {
+            name: 'Decrease column decimal places by one',
+            disabled: () => {
+              return !this.canShiftDecimalPlaceRight();
+            },
+            callback: (key, selection, clickEvent) => {
+              this.shiftDecimalPlaceRight(selection[0].end.col);
+            },
+          },
+        },
+      },
+
       minRows: 5,
       maxCols: 4,
       licenseKey: 'non-commercial-and-evaluation',
@@ -275,21 +329,45 @@ export class DataTablesComponent implements OnInit {
     this.processedDataTableSettings.data = processedDataTable.dataTableData;
     this.processedDataTableSettings.contextMenu = false;
 
-    (this.processedDataTableSettings.colHeaders = [
+    this.processedDataTableSettings.colHeaders = [
       'Uncertainties for Curve Straightened<br>Responding Variable',
       'Curve Straightened<br>Responding Variable',
       'Curve Straightened<br>Manipulated Variable',
       'Uncertainties for Curve Straightened<br>Manipulated Variable',
-    ]),
-      // the processed data table will have an _id attached to it that should
-      // not be displayed as a column, so we will specify which columns are displayed here
-      (this.processedDataTableSettings.columns = [
-        { data: 'yUncertainty', readOnly: true },
-        { data: 'yCoord', readOnly: true },
-        { data: 'xCoord', readOnly: true },
-        { data: 'xUncertainty', readOnly: true },
-      ]);
-    this.processedDataTableSettings.dropdownMenu = false;
+    ];
+    // the processed data table will have an _id attached to it that should
+    // not be displayed as a column, so we will specify which columns are displayed here
+    for (var i = 0; i < this.processedDataTableSettings.columns.length; ++i) {
+      this.processedDataTableSettings.columns[i].readOnly = true;
+    }
+
+    // this.processedDataTableSettings.columns = [
+    //   { data: 'yUncertainty', readOnly: true },
+    //   { data: 'yCoord', readOnly: true },
+    //   { data: 'xCoord', readOnly: true },
+    //   { data: 'xUncertainty', readOnly: true },
+    // ];
+    this.processedDataTableSettings.dropdownMenu = {
+      items: {
+        shiftDecimalLeft: {
+          name: 'Increase column decimal places by one', // can be string or function...
+          callback: (key, selection, clickEvent) => {
+            // selection[0].end.col  and selection[0].start.col should be the same
+            // as this dropdown menu can only select an entire column
+            this.shiftProcessedDecimalPlaceLeft(selection[0].end.col);
+          },
+        },
+        shiftDecimalRight: {
+          name: 'Decrease column decimal places by one',
+          disabled: () => {
+            return !this.canShiftProcessedDecimalPlaceRight();
+          },
+          callback: (key, selection, clickEvent) => {
+            this.shiftProcessedDecimalPlaceRight(selection[0].end.col);
+          },
+        },
+      },
+    };
     // console.log('processed data table settings: ');
     // console.log(this.processedDataTableSettings);
   }
@@ -309,6 +387,91 @@ export class DataTablesComponent implements OnInit {
 
   private removeFirstWord(string: string): string {
     return string.substr(string.indexOf(' ') + 1);
+  }
+
+  private shiftDecimalPlaceLeft(columnIndex) {
+    this.rawDataTableSettings.columns[columnIndex].numericFormat.pattern += '0';
+    this.hotRegisterer.getInstance(this.rawDataTableHandsontableID).render();
+  }
+
+  private shiftDecimalPlaceRight(columnIndex) {
+    let columnNumericFormatPattern = this.rawDataTableSettings.columns[
+      columnIndex
+    ].numericFormat.pattern;
+    let columnNumericFormatPatternLastDigit = columnNumericFormatPattern.slice(
+      -1
+    );
+
+    if (columnNumericFormatPatternLastDigit !== '0,0') {
+      this.rawDataTableSettings.columns[
+        columnIndex
+      ].numericFormat.pattern = columnNumericFormatPattern.slice(0, -1);
+      this.hotRegisterer.getInstance(this.rawDataTableHandsontableID).render();
+    } else {
+    }
+  }
+
+  private canShiftDecimalPlaceRight() {
+    if (this.rawDataTableSettings) {
+      let colIndex = this.hotRegisterer
+        .getInstance(this.rawDataTableHandsontableID)
+        .getSelectedRangeLast().from.col;
+      let columnNumericFormatPatternLastDigit = this.rawDataTableSettings.columns[
+        colIndex
+      ].numericFormat.pattern.slice(-1);
+
+      if (columnNumericFormatPatternLastDigit !== '.') {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  private shiftProcessedDecimalPlaceLeft(columnIndex) {
+    this.processedDataTableSettings.columns[
+      columnIndex
+    ].numericFormat.pattern += '0';
+    this.hotRegisterer
+      .getInstance(this.processedDataTableHandsontableID)
+      .render();
+  }
+
+  private shiftProcessedDecimalPlaceRight(columnIndex) {
+    let columnNumericFormatPattern = this.processedDataTableSettings.columns[
+      columnIndex
+    ].numericFormat.pattern;
+    let columnNumericFormatPatternLastDigit = columnNumericFormatPattern.slice(
+      -1
+    );
+    if (columnNumericFormatPatternLastDigit !== '.') {
+      this.processedDataTableSettings.columns[
+        columnIndex
+      ].numericFormat.pattern = columnNumericFormatPattern.slice(0, -1);
+      this.hotRegisterer
+        .getInstance(this.processedDataTableHandsontableID)
+        .render();
+    } else {
+    }
+  }
+
+  private canShiftProcessedDecimalPlaceRight() {
+    if (this.processedDataTableSettings) {
+      let colIndex = this.hotRegisterer
+        .getInstance(this.processedDataTableHandsontableID)
+        .getSelectedRangeLast().from.col;
+      let columnNumericFormatPatternLastDigit = this.processedDataTableSettings.columns[
+        colIndex
+      ].numericFormat.pattern.slice(-1);
+
+      if (columnNumericFormatPatternLastDigit !== '.') {
+        return true;
+      } else {
+        return false;
+      }
+    }
+    return false;
   }
 
   private generateDefaultDataTable(dataTableArray: any[]): DataTable[] {

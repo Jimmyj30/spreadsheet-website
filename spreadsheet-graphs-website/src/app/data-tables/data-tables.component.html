@@ -82,6 +82,7 @@
   <div *ngIf="processedDataTable" class="vertical-margin">
     <hot-table
       #processedDataTableRef
+      [hotId]="processedDataTableHandsontableID"
       [settings]="processedDataTableSettings"
     ></hot-table>
   </div>
