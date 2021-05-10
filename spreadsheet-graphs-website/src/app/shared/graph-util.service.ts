@@ -76,10 +76,10 @@ export class GraphUtilService {
   }
 
   // line of best fit
-  createLineOfBestFitInfo(xArray: number[], yArray: number[]) {
+  createLineOfBestFitInfo(xArray: number[], yArray: number[], precision = 3) {
     const data = this.generateRegressionData(xArray, yArray);
     const result = regression.linear(data, {
-      precision: 3,
+      precision: precision,
     });
 
     let overflowFactor: number = 1.1;

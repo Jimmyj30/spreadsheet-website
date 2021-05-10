@@ -28,20 +28,21 @@ export class DataTablesComponent implements OnInit {
   // https://www.positronx.io/angular-7-select-dropdown-examples-with-reactive-forms/
   // https://angular.io/guide/form-validation#defining-custom-validators
 
+  // https://developer.okta.com/blog/2019/10/03/painless-node-authentication
+  // https://medium.com/swlh/set-up-an-express-js-app-with-passport-js-and-mongodb-for-password-authentication-6ea05d95335c
+
   // to run locally: ng serve --proxy-config proxy.conf.json
   // https://medium.com/@ryanchenkie_40935/angular-cli-deployment-host-your-angular-2-app-on-heroku-3f266f13f352
 
   private hotRegisterer = new HotTableRegisterer();
 
-  rawData: any[] = this.generateDefaultDataTable(
-    Handsontable.default.helper.createSpreadsheetData(5, 4)
-  );
-  rawDataTableSettings: Handsontable.default.GridSettings;
+  rawData: any[];
+  rawDataTableSettings;
   rawDataTable: DataTable;
   rawDataTableHandsontableID = 'rawDataTable';
 
   processedData: any[];
-  processedDataTableSettings: Handsontable.default.GridSettings;
+  processedDataTableSettings;
   processedDataTable: DataTable;
   processedDataTableHandsontableID = 'processedDataTable';
 
@@ -64,12 +65,16 @@ export class DataTablesComponent implements OnInit {
   rawDataTableRef: HotTableComponent;
 
   errorMessage: string = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
+  loading: boolean = false;
   showGraph: boolean = false;
 
   constructor(
     private readonly dataTableService: DataTableService,
     private readonly fb: FormBuilder
   ) {
+    this.rawData = this.generateDefaultDataTable(
+      Handsontable.default.helper.createSpreadsheetData(5, 4)
+    );
     // add context menu for cells: https://handsontable.com/docs/8.3.2/demo-context-menu.html
     this.rawDataTableSettings = {
       data: this.rawData,
@@ -85,7 +90,9 @@ export class DataTablesComponent implements OnInit {
           data: 'yUncertainty',
           type: 'numeric',
           numericFormat: {
-            pattern: '0,0.00',
+            pattern: {
+              mantissa: 2,
+            },
           },
           allowEmpty: false,
         },
@@ -93,7 +100,9 @@ export class DataTablesComponent implements OnInit {
           data: 'yCoord',
           type: 'numeric',
           numericFormat: {
-            pattern: '0,0.00',
+            pattern: {
+              mantissa: 2,
+            },
           },
           allowEmpty: false,
         },
@@ -101,7 +110,9 @@ export class DataTablesComponent implements OnInit {
           data: 'xCoord',
           type: 'numeric',
           numericFormat: {
-            pattern: '0,0.00',
+            pattern: {
+              mantissa: 2,
+            },
           },
           allowEmpty: false,
         },
@@ -109,7 +120,9 @@ export class DataTablesComponent implements OnInit {
           data: 'xUncertainty',
           type: 'numeric',
           numericFormat: {
-            pattern: '0,0.00',
+            pattern: {
+              mantissa: 2,
+            },
           },
           allowEmpty: false,
         },
@@ -268,14 +281,17 @@ export class DataTablesComponent implements OnInit {
     if (this.processedDataTable && this.processedDataTable._id) {
       // we are updating processedDataTable based on the ID of the rawDataTable...
       // we could have the API return a processedDataTable along with the ID of the raw data table...
+      this.loading = true;
       this.dataTableService
         .updateDataTable(this.rawDataTable, this.processedDataTable._id)
         .subscribe((response: any) => {
           // console.log('update table response: ');
           // console.log(response);
           this.updateProcessedDataTableSettings(response.data);
+          this.loading = false;
         });
     } else {
+      this.loading = true;
       this.dataTableService
         .createDataTable(this.rawDataTable)
         .subscribe((response: any) => {
@@ -286,14 +302,16 @@ export class DataTablesComponent implements OnInit {
           // return a processed data table as the response....
           // response contains a processedDataTable and a rawDataTableID
 
-          // this.processedDataTable only really needs to hold an ID since the data
-          // table data is stored in this.processedDataTableSettings so we don't have to
-          // update the data inside it...
+          // this.processedDataTable only really needs to hold an ID since the raw data
+          // table data can be changed by the user — the raw data just gets updated in the
+          // DB every time that it gets submitted to the API (creating/updating the
+          // raw data table)
           this.processedDataTable = response.processedDataTable;
           this.createProcessedDataTableSettings(response.processedDataTable);
 
           //(gives raw data table an ID)
           this.rawDataTable._id = response.rawDataTableID;
+          this.loading = false;
         });
     }
   }
@@ -341,12 +359,6 @@ export class DataTablesComponent implements OnInit {
       this.processedDataTableSettings.columns[i].readOnly = true;
     }
 
-    // this.processedDataTableSettings.columns = [
-    //   { data: 'yUncertainty', readOnly: true },
-    //   { data: 'yCoord', readOnly: true },
-    //   { data: 'xCoord', readOnly: true },
-    //   { data: 'xUncertainty', readOnly: true },
-    // ];
     this.processedDataTableSettings.dropdownMenu = {
       items: {
         shiftDecimalLeft: {
@@ -390,22 +402,20 @@ export class DataTablesComponent implements OnInit {
   }
 
   private shiftDecimalPlaceLeft(columnIndex) {
-    this.rawDataTableSettings.columns[columnIndex].numericFormat.pattern += '0';
+    this.rawDataTableSettings.columns[
+      columnIndex
+    ].numericFormat.pattern.mantissa += 1;
     this.hotRegisterer.getInstance(this.rawDataTableHandsontableID).render();
   }
 
   private shiftDecimalPlaceRight(columnIndex) {
-    let columnNumericFormatPattern = this.rawDataTableSettings.columns[
-      columnIndex
-    ].numericFormat.pattern;
-    let columnNumericFormatPatternLastDigit = columnNumericFormatPattern.slice(
-      -1
-    );
+    let colMantissa = this.rawDataTableSettings.columns[columnIndex]
+      .numericFormat.pattern.mantissa;
 
-    if (columnNumericFormatPatternLastDigit !== '0,0') {
+    if (colMantissa !== 0) {
       this.rawDataTableSettings.columns[
         columnIndex
-      ].numericFormat.pattern = columnNumericFormatPattern.slice(0, -1);
+      ].numericFormat.pattern.mantissa -= 1;
       this.hotRegisterer.getInstance(this.rawDataTableHandsontableID).render();
     } else {
     }
@@ -416,11 +426,10 @@ export class DataTablesComponent implements OnInit {
       let colIndex = this.hotRegisterer
         .getInstance(this.rawDataTableHandsontableID)
         .getSelectedRangeLast().from.col;
-      let columnNumericFormatPatternLastDigit = this.rawDataTableSettings.columns[
-        colIndex
-      ].numericFormat.pattern.slice(-1);
+      let colMantissa = this.rawDataTableSettings.columns[colIndex]
+        .numericFormat.pattern.mantissa;
 
-      if (columnNumericFormatPatternLastDigit !== '.') {
+      if (colMantissa !== 0) {
         return true;
       } else {
         return false;
@@ -432,23 +441,21 @@ export class DataTablesComponent implements OnInit {
   private shiftProcessedDecimalPlaceLeft(columnIndex) {
     this.processedDataTableSettings.columns[
       columnIndex
-    ].numericFormat.pattern += '0';
+    ].numericFormat.pattern.mantissa += 1;
     this.hotRegisterer
       .getInstance(this.processedDataTableHandsontableID)
       .render();
   }
 
   private shiftProcessedDecimalPlaceRight(columnIndex) {
-    let columnNumericFormatPattern = this.processedDataTableSettings.columns[
-      columnIndex
-    ].numericFormat.pattern;
-    let columnNumericFormatPatternLastDigit = columnNumericFormatPattern.slice(
-      -1
-    );
-    if (columnNumericFormatPatternLastDigit !== '.') {
+    let colMantissa = this.processedDataTableSettings.columns[columnIndex]
+      .numericFormat.pattern.mantissa;
+
+    if (colMantissa !== 0) {
       this.processedDataTableSettings.columns[
         columnIndex
-      ].numericFormat.pattern = columnNumericFormatPattern.slice(0, -1);
+      ].numericFormat.pattern.mantissa -= 1;
+
       this.hotRegisterer
         .getInstance(this.processedDataTableHandsontableID)
         .render();
@@ -461,11 +468,10 @@ export class DataTablesComponent implements OnInit {
       let colIndex = this.hotRegisterer
         .getInstance(this.processedDataTableHandsontableID)
         .getSelectedRangeLast().from.col;
-      let columnNumericFormatPatternLastDigit = this.processedDataTableSettings.columns[
-        colIndex
-      ].numericFormat.pattern.slice(-1);
+      let colMantissa = this.processedDataTableSettings.columns[colIndex]
+        .numericFormat.pattern.mantissa;
 
-      if (columnNumericFormatPatternLastDigit !== '.') {
+      if (colMantissa !== 0) {
         return true;
       } else {
         return false;

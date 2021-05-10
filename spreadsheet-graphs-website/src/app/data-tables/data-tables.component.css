@@ -1,3 +1,7 @@
+.container {
+  padding: 15px 15px 25px 15px;
+}
+
 .webpage-instructions {
   max-width: 500px;
   border: solid 2px grey;

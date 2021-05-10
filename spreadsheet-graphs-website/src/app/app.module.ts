@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HotTableModule } from '@handsontable/angular';
 import * as PlotlyJS from 'plotly.js/dist/plotly.js';
 import { PlotlyModule } from 'angular-plotly.js';
@@ -21,6 +23,8 @@ PlotlyModule.plotlyjs = PlotlyJS;
     FormsModule,
     ReactiveFormsModule,
     PlotlyModule,
+    MatProgressSpinnerModule,
+    BrowserAnimationsModule,
   ],
   providers: [HttpClientModule],
   bootstrap: [AppComponent],
