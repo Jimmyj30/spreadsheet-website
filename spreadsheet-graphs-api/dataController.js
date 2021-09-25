@@ -31,16 +31,13 @@ exports.index = function (req, res) {
 
 // Handle create data table actions
 exports.new = function (req, res) {
-  var dataTable = new DataTable();
+  var dataTable = new DataTable(req.body);
 
-  // dataTable.name = req.body.name ? req.body.name : dataTable.name;
-  dataTable.dataTableData = req.body.dataTableData;
-
-  dataTable.xCurveStraighteningInstructions =
-    req.body.xCurveStraighteningInstructions;
-  dataTable.yCurveStraighteningInstructions =
-    req.body.yCurveStraighteningInstructions;
-
+  // dataTable.dataTableData = req.body.dataTableData;
+  // dataTable.xCurveStraighteningInstructions =
+  //   req.body.xCurveStraighteningInstructions;
+  // dataTable.yCurveStraighteningInstructions =
+  //   req.body.yCurveStraighteningInstructions;
   var processedDataTable = generateProcessedDataTable(dataTable);
 
   // save the data table and check for errors
@@ -87,9 +84,6 @@ exports.view = function (req, res) {
 
 // Handle update data table info
 exports.update = function (req, res) {
-  // console.log(req);
-  // console.log(req.query.processedDataTable_id);
-  // console.log(req.params.dataTable_id);
   // req.query.parametername can be used to store information...
   // req.params.dataTable_id refers to the _id of the raw data table
   // req.body is the latest version of the raw data table from the front-end
@@ -312,6 +306,9 @@ function processXCoordinate(dataTable, index) {
 
 // process data point based on data table instructions
 function processYCoordinate(dataTable, index) {
+  if (!dataTable.yCurveStraighteningInstructions) {
+    return dataTable.dataTableData[index].yCoord;
+  }
   if (dataTable.yCurveStraighteningInstructions.constantPower) {
     return returnRealValuesOnly(
       math.pow(
@@ -387,6 +384,9 @@ function processXUncertainty(dataTable, index) {
 
 // process uncertainty based on data table instructions
 function processYUncertainty(dataTable, index) {
+  if (!dataTable.yCurveStraighteningInstructions) {
+    return math.abs(dataTable.dataTableData[index].yUncertainty);
+  }
   // WIP
   if (dataTable.yCurveStraighteningInstructions.constantPower) {
     const processedYCoordinateValue = returnRealValuesOnly(

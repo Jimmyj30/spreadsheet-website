@@ -1,51 +1,22 @@
 // dataTablesModel.js
 var mongoose = require("mongoose");
+const { dataPoint } = require("./schemas/dataPointSchema.js");
+const { instruction } = require("./schemas/instructionSchema.js");
+
 // https://mongoosejs.com/docs/schematypes.html#arrays
-
-// curve straightening instructions...
-const Instruction = new mongoose.Schema({
-  //"type" of function -- eg: LOG_BASE_E, LOG_BASE_10, TO_CONST_POWER, MULTIPLIED_BY_CONSTANT_VARIABLE...
-  functionClass: {
-    type: String,
-    required: true,
-  },
-  constantPower: {
-    type: String, // will get processed as a number in the backend
-  },
-  constantVariableValue: {
-    type: Number,
-  },
-  constantVariableUncertainty: {
-    type: Number,
-  },
-});
-
-// data points (one "row" of a data table)...
-const dataPoint = new mongoose.Schema({
-  xCoord: {
-    type: String,
-    required: true,
-  },
-  yCoord: {
-    type: String,
-    required: true,
-  },
-  xUncertainty: {
-    type: String,
-    required: true,
-  },
-  yUncertainty: {
-    type: String,
-    required: true,
-  },
-});
 
 // Setup schema
 var dataTableSchema = mongoose.Schema({
   dataTableData: {
     // the numeric data stored in the data table
+    // array of dataPoints that represent the "rows" of the data table
     type: [dataPoint],
     required: true,
+    validate(array) {
+      return array.every(
+        (v) => v.xCoord && v.yCoord && v.xUncertainty && v.yUncertainty
+      );
+    },
   },
   xLabel: {
     // label for the x-axis
@@ -57,39 +28,21 @@ var dataTableSchema = mongoose.Schema({
   },
   xCurveStraighteningInstructions: {
     // curve straightening instructions for each "x" coordinate
-    type: Instruction,
+    type: instruction,
   },
   yCurveStraighteningInstructions: {
     // curve straightening instructions for each "y" coordinate
-    type: Instruction,
+    type: instruction,
   },
   create_date: {
     type: Date,
     default: Date.now,
   },
-
-  // ******* old data format for the table *************
-  // xCoords: {
-  //   // “x” coordinates of the data table
-  //   type: Array,
-  //   required: true,
-  // },
-  // yCoords: {
-  //   // “y” coordinates of the data table
-  //   type: Array,
-  //   required: true,
-  // },
-  // xUncertainties: {
-  //   // uncertainties corresponding to each “x” coordinate
-  //   type: Array,
-  //   required: true,
-  // },
-  // yUncertainties: {
-  //   // uncertainties corresponding to each “y” coordinate
-  //   type: Array,
-  //   required: true,
-  // },
 });
+
+// dataTableSchema.statics.testMethod = function () {
+//   console.log("test");
+// };
 
 // Export data table model
 // Mongoose automatically looks for the plural, lowercased version of your model name as the collection name
