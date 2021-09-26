@@ -5,7 +5,7 @@ var mongoose = require("mongoose");
 const dataPoint = mongoose.Schema({
   xCoord: {
     type: String,
-    // required: true,
+    required: true,
   },
   yCoord: {
     type: String,
@@ -13,7 +13,7 @@ const dataPoint = mongoose.Schema({
   },
   xUncertainty: {
     type: String,
-    // required: true,
+    required: true,
   },
   yUncertainty: {
     type: String,

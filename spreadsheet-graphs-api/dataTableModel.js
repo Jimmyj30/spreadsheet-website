@@ -2,6 +2,11 @@
 var mongoose = require("mongoose");
 const { dataPoint } = require("./schemas/dataPointSchema.js");
 const { instruction } = require("./schemas/instructionSchema.js");
+const {
+  dataTableFullCoordinateExists,
+  processCoordinate,
+  processUncertainty,
+} = require("./utils/dataProcessingUtils");
 
 // https://mongoosejs.com/docs/schematypes.html#arrays
 
@@ -12,11 +17,6 @@ var dataTableSchema = mongoose.Schema({
     // array of dataPoints that represent the "rows" of the data table
     type: [dataPoint],
     required: true,
-    validate(array) {
-      return array.every(
-        (v) => v.xCoord && v.yCoord && v.xUncertainty && v.yUncertainty
-      );
-    },
   },
   xLabel: {
     // label for the x-axis
@@ -40,9 +40,49 @@ var dataTableSchema = mongoose.Schema({
   },
 });
 
-// dataTableSchema.statics.testMethod = function () {
-//   console.log("test");
-// };
+dataTableSchema.methods.generateProcessedDataTable = function (dataTable) {
+  return generateProcessedDataTable(dataTable);
+};
+
+function generateProcessedDataTable(dataTable) {
+  let processedDataTable = new DataTable();
+
+  // copy over processedDataTable's data as the raw data table's data
+  // which will be overwritten by later functions
+  processedDataTable.dataTableData = dataTable.dataTableData;
+
+  for (var i = 0; i < dataTable.dataTableData.length; ++i) {
+    if (dataTableFullCoordinateExists(dataTable, i, "x")) {
+      processedDataTable.dataTableData[i].xCoord = processCoordinate(
+        dataTable,
+        i,
+        "x"
+      );
+      processedDataTable.dataTableData[i].xUncertainty = processUncertainty(
+        dataTable,
+        i,
+        "x"
+      );
+    }
+    if (dataTableFullCoordinateExists(dataTable, i, "y")) {
+      processedDataTable.dataTableData[i].yCoord = processCoordinate(
+        dataTable,
+        i,
+        "y"
+      );
+      processedDataTable.dataTableData[i].yUncertainty = processUncertainty(
+        dataTable,
+        i,
+        "y"
+      );
+    }
+
+    var id = mongoose.Types.ObjectId();
+    processedDataTable.dataTableData[i]._id = id;
+  }
+
+  return processedDataTable;
+}
 
 // Export data table model
 // Mongoose automatically looks for the plural, lowercased version of your model name as the collection name
