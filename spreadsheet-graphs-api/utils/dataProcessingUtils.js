@@ -1,4 +1,6 @@
 // WIP
+// Import math.js
+// https://mathjs.org/examples/expressions.js.html
 var math = require("mathjs");
 
 // *******************************************
@@ -152,5 +154,5 @@ exports.processUncertainty = function (dataTable, index, coordVar) {
     );
   }
   // if instruction doesn't match any case, return original value
-  return math.abs(dataTable.dataTableData[index].xUncertainty);
+  return math.abs(dataTable.dataTableData[index][`${coordVar}Uncertainty`]);
 };

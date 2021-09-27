@@ -44,12 +44,18 @@ dataTableSchema.methods.generateProcessedDataTable = function (dataTable) {
   return generateProcessedDataTable(dataTable);
 };
 
+// generates a data table and it will not be saved to mongoDB.
+// It will be seen by the front end but not be saved to back end
+// since it can be generated from the original data table
+// and we can "calculate" what the processed data table would be
+// as long as we have access to the original data table
 function generateProcessedDataTable(dataTable) {
   let processedDataTable = new DataTable();
 
   // copy over processedDataTable's data as the raw data table's data
   // which will be overwritten by later functions
   processedDataTable.dataTableData = dataTable.dataTableData;
+  processedDataTable = processedDataTable.toObject();
 
   for (var i = 0; i < dataTable.dataTableData.length; ++i) {
     if (dataTableFullCoordinateExists(dataTable, i, "x")) {
@@ -77,9 +83,11 @@ function generateProcessedDataTable(dataTable) {
       );
     }
 
-    var id = mongoose.Types.ObjectId();
-    processedDataTable.dataTableData[i]._id = id;
+    // processedDataTable does not need an ID since it will
+    // not need to be saved to backend
+    delete processedDataTable.dataTableData[i]._id;
   }
+  delete processedDataTable._id;
 
   return processedDataTable;
 }
