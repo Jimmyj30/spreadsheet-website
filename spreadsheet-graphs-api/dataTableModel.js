@@ -92,15 +92,16 @@ function generateProcessedDataTable(dataTable) {
   return processedDataTable;
 }
 
+// TODO: add checking for if API request contains valid instructions and data
+// https://stackoverflow.com/questions/58172762/how-to-export-multiple-schemas-in-same-file-in-mongoose
+
 // Export data table model
 // Mongoose automatically looks for the plural, lowercased version of your model name as the collection name
 var DataTable = (module.exports = mongoose.model("dataTable", dataTableSchema));
 
-// https://stackoverflow.com/questions/58172762/how-to-export-multiple-schemas-in-same-file-in-mongoose
-
-// export dataPoint if it is needed later
-// module.exports.DataPoint = mongoose.model("dataPoint", dataPoint);
-
 module.exports.get = function (callback, limit) {
   DataTable.find(callback).limit(limit);
 };
+
+// export dataPoint if it is needed later
+// module.exports.DataPoint = mongoose.model("dataPoint", dataPoint);

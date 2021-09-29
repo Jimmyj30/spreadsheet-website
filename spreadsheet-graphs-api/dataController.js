@@ -59,7 +59,8 @@ exports.view = function (req, res) {
 
 // Handle update data table info
 exports.update = function (req, res) {
-  // req.query.parametername can be used to store information...
+  // https://dev.to/gathoni/express-req-params-req-query-and-req-body-4lpc
+  // req.query.parametername can be used to store information
   // req.params.dataTable_id refers to the _id of the raw data table
   // req.body is the latest version of the raw data table from the front-end
   DataTable.findById(req.params.dataTable_id, function (err, dataTable) {
