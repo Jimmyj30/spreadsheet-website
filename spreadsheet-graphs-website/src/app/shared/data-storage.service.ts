@@ -7,6 +7,9 @@ import { environment } from 'src/environments/environment';
 import { DataTable } from '../data-tables/models/data-table.model';
 
 const API_URL = environment.apiUrl;
+// TODO: Add firebase auth for user authentication
+// and connect that with mongoDB backend
+// https://javascript.plainenglish.io/lets-create-react-app-with-firebase-auth-express-backend-and-mongodb-database-805c83e4dadd
 
 @Injectable({ providedIn: 'root' })
 export class DataStorageService {
@@ -32,13 +35,9 @@ export class DataStorageService {
     );
   }
 
-  public updateDataTable(dataTable: DataTable, processedDataTableID: string) {
+  public updateDataTable(dataTable: DataTable) {
     return this.http
-      .put(API_URL + '/api/data-tables/' + dataTable._id, dataTable, {
-        params: {
-          processedDataTable_id: processedDataTableID,
-        },
-      })
+      .put(API_URL + '/api/data-tables/' + dataTable._id, dataTable, {})
       .pipe(
         catchError((error) => {
           return this.handleError(error);

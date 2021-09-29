@@ -2,13 +2,11 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { HotTableComponent, HotTableRegisterer } from '@handsontable/angular';
 import { FormControl, FormBuilder, Validators } from '@angular/forms';
 import * as Handsontable from 'handsontable';
-import { mergeMap } from 'rxjs/operators';
 
 import { DataTableService } from '../shared/data-table.service';
 import { DataTable } from './models/data-table.model';
 import { DataPoint } from './models/data-point.model';
 import { numberFractionValidator } from '../shared/number-fraction.directive';
-import { of } from 'rxjs';
 
 const FILL_OUT_SPREADSHEET_FULLY_MESSAGE =
   'Please fully fill out the above spreadsheet with real numbers.';
@@ -267,7 +265,7 @@ export class DataTablesComponent implements OnInit {
           : undefined,
       },
 
-      _id: this.rawDataTable ? this.rawDataTable._id : undefined, // this.rawDataTable._id...
+      _id: this.rawDataTable ? this.rawDataTable._id : undefined,
     });
     // console.log('rawDataTable: ');
     // console.log(this.rawDataTable);
@@ -278,12 +276,13 @@ export class DataTablesComponent implements OnInit {
     // we could then display the processedDataTable and give the rawDataTable an id
     // that will need to be used if we want update the processed data table...
 
-    if (this.processedDataTable && this.processedDataTable._id) {
-      // we are updating processedDataTable based on the ID of the rawDataTable...
-      // we could have the API return a processedDataTable along with the ID of the raw data table...
+    // if the processedDataTable exists and rawDataTable has an ID then
+    // rawDataTable has been saved to the database
+    if (this.processedDataTable && this.rawDataTable._id) {
+      // the API returns a processedDataTable along with the ID of the raw data table...
       this.loading = true;
       this.dataTableService
-        .updateDataTable(this.rawDataTable, this.processedDataTable._id)
+        .updateDataTable(this.rawDataTable)
         .subscribe((response: any) => {
           // console.log('update table response: ');
           // console.log(response);
@@ -302,10 +301,10 @@ export class DataTablesComponent implements OnInit {
           // return a processed data table as the response....
           // response contains a processedDataTable and a rawDataTableID
 
-          // this.processedDataTable only really needs to hold an ID since the raw data
-          // table data can be changed by the user — the raw data just gets updated in the
+          // this.processedDataTable is a plain object since only the raw data
+          // table data can be changed by the user — the raw data gets updated in the
           // DB every time that it gets submitted to the API (creating/updating the
-          // raw data table)
+          // raw data table) and the processedDataTable is part of the API response
           this.processedDataTable = response.processedDataTable;
           this.createProcessedDataTableSettings(response.processedDataTable);
 
@@ -317,22 +316,11 @@ export class DataTablesComponent implements OnInit {
   }
 
   onFinish(): void {
-    if (this.processedDataTable && this.processedDataTable._id) {
-      this.dataTableService
-        .deleteDataTable(this.processedDataTable)
-        .pipe(
-          mergeMap(() => {
-            if (this.rawDataTable && this.rawDataTable._id) {
-              return this.dataTableService.deleteDataTable(this.rawDataTable);
-            } else {
-              return of(null);
-            }
-          })
-        )
-        .subscribe(() => {
-          console.log('data table(s) deleted');
-          window.location.reload();
-        });
+    if (this.rawDataTable && this.rawDataTable._id && this.processedDataTable) {
+      this.dataTableService.deleteDataTable(this.rawDataTable).subscribe(() => {
+        console.log('data table(s) deleted');
+        window.location.reload();
+      });
     }
   }
 
@@ -401,6 +389,9 @@ export class DataTablesComponent implements OnInit {
     return string.substr(string.indexOf(' ') + 1);
   }
 
+  // you can shift the decimal place left as many
+  // times as you want so there is no validity check
+  // for this operation
   private shiftDecimalPlaceLeft(columnIndex) {
     this.rawDataTableSettings.columns[
       columnIndex
@@ -409,8 +400,9 @@ export class DataTablesComponent implements OnInit {
   }
 
   private shiftDecimalPlaceRight(columnIndex) {
-    let colMantissa = this.rawDataTableSettings.columns[columnIndex]
-      .numericFormat.pattern.mantissa;
+    let colMantissa =
+      this.rawDataTableSettings.columns[columnIndex].numericFormat.pattern
+        .mantissa;
 
     if (colMantissa !== 0) {
       this.rawDataTableSettings.columns[
@@ -426,8 +418,9 @@ export class DataTablesComponent implements OnInit {
       let colIndex = this.hotRegisterer
         .getInstance(this.rawDataTableHandsontableID)
         .getSelectedRangeLast().from.col;
-      let colMantissa = this.rawDataTableSettings.columns[colIndex]
-        .numericFormat.pattern.mantissa;
+      let colMantissa =
+        this.rawDataTableSettings.columns[colIndex].numericFormat.pattern
+          .mantissa;
 
       if (colMantissa !== 0) {
         return true;
@@ -438,6 +431,9 @@ export class DataTablesComponent implements OnInit {
     return false;
   }
 
+  // you can shift the decimal place left as many
+  // times as you want so there is no validity check
+  // for this operation
   private shiftProcessedDecimalPlaceLeft(columnIndex) {
     this.processedDataTableSettings.columns[
       columnIndex
@@ -448,8 +444,9 @@ export class DataTablesComponent implements OnInit {
   }
 
   private shiftProcessedDecimalPlaceRight(columnIndex) {
-    let colMantissa = this.processedDataTableSettings.columns[columnIndex]
-      .numericFormat.pattern.mantissa;
+    let colMantissa =
+      this.processedDataTableSettings.columns[columnIndex].numericFormat.pattern
+        .mantissa;
 
     if (colMantissa !== 0) {
       this.processedDataTableSettings.columns[
@@ -468,8 +465,9 @@ export class DataTablesComponent implements OnInit {
       let colIndex = this.hotRegisterer
         .getInstance(this.processedDataTableHandsontableID)
         .getSelectedRangeLast().from.col;
-      let colMantissa = this.processedDataTableSettings.columns[colIndex]
-        .numericFormat.pattern.mantissa;
+      let colMantissa =
+        this.processedDataTableSettings.columns[colIndex].numericFormat.pattern
+          .mantissa;
 
       if (colMantissa !== 0) {
         return true;
