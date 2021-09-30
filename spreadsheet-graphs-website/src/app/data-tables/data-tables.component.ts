@@ -78,24 +78,14 @@ export class DataTablesComponent implements OnInit {
       data: this.rawData,
       rowHeaders: true,
       colHeaders: [
-        'Uncertainties for<br>Responding Variable',
-        'Responding Variable',
-        'Manipulated Variable',
         'Uncertainties for<br>Manipulated Variable',
+        'Manipulated Variable',
+        'Responding Variable',
+        'Uncertainties for<br>Responding Variable',
       ],
       columns: [
         {
-          data: 'yUncertainty',
-          type: 'numeric',
-          numericFormat: {
-            pattern: {
-              mantissa: 2,
-            },
-          },
-          allowEmpty: false,
-        },
-        {
-          data: 'yCoord',
+          data: 'xUncertainty',
           type: 'numeric',
           numericFormat: {
             pattern: {
@@ -115,7 +105,17 @@ export class DataTablesComponent implements OnInit {
           allowEmpty: false,
         },
         {
-          data: 'xUncertainty',
+          data: 'yCoord',
+          type: 'numeric',
+          numericFormat: {
+            pattern: {
+              mantissa: 2,
+            },
+          },
+          allowEmpty: false,
+        },
+        {
+          data: 'yUncertainty',
           type: 'numeric',
           numericFormat: {
             pattern: {
@@ -158,16 +158,16 @@ export class DataTablesComponent implements OnInit {
             callback: (key, selection, clickEvent) => {
               // selection[0].end.col  and selection[0].start.col should be the same
               // as this dropdown menu can only select an entire column
-              this.shiftDecimalPlaceLeft(selection[0].end.col);
+              this.shiftDecimalPlaceLeft(selection[0].end.col, 'rawDataTable');
             },
           },
           shiftDecimalRight: {
             name: 'Decrease column decimal places by one',
             disabled: () => {
-              return !this.canShiftDecimalPlaceRight();
+              return !this.canShiftDecimalPlaceRight('rawDataTable');
             },
             callback: (key, selection, clickEvent) => {
-              this.shiftDecimalPlaceRight(selection[0].end.col);
+              this.shiftDecimalPlaceRight(selection[0].end.col, 'rawDataTable');
             },
           },
         },
@@ -336,10 +336,10 @@ export class DataTablesComponent implements OnInit {
     this.processedDataTableSettings.contextMenu = false;
 
     this.processedDataTableSettings.colHeaders = [
-      'Uncertainties for Curve Straightened<br>Responding Variable',
-      'Curve Straightened<br>Responding Variable',
-      'Curve Straightened<br>Manipulated Variable',
       'Uncertainties for Curve Straightened<br>Manipulated Variable',
+      'Curve Straightened<br>Manipulated Variable',
+      'Curve Straightened<br>Responding Variable',
+      'Uncertainties for Curve Straightened<br>Responding Variable',
     ];
     // the processed data table will have an _id attached to it that should
     // not be displayed as a column, so we will specify which columns are displayed here
@@ -354,16 +354,22 @@ export class DataTablesComponent implements OnInit {
           callback: (key, selection, clickEvent) => {
             // selection[0].end.col  and selection[0].start.col should be the same
             // as this dropdown menu can only select an entire column
-            this.shiftProcessedDecimalPlaceLeft(selection[0].end.col);
+            this.shiftDecimalPlaceLeft(
+              selection[0].end.col,
+              'processedDataTable'
+            );
           },
         },
         shiftDecimalRight: {
           name: 'Decrease column decimal places by one',
           disabled: () => {
-            return !this.canShiftProcessedDecimalPlaceRight();
+            return !this.canShiftDecimalPlaceRight('processedDataTable');
           },
           callback: (key, selection, clickEvent) => {
-            this.shiftProcessedDecimalPlaceRight(selection[0].end.col);
+            this.shiftDecimalPlaceRight(
+              selection[0].end.col,
+              'processedDataTable'
+            );
           },
         },
       },
@@ -392,81 +398,61 @@ export class DataTablesComponent implements OnInit {
   // you can shift the decimal place left as many
   // times as you want so there is no validity check
   // for this operation
-  private shiftDecimalPlaceLeft(columnIndex) {
-    this.rawDataTableSettings.columns[
-      columnIndex
-    ].numericFormat.pattern.mantissa += 1;
-    this.hotRegisterer.getInstance(this.rawDataTableHandsontableID).render();
-  }
-
-  private shiftDecimalPlaceRight(columnIndex) {
-    let colMantissa =
-      this.rawDataTableSettings.columns[columnIndex].numericFormat.pattern
-        .mantissa;
-
-    if (colMantissa !== 0) {
-      this.rawDataTableSettings.columns[
-        columnIndex
-      ].numericFormat.pattern.mantissa -= 1;
-      this.hotRegisterer.getInstance(this.rawDataTableHandsontableID).render();
-    } else {
+  // TODO: separate mantissas for processed and
+  private shiftDecimalPlaceLeft(columnIndex, dataTable) {
+    let dataTableVar;
+    if (dataTable === 'rawDataTable') {
+      dataTableVar = 'rawDataTable';
+    } else if (dataTable === 'processedDataTable') {
+      dataTableVar = 'processedDataTable';
     }
-  }
 
-  private canShiftDecimalPlaceRight() {
-    if (this.rawDataTableSettings) {
-      let colIndex = this.hotRegisterer
-        .getInstance(this.rawDataTableHandsontableID)
-        .getSelectedRangeLast().from.col;
-      let colMantissa =
-        this.rawDataTableSettings.columns[colIndex].numericFormat.pattern
-          .mantissa;
-
-      if (colMantissa !== 0) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-    return false;
-  }
-
-  // you can shift the decimal place left as many
-  // times as you want so there is no validity check
-  // for this operation
-  private shiftProcessedDecimalPlaceLeft(columnIndex) {
-    this.processedDataTableSettings.columns[
+    this[`${dataTableVar}Settings`].columns[
       columnIndex
     ].numericFormat.pattern.mantissa += 1;
     this.hotRegisterer
-      .getInstance(this.processedDataTableHandsontableID)
+      .getInstance(this[`${dataTableVar}HandsontableID`])
       .render();
   }
 
-  private shiftProcessedDecimalPlaceRight(columnIndex) {
+  // dataTable param has to either be rawDataTable or processedDataTable
+  private shiftDecimalPlaceRight(columnIndex, dataTable) {
+    let dataTableVar;
+    if (dataTable === 'rawDataTable') {
+      dataTableVar = 'rawDataTable';
+    } else if (dataTable === 'processedDataTable') {
+      dataTableVar = 'processedDataTable';
+    }
+
     let colMantissa =
-      this.processedDataTableSettings.columns[columnIndex].numericFormat.pattern
+      this[`${dataTableVar}Settings`].columns[columnIndex].numericFormat.pattern
         .mantissa;
 
     if (colMantissa !== 0) {
-      this.processedDataTableSettings.columns[
+      this[`${dataTableVar}Settings`].columns[
         columnIndex
       ].numericFormat.pattern.mantissa -= 1;
-
       this.hotRegisterer
-        .getInstance(this.processedDataTableHandsontableID)
+        .getInstance(this[`${dataTableVar}HandsontableID`])
         .render();
     } else {
     }
   }
 
-  private canShiftProcessedDecimalPlaceRight() {
-    if (this.processedDataTableSettings) {
+  private canShiftDecimalPlaceRight(dataTable) {
+    let dataTableVar;
+    if (dataTable === 'rawDataTable') {
+      dataTableVar = 'rawDataTable';
+    } else if (dataTable === 'processedDataTable') {
+      dataTableVar = 'processedDataTable';
+    }
+
+    if (this[`${dataTableVar}Settings`]) {
       let colIndex = this.hotRegisterer
-        .getInstance(this.processedDataTableHandsontableID)
+        .getInstance(this[`${dataTableVar}HandsontableID`])
         .getSelectedRangeLast().from.col;
       let colMantissa =
-        this.processedDataTableSettings.columns[colIndex].numericFormat.pattern
+        this[`${dataTableVar}Settings`].columns[colIndex].numericFormat.pattern
           .mantissa;
 
       if (colMantissa !== 0) {
@@ -482,10 +468,10 @@ export class DataTablesComponent implements OnInit {
     let defaultDataTable = [];
     for (var i = 0; i < dataTableArray.length; ++i) {
       let row = new DataPoint({
-        yUncertainty: dataTableArray[i][0],
-        yCoord: dataTableArray[i][1],
-        xCoord: dataTableArray[i][2],
-        xUncertainty: dataTableArray[i][3],
+        xUncertainty: dataTableArray[i][0],
+        xCoord: dataTableArray[i][1],
+        yCoord: dataTableArray[i][2],
+        yUncertainty: dataTableArray[i][3],
       });
       defaultDataTable.push(row);
     }
