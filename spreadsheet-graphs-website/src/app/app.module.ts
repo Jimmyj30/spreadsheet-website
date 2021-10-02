@@ -14,10 +14,12 @@ import { DataTablesComponent } from './data-tables/data-tables.component';
 import { GraphsComponent } from './data-tables/graphs/graphs.component';
 import { HeaderComponent } from './header/header.component';
 import { HelpComponent } from './help/help.component';
+import { AuthComponent } from './auth/auth.component';
 
 const appRoutes: Routes = [
   { path: '', component: DataTablesComponent },
   { path: 'help', component: HelpComponent },
+  { path: 'auth', component: AuthComponent },
   { path: '**', component: DataTablesComponent },
 ];
 
@@ -30,6 +32,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     GraphsComponent,
     HeaderComponent,
     HelpComponent,
+    AuthComponent,
   ],
   imports: [
     BrowserModule,
