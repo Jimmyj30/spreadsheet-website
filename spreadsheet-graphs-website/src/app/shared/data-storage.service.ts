@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { map, catchError, take, mergeMap } from 'rxjs/operators';
 
 import { environment } from 'src/environments/environment';
 import { DataTable } from '../data-tables/models/data-table.model';
+import { AuthService } from '../auth/auth.service';
 
 const API_URL = environment.apiUrl;
 // TODO: Add firebase auth for user authentication
@@ -13,7 +14,7 @@ const API_URL = environment.apiUrl;
 
 @Injectable({ providedIn: 'root' })
 export class DataStorageService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthService) {}
 
   // api requests ???
   // https://www.sitepoint.com/angular-rxjs-create-api-service-rest-backend/
@@ -27,31 +28,59 @@ export class DataStorageService {
   // DELETE /data-tables/{id} will delete a single data table
 
   public createDataTable(dataTable: DataTable) {
-    return this.http.post(API_URL + '/api/data-tables', dataTable).pipe(
-      catchError((error) => {
-        return this.handleError(error);
-      })
-      // response of this function will be a json object...
-    );
-  }
-
-  public updateDataTable(dataTable: DataTable) {
-    return this.http
-      .put(API_URL + '/api/data-tables/' + dataTable._id, dataTable, {})
+    return this.authService.user
+      .pipe(
+        take(1),
+        mergeMap((user) => {
+          console.log(user);
+          return this.http.post(API_URL + '/api/data-tables', dataTable);
+        })
+      )
       .pipe(
         catchError((error) => {
           return this.handleError(error);
         })
-        // response of this function will be a json object...
       );
+    // response of this function will be a json object...
+  }
+
+  public updateDataTable(dataTable: DataTable) {
+    return this.authService.user
+      .pipe(
+        take(1),
+        mergeMap((user) => {
+          console.log(user);
+          return this.http.put(
+            API_URL + '/api/data-tables/' + dataTable._id,
+            dataTable,
+            {}
+          );
+        })
+      )
+      .pipe(
+        catchError((error) => {
+          return this.handleError(error);
+        })
+      );
+    // response of this function will be a json object...
   }
 
   public deleteDataTable(dataTable: DataTable) {
-    return this.http.delete(API_URL + '/api/data-tables/' + dataTable._id).pipe(
-      catchError((error) => {
-        return this.handleError(error);
-      })
-    );
+    return this.authService.user
+      .pipe(
+        take(1),
+        mergeMap((user) => {
+          console.log(user);
+          return this.http.delete(
+            API_URL + '/api/data-tables/' + dataTable._id
+          );
+        })
+      )
+      .pipe(
+        catchError((error) => {
+          return this.handleError(error);
+        })
+      );
   }
 
   private handleError(error: Response | any) {
