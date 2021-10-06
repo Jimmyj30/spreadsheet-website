@@ -9,6 +9,10 @@ export const environment = {
   // heroku url: https://spreadsheet-graphs-api.herokuapp.com
   // localhost url: http://localhost:8080
   apiUrl: 'http://localhost:8080',
+  firebaseSignInUrl:
+    'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDxJ2Jih5LV5E62kkesLIr1pQb7dApw6Tk',
+  firebaseSignUpUrl:
+    'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDxJ2Jih5LV5E62kkesLIr1pQb7dApw6Tk',
 };
 
 /*

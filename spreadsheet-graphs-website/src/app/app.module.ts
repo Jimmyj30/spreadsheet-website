@@ -15,12 +15,13 @@ import { GraphsComponent } from './data-tables/graphs/graphs.component';
 import { HeaderComponent } from './header/header.component';
 import { HelpComponent } from './help/help.component';
 import { AuthComponent } from './auth/auth.component';
+import { AuthGuard } from './auth/auth.guard';
 
 const appRoutes: Routes = [
-  { path: '', component: DataTablesComponent },
+  { path: '', component: DataTablesComponent, canActivate: [AuthGuard] },
   { path: 'help', component: HelpComponent },
   { path: 'auth', component: AuthComponent },
-  { path: '**', component: DataTablesComponent },
+  { path: '**', redirectTo: '/' },
 ];
 
 // adding the plotly.js module to the Angular library

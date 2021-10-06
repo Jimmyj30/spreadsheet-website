@@ -7,7 +7,9 @@
     </ul>
     <ul class="nav navbar-nav navbar-right">
       <li>
-        <a *ngIf="isAuthenticated" (click)="onLogout()"> Logout </a>
+        <a style="cursor: pointer" *ngIf="isAuthenticated" (click)="onLogout()">
+          Logout
+        </a>
       </li>
     </ul>
   </div>
