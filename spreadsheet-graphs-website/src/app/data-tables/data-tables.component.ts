@@ -62,7 +62,8 @@ export class DataTablesComponent implements OnInit {
   @ViewChild('rawDataTableRef', { static: false })
   rawDataTableRef: HotTableComponent;
 
-  errorMessage: string = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
+  error: string; //general error message
+  invalidFormErrorMsg: string = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
   loading: boolean = false;
   showGraph: boolean = false;
 
@@ -281,19 +282,23 @@ export class DataTablesComponent implements OnInit {
     if (this.processedDataTable && this.rawDataTable._id) {
       // the API returns a processedDataTable along with the ID of the raw data table...
       this.loading = true;
-      this.dataTableService
-        .updateDataTable(this.rawDataTable)
-        .subscribe((response: any) => {
+      this.dataTableService.updateDataTable(this.rawDataTable).subscribe(
+        (response: any) => {
           // console.log('update table response: ');
           // console.log(response);
           this.updateProcessedDataTableSettings(response.data);
+          this.error = undefined;
           this.loading = false;
-        });
+        },
+        (error) => {
+          this.error = error;
+          this.loading = false;
+        }
+      );
     } else {
       this.loading = true;
-      this.dataTableService
-        .createDataTable(this.rawDataTable)
-        .subscribe((response: any) => {
+      this.dataTableService.createDataTable(this.rawDataTable).subscribe(
+        (response: any) => {
           // console.log('create table response: ');
           // console.log(response);
 
@@ -310,17 +315,29 @@ export class DataTablesComponent implements OnInit {
 
           //(gives raw data table an ID)
           this.rawDataTable._id = response.rawDataTableID;
+          this.error = undefined;
           this.loading = false;
-        });
+        },
+        (error) => {
+          this.error = error;
+          this.loading = false;
+        }
+      );
     }
   }
 
   onFinish(): void {
     if (this.rawDataTable && this.rawDataTable._id && this.processedDataTable) {
-      this.dataTableService.deleteDataTable(this.rawDataTable).subscribe(() => {
-        console.log('data table(s) deleted');
-        window.location.reload();
-      });
+      this.dataTableService.deleteDataTable(this.rawDataTable).subscribe(
+        () => {
+          console.log('data table(s) deleted');
+          window.location.reload();
+        },
+        (error) => {
+          this.error = error;
+          this.loading = false;
+        }
+      );
     }
   }
 
@@ -511,10 +528,10 @@ export class DataTablesComponent implements OnInit {
 
     let minRows = 5; // data table should only have 5+ rows
     if (this.isHandsontableValid(dataArray) && dataArray.length >= minRows) {
-      this.errorMessage = undefined;
+      this.invalidFormErrorMsg = undefined;
     } else {
       // default value for table without anything filled in yet
-      this.errorMessage = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
+      this.invalidFormErrorMsg = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
     }
   }
 }

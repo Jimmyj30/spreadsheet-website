@@ -84,7 +84,7 @@ export class DataStorageService {
   }
 
   private handleError(error: Response | any) {
-    console.error('ApiService::handleError', error);
+    console.error('DataStorageService::handleError', error);
     return throwError(error.message);
   }
 }

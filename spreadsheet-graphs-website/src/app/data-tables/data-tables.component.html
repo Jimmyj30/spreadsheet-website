@@ -55,15 +55,22 @@
     </form>
   </div>
   <div class="vertical-margin">
+    <div class="alert alert-danger error-message" *ngIf="error">
+      <p>{{ error }}</p>
+    </div>
     <button
       type="submit"
       (click)="onSubmit()"
-      [disabled]="!curveStraighteningInstructionsForm.valid || errorMessage"
+      [disabled]="
+        !curveStraighteningInstructionsForm.valid || invalidFormErrorMsg
+      "
       class="btn"
     >
       Submit
     </button>
-    <span class="left-margin" *ngIf="errorMessage">{{ errorMessage }} </span>
+    <span class="left-margin" *ngIf="invalidFormErrorMsg"
+      >{{ invalidFormErrorMsg }}
+    </span>
   </div>
   <div *ngIf="loading" class="vertical-margin">
     <p>loading...</p>
