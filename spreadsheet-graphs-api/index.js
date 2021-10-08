@@ -11,6 +11,9 @@ app.use(cors());
 // Import routes
 let apiRoutes = require("./api-routes");
 
+// Import auth
+let decodeIDToken = require("./middleware/authenticateToken");
+
 // Deploy on Heroku: https://developer.mongodb.com/how-to/use-atlas-on-heroku/
 // https://devcenter.heroku.com/articles/deploying-nodejs
 
@@ -21,6 +24,7 @@ app.use(
     extended: true,
   })
 );
+app.use(decodeIDToken);
 
 // Connect to Mongoose and set connection variable
 const uri =

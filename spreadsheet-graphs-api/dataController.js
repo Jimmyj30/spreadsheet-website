@@ -9,11 +9,15 @@ var mongoose = require("mongoose");
 
 // Handle index actions
 exports.index = function (req, res) {
+  const auth = req.currentUser;
+
   DataTable.get(function (err, dataTables) {
-    if (err) {
+    if (err || !auth) {
+      // TODO:  add a function to
+      // send particular error messages
       res.json({
         status: "error",
-        message: err,
+        message: err ? err : "403 Forbidden",
       });
     } else {
       res.json({
@@ -27,6 +31,10 @@ exports.index = function (req, res) {
 
 // Handle create data table actions
 exports.new = function (req, res) {
+  console.log(req.headers.authorization);
+  const auth = req.currentUser;
+  console.log(auth);
+
   var dataTable = new DataTable(req.body);
   var processedDataTable = dataTable.generateProcessedDataTable(dataTable);
 
@@ -46,6 +54,10 @@ exports.new = function (req, res) {
 
 // Handle view data table info
 exports.view = function (req, res) {
+  console.log(req.headers.authorization);
+  const auth = req.currentUser;
+  console.log(auth);
+
   DataTable.findById(req.params.dataTable_id, function (err, dataTable) {
     if (err) res.send(err);
     else {
@@ -63,6 +75,10 @@ exports.update = function (req, res) {
   // req.query.parametername can be used to store information
   // req.params.dataTable_id refers to the _id of the raw data table
   // req.body is the latest version of the raw data table from the front-end
+  console.log(req.headers.authorization);
+  const auth = req.currentUser;
+  console.log(auth);
+
   DataTable.findById(req.params.dataTable_id, function (err, dataTable) {
     if (err || dataTable == null) res.send(err ? err : "error");
     else {
@@ -92,6 +108,11 @@ exports.update = function (req, res) {
 
 // Handle delete data table
 exports.delete = function (req, res) {
+  console.log(req.headers.authorization);
+  const auth = req.currentUser;
+  console.log(auth);
+  console.log(auth.uid);
+
   DataTable.deleteOne(
     {
       _id: req.params.dataTable_id,
