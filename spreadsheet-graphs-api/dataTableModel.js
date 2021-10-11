@@ -38,6 +38,10 @@ var dataTableSchema = mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  firebase_uid: {
+    type: String,
+    // required: true,
+  },
 });
 
 dataTableSchema.methods.generateProcessedDataTable = function (dataTable) {

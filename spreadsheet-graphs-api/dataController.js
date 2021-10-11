@@ -7,6 +7,8 @@ const DataTable = require("./dataTableModel");
 exports.index = function (req, res) {
   const auth = req.currentUser;
 
+  // later: make this only for an "admin" account
+  // once the other user role stuff can be handled
   DataTable.get(function (err, dataTables) {
     if (err || !auth) {
       let statusCode = getStatusCode(err, auth);
@@ -34,18 +36,28 @@ exports.new = function (req, res) {
   var dataTable = new DataTable(req.body);
   var processedDataTable = dataTable.generateProcessedDataTable(dataTable);
 
-  // save the data table and check for errors
-  dataTable.save(function (err) {
+  DataTable.find({ firebase_uid: auth?.uid }, function (err, dataTables) {
     if (err || !auth) {
       let statusCode = getStatusCode(err, auth);
       let statusMessage = getStatusMessage(err, auth);
       res.status(statusCode).send(statusMessage);
+    } else if (dataTables.length > 0) {
+      // can't make a new data table
+      res
+        .status(400)
+        .send("Bad request, data table already exists for this user");
     } else {
-      res.json({
-        // we send the processed data table to the front end
-        message: "New data table created!",
-        rawDataTableID: dataTable._id,
-        processedDataTable: processedDataTable,
+      // save the data table and check for errors
+      dataTable.save(function (err) {
+        if (err) res.json(err);
+        else {
+          res.json({
+            // we send the processed data table to the front end
+            message: "New data table created!",
+            rawDataTableID: dataTable._id,
+            processedDataTable: processedDataTable,
+          });
+        }
       });
     }
   });
@@ -62,6 +74,8 @@ exports.view = function (req, res) {
       let statusCode = getStatusCode(err, auth, dataTable == null);
       let statusMessage = getStatusMessage(err, auth, dataTable == null);
       res.status(statusCode).send(statusMessage);
+    } else if (dataTable.firebase_uid !== auth.uid) {
+      res.status(403).send("403 Forbidden");
     } else {
       res.json({
         message: "data table details loading..",
@@ -86,6 +100,9 @@ exports.update = function (req, res) {
       let statusCode = getStatusCode(err, auth, dataTable == null);
       let statusMessage = getStatusMessage(err, auth, dataTable == null);
       res.status(statusCode).send(statusMessage);
+    } else if (auth.uid !== dataTable.firebase_uid) {
+      // not allowed to update data table
+      res.status(403).send("403 Forbidden");
     } else {
       dataTable.dataTableData = req.body.dataTableData;
 
@@ -117,23 +134,37 @@ exports.delete = function (req, res) {
   const auth = req.currentUser;
   console.log(auth);
 
-  DataTable.deleteOne(
-    {
-      _id: req.params.dataTable_id,
-    },
-    function (err, dataTable) {
-      if (err || !auth) {
-        let statusCode = getStatusCode(err, auth);
-        let statusMessage = getStatusMessage(err, auth);
-        res.status(statusCode).send(statusMessage);
-      } else {
-        res.json({
-          status: "success",
-          message: "data table deleted",
-        });
-      }
+  DataTable.find({ firebase_uid: auth?.uid }, function (err, dataTables) {
+    if (err || !auth) {
+      let statusCode = getStatusCode(err, auth);
+      let statusMessage = getStatusMessage(err, auth);
+      res.status(statusCode).send(statusMessage);
+    } else if (dataTables.length === 1) {
+      res.status(500).send("500 Internal Server Error");
+    } else if (dataTables[0].firebase_uid !== auth.uid) {
+      res.status(403).send("403 Forbidden");
+    } else {
+      DataTable.deleteOne(
+        {
+          _id: req.params.dataTable_id,
+        },
+        function (err, deleteResult) {
+          let dataTableNotFound = deleteResult.deletedCount === 0;
+
+          if (err || !auth || dataTableNotFound) {
+            let statusCode = getStatusCode(err, auth, dataTableNotFound);
+            let statusMessage = getStatusMessage(err, auth, dataTableNotFound);
+            res.status(statusCode).send(statusMessage);
+          } else {
+            res.json({
+              status: "success",
+              message: "data table deleted",
+            });
+          }
+        }
+      );
     }
-  );
+  });
 };
 
 // Commands...
