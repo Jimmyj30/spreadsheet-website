@@ -9,14 +9,10 @@ exports.index = function (req, res) {
 
   // later: make this only for an "admin" account
   // once the other user role stuff can be handled
+
   DataTable.get(function (err, dataTables) {
-    if (err || !auth) {
-      let statusCode = getStatusCode(err, auth);
-      let statusMessage = getStatusMessage(err, auth);
-      res.status(statusCode).json({
-        status: "error",
-        message: statusMessage,
-      });
+    if (checkError(err, auth, true)) {
+      res.json(getError(err, auth, true));
     } else {
       res.json({
         status: "success",
@@ -33,19 +29,19 @@ exports.new = function (req, res) {
   const auth = req.currentUser;
   console.log(auth);
 
-  var dataTable = new DataTable(req.body);
-  var processedDataTable = dataTable.generateProcessedDataTable(dataTable);
+  let dataTable = new DataTable(req.body);
+  dataTable.firebase_uid = auth?.uid;
+  let processedDataTable = dataTable.generateProcessedDataTable(dataTable);
 
   DataTable.find({ firebase_uid: auth?.uid }, function (err, dataTables) {
-    if (err || !auth) {
-      let statusCode = getStatusCode(err, auth);
-      let statusMessage = getStatusMessage(err, auth);
-      res.status(statusCode).send(statusMessage);
+    if (checkError(err, auth, true)) {
+      res.json(getError(err, auth, true));
     } else if (dataTables.length > 0) {
-      // can't make a new data table
-      res
-        .status(400)
-        .send("Bad request, data table already exists for this user");
+      // can't make a new data table if one already exists
+      res.status(400).json({
+        status: "error 400",
+        message: "400 bad request: data table already exists for this user",
+      });
     } else {
       // save the data table and check for errors
       dataTable.save(function (err) {
@@ -67,15 +63,19 @@ exports.new = function (req, res) {
 exports.view = function (req, res) {
   // console.log(req.headers.authorization);
   const auth = req.currentUser;
+  let query;
   console.log(auth);
 
-  DataTable.findById(req.params.dataTable_id, function (err, dataTable) {
-    if (err || dataTable == null || !auth) {
-      let statusCode = getStatusCode(err, auth, dataTable == null);
-      let statusMessage = getStatusMessage(err, auth, dataTable == null);
-      res.status(statusCode).send(statusMessage);
-    } else if (dataTable.firebase_uid !== auth.uid) {
-      res.status(403).send("403 Forbidden");
+  if (req.params.dataTable_id) {
+    query = { _id: req.params.dataTable_id };
+  }
+  if (auth?.uid && req.query["view-by-firebase-uid"]) {
+    query = { firebase_uid: auth.uid };
+  }
+
+  DataTable.findOne(query, function (err, dataTable) {
+    if (checkError(err, auth, dataTable, true, true)) {
+      res.json(getError(err, auth, dataTable, true, true));
     } else {
       res.json({
         message: "data table details loading..",
@@ -96,13 +96,8 @@ exports.update = function (req, res) {
   console.log(auth);
 
   DataTable.findById(req.params.dataTable_id, function (err, dataTable) {
-    if (err || dataTable == null || !auth) {
-      let statusCode = getStatusCode(err, auth, dataTable == null);
-      let statusMessage = getStatusMessage(err, auth, dataTable == null);
-      res.status(statusCode).send(statusMessage);
-    } else if (auth.uid !== dataTable.firebase_uid) {
-      // not allowed to update data table
-      res.status(403).send("403 Forbidden");
+    if (checkError(err, auth, dataTable, true, true)) {
+      res.json(getError(err, auth, dataTable, true, true));
     } else {
       dataTable.dataTableData = req.body.dataTableData;
 
@@ -112,7 +107,7 @@ exports.update = function (req, res) {
         req.body.yCurveStraighteningInstructions;
 
       // make new processed data table from rawDataTable sent in request
-      var processedDataTable = dataTable.generateProcessedDataTable(req.body);
+      let processedDataTable = dataTable.generateProcessedDataTable(req.body);
 
       // save the updated data table and check for errors
       dataTable.save(function (err) {
@@ -134,27 +129,22 @@ exports.delete = function (req, res) {
   const auth = req.currentUser;
   console.log(auth);
 
-  DataTable.find({ firebase_uid: auth?.uid }, function (err, dataTables) {
-    if (err || !auth) {
-      let statusCode = getStatusCode(err, auth);
-      let statusMessage = getStatusMessage(err, auth);
-      res.status(statusCode).send(statusMessage);
-    } else if (dataTables.length === 1) {
-      res.status(500).send("500 Internal Server Error");
-    } else if (dataTables[0].firebase_uid !== auth.uid) {
-      res.status(403).send("403 Forbidden");
+  DataTable.findById(req.params.dataTable_id, function (err, dataTable) {
+    if (checkError(err, auth, dataTable, true, true)) {
+      res.json(getError(err, auth, dataTable, true, true));
     } else {
       DataTable.deleteOne(
         {
           _id: req.params.dataTable_id,
+          firebase_uid: auth.uid,
         },
         function (err, deleteResult) {
           let dataTableNotFound = deleteResult.deletedCount === 0;
-
-          if (err || !auth || dataTableNotFound) {
-            let statusCode = getStatusCode(err, auth, dataTableNotFound);
-            let statusMessage = getStatusMessage(err, auth, dataTableNotFound);
-            res.status(statusCode).send(statusMessage);
+          if (dataTableNotFound) {
+            res.status(404).json({
+              status: "error 404",
+              message: "404 data table not found",
+            });
           } else {
             res.json({
               status: "success",
@@ -176,30 +166,56 @@ exports.delete = function (req, res) {
 
 // - req and res mean request and response...
 
-// might have more parameters later on...
-function getStatusCode(error, auth, dataTableNotFound = false) {
-  if (!auth) {
-    return 403;
+// check if an error exists
+function checkError(
+  error,
+  auth,
+  dataTable,
+  checkDataTable = false,
+  matchUid = false
+) {
+  if (error || !auth) {
+    return true;
   }
-  if (error) {
-    return 520;
+  if (checkDataTable && !dataTable) {
+    return true;
   }
-  if (dataTableNotFound) {
-    // request is fine but no table found
-    return 200;
+  if (matchUid && auth.uid !== dataTable?.firebase_uid) {
+    return true;
   }
-  return 520;
+  return false;
 }
 
-function getStatusMessage(error, auth, dataTableNotFound = false) {
+// send error responses
+function getError(
+  error,
+  auth,
+  dataTable,
+  checkDataTable = false,
+  matchUid = false
+) {
+  let statusCode;
+  let statusMessage;
+
   if (!auth) {
-    return "403 Forbidden";
+    statusCode = 401;
+    statusMessage = "401 unauthorized";
+  } else if (error) {
+    statusCode = 400;
+    statusMessage = error;
+  } else if (checkDataTable && !dataTable) {
+    statusCode = 404;
+    statusMessage = "404 data table not found";
+  } else if (matchUid && auth.uid !== dataTable?.firebase_uid) {
+    statusCode = 403;
+    statusMessage = "403 unauthorized";
+  } else {
+    statusCode = 500;
+    statusMessage = "500 internal server error";
   }
-  if (error) {
-    return error;
-  }
-  if (dataTableNotFound) {
-    return "Data table not found";
-  }
-  return "error";
+
+  return {
+    status: "error " + statusCode,
+    message: statusMessage,
+  };
 }
