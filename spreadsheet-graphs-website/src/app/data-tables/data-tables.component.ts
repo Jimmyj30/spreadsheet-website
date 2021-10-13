@@ -182,6 +182,18 @@ export class DataTablesComponent implements OnInit {
 
   ngOnInit(): void {
     // console.log(this.rawDataTableSettings);
+    // this route is protected by a guard so you need to be
+    // logged in to realistically access here
+    this.dataTableService.getDataTableFromLoggedInUser().subscribe((res) => {
+      this.rawData = res['rawDataTable']['dataTableData'];
+      this.rawDataTableSettings.data = this.rawData;
+      this.rawDataTable = res['rawDataTable'];
+      this.rawDataTable._id = res['rawDataTable']['_id'];
+      this.refreshRawDataTable(this.rawDataTableSettings);
+
+      this.processedDataTable = res['processedDataTable'];
+      this.createProcessedDataTableSettings(res['processedDataTable']);
+    });
   }
 
   get xCurveStraighteningInstructions() {
@@ -408,8 +420,12 @@ export class DataTablesComponent implements OnInit {
     this.processedDataTableRef.updateHotTable(settings);
   }
 
+  private refreshRawDataTable(settings): void {
+    this.rawDataTableRef.updateHotTable(settings);
+  }
+
   private removeFirstWord(string: string): string {
-    return string.substr(string.indexOf(' ') + 1);
+    return string.substring(string.indexOf(' ') + 1);
   }
 
   // you can shift the decimal place left as many

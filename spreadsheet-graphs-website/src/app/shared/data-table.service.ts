@@ -18,4 +18,8 @@ export class DataTableService {
   deleteDataTable(dataTable: DataTable) {
     return this.api.deleteDataTable(dataTable);
   }
+
+  getDataTableFromLoggedInUser() {
+    return this.api.getDataTableByFirebaseUid();
+  }
 }

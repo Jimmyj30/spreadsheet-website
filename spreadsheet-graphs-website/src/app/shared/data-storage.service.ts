@@ -48,6 +48,33 @@ export class DataStorageService {
     // response of this function will be a json object...
   }
 
+  public getDataTableByFirebaseUid() {
+    return this.authService.user
+      .pipe(
+        take(1),
+        mergeMap((user) => {
+          console.log(user);
+          let getDataByUidPathString = 'x';
+          return this.http.get(
+            API_URL + '/api/data-tables/' + getDataByUidPathString,
+            {
+              headers: {
+                Authorization: `Bearer ${user.token}`,
+              },
+              params: {
+                'view-by-firebase-uid': 'true',
+              },
+            }
+          );
+        })
+      )
+      .pipe(
+        catchError((error) => {
+          return this.handleError(error);
+        })
+      );
+  }
+
   public updateDataTable(dataTable: DataTable) {
     return this.authService.user
       .pipe(

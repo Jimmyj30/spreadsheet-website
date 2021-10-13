@@ -79,7 +79,8 @@ exports.view = function (req, res) {
     } else {
       res.json({
         message: "data table details loading..",
-        data: dataTable,
+        rawDataTable: dataTable,
+        processedDataTable: dataTable.generateProcessedDataTable(dataTable),
       });
     }
   });
