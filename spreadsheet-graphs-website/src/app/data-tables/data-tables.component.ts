@@ -185,14 +185,16 @@ export class DataTablesComponent implements OnInit {
     // this route is protected by a guard so you need to be
     // logged in to realistically access here
     this.dataTableService.getDataTableFromLoggedInUser().subscribe((res) => {
-      this.rawData = res['rawDataTable']['dataTableData'];
-      this.rawDataTableSettings.data = this.rawData;
-      this.rawDataTable = res['rawDataTable'];
-      this.rawDataTable._id = res['rawDataTable']['_id'];
-      this.refreshRawDataTable(this.rawDataTableSettings);
+      if (res['rawDataTable'] && res['processedDataTable']) {
+        this.rawData = res['rawDataTable']['dataTableData'];
+        this.rawDataTableSettings.data = this.rawData;
+        this.rawDataTable = res['rawDataTable'];
+        this.rawDataTable._id = res['rawDataTable']['_id'];
+        this.refreshRawDataTable(this.rawDataTableSettings);
 
-      this.processedDataTable = res['processedDataTable'];
-      this.createProcessedDataTableSettings(res['processedDataTable']);
+        this.processedDataTable = res['processedDataTable'];
+        this.createProcessedDataTableSettings(res['processedDataTable']);
+      }
     });
   }
 
