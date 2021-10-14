@@ -9,21 +9,29 @@ export class GraphUtilService {
     xArray: number[],
     yArray: number[],
     errorXArray: number[],
-    errorYArray: number[]
+    errorYArray: number[],
+    positiveSlopeLOBF = true
   ) {
     let smallestXIndex = this.findSmallestIndex(xArray, xArray.length);
     let largestXIndex = this.findLargestIndex(xArray, xArray.length);
+    let x0: number, y0: number, x1: number, y1: number;
 
     // assuming that xArray[index] corresponds to the point yArray[index]
     // min gradient: top left of leftmost data point to bottom right of rightmost data point
-    let x0: number =
-      Number(xArray[smallestXIndex]) - Number(errorXArray[smallestXIndex]);
-    let y0: number =
-      Number(yArray[smallestXIndex]) + Number(errorYArray[smallestXIndex]);
-    let x1: number =
-      Number(xArray[largestXIndex]) + Number(errorXArray[largestXIndex]);
-    let y1: number =
-      Number(yArray[largestXIndex]) - Number(errorYArray[largestXIndex]);
+    if (positiveSlopeLOBF) {
+      x0 = Number(xArray[smallestXIndex]) - Number(errorXArray[smallestXIndex]);
+      y0 = Number(yArray[smallestXIndex]) + Number(errorYArray[smallestXIndex]);
+      x1 = Number(xArray[largestXIndex]) + Number(errorXArray[largestXIndex]);
+      y1 = Number(yArray[largestXIndex]) - Number(errorYArray[largestXIndex]);
+    } else {
+      // negative LOBF min gradient:
+      // bottom left of leftmost data point to top right of rightmost data point
+      x0 = Number(xArray[smallestXIndex]) - Number(errorXArray[smallestXIndex]);
+      y0 = Number(yArray[smallestXIndex]) - Number(errorYArray[smallestXIndex]);
+      x1 = Number(xArray[largestXIndex]) + Number(errorXArray[largestXIndex]);
+      y1 = Number(yArray[largestXIndex]) + Number(errorYArray[largestXIndex]);
+    }
+
     let overflowFactor: number = 1.1; // axis wil go 10% beyond the rightmost data point
 
     // y = mx + b  --> b = y - mx
@@ -44,21 +52,29 @@ export class GraphUtilService {
     xArray: number[],
     yArray: number[],
     errorXArray: number[],
-    errorYArray: number[]
+    errorYArray: number[],
+    positiveSlopeLOBF = true
   ) {
     // assuming that xArray[index] corresponds to the point yArray[index]
     // max gradient: bottom right of leftmost data point to top left of rightmost data point
     let smallestXIndex = this.findSmallestIndex(xArray, xArray.length);
     let largestXIndex = this.findLargestIndex(xArray, xArray.length);
+    let x0: number, y0: number, x1: number, y1: number;
 
-    let x0: number =
-      Number(xArray[smallestXIndex]) + Number(errorXArray[smallestXIndex]);
-    let y0: number =
-      Number(yArray[smallestXIndex]) - Number(errorYArray[smallestXIndex]);
-    let x1: number =
-      Number(xArray[largestXIndex]) - Number(errorXArray[largestXIndex]);
-    let y1: number =
-      Number(yArray[largestXIndex]) + Number(errorYArray[largestXIndex]);
+    if (positiveSlopeLOBF) {
+      // positive LOBF slope: bottom right of leftmost point to top left of rightmost point
+      x0 = Number(xArray[smallestXIndex]) + Number(errorXArray[smallestXIndex]);
+      y0 = Number(yArray[smallestXIndex]) - Number(errorYArray[smallestXIndex]);
+      x1 = Number(xArray[largestXIndex]) - Number(errorXArray[largestXIndex]);
+      y1 = Number(yArray[largestXIndex]) + Number(errorYArray[largestXIndex]);
+    } else {
+      // negative LOBF slope: top right of leftmost point to bottom left of rightmost point
+      x0 = Number(xArray[smallestXIndex]) + Number(errorXArray[smallestXIndex]);
+      y0 = Number(yArray[smallestXIndex]) + Number(errorYArray[smallestXIndex]);
+      x1 = Number(xArray[largestXIndex]) - Number(errorXArray[largestXIndex]);
+      y1 = Number(yArray[largestXIndex]) - Number(errorYArray[largestXIndex]);
+    }
+
     let overflowFactor: number = 1.1; // axis wil go 10% beyond the rightmost data point
 
     // y = mx + b  --> b = y - mx

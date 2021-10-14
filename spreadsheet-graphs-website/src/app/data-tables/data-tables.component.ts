@@ -184,18 +184,23 @@ export class DataTablesComponent implements OnInit {
     // console.log(this.rawDataTableSettings);
     // this route is protected by a guard so you need to be
     // logged in to realistically access here
-    this.dataTableService.getDataTableFromLoggedInUser().subscribe((res) => {
-      if (res['rawDataTable'] && res['processedDataTable']) {
-        this.rawData = res['rawDataTable']['dataTableData'];
-        this.rawDataTableSettings.data = this.rawData;
-        this.rawDataTable = res['rawDataTable'];
-        this.rawDataTable._id = res['rawDataTable']['_id'];
-        this.refreshRawDataTable(this.rawDataTableSettings);
+    this.dataTableService.getDataTableFromLoggedInUser().subscribe(
+      (res) => {
+        if (res['rawDataTable'] && res['processedDataTable']) {
+          this.rawData = res['rawDataTable']['dataTableData'];
+          this.rawDataTableSettings.data = this.rawData;
+          this.rawDataTable = res['rawDataTable'];
+          this.rawDataTable._id = res['rawDataTable']['_id'];
+          this.refreshRawDataTable(this.rawDataTableSettings);
 
-        this.processedDataTable = res['processedDataTable'];
-        this.createProcessedDataTableSettings(res['processedDataTable']);
+          this.processedDataTable = res['processedDataTable'];
+          this.createProcessedDataTableSettings(res['processedDataTable']);
+        }
+      },
+      (err) => {
+        this.error = 'There was an error loading your data';
       }
-    });
+    );
   }
 
   get xCurveStraighteningInstructions() {
@@ -362,7 +367,9 @@ export class DataTablesComponent implements OnInit {
   private createProcessedDataTableSettings(
     processedDataTable: DataTable
   ): void {
-    this.processedDataTableSettings = this.rawDataTableSettings;
+    this.processedDataTableSettings = JSON.parse(
+      JSON.stringify(this.rawDataTableSettings)
+    );
     this.processedDataTableSettings.data = processedDataTable.dataTableData;
     this.processedDataTableSettings.contextMenu = false;
 

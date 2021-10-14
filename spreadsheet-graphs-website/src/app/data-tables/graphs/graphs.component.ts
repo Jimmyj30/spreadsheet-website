@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { GraphUtilService } from 'src/app/shared/graph-util.service';
 import { DataPoint } from '../models/data-point.model';
+import { LineInfo } from '../models/line.model';
 import { PlotlyData } from '../models/plotly-data.model';
 
 @Component({
@@ -79,8 +80,7 @@ export class GraphsComponent implements OnInit, DoCheck {
         hovermode: 'closest',
         xaxis: {
           title: {
-            text:
-              'you can see how to add <sub>subscripts</sub>, <sup>superscripts</sup>, and<br>line breaks to graph labels/axes by clicking on this example',
+            text: 'you can see how to add <sub>subscripts</sub>, <sup>superscripts</sup>, and<br>line breaks to graph labels/axes by clicking on this example',
           },
           rangemode: 'tozero',
           autorange: true,
@@ -216,10 +216,10 @@ export class GraphsComponent implements OnInit, DoCheck {
   private createScatterChartData(
     processedDataTableData: DataPoint[]
   ): PlotlyData {
-    var xArray: number[] = [];
-    var yArray: number[] = [];
-    var errorXArray: number[] = [];
-    var errorYArray: number[] = [];
+    let xArray: number[] = [];
+    let yArray: number[] = [];
+    let errorXArray: number[] = [];
+    let errorYArray: number[] = [];
 
     // double check type declarations...
     for (var i = 0; i < processedDataTableData.length; ++i) {
@@ -228,6 +228,12 @@ export class GraphsComponent implements OnInit, DoCheck {
       errorXArray.push(Number(processedDataTableData[i].xUncertainty));
       errorYArray.push(Number(processedDataTableData[i].yUncertainty));
     }
+
+    let InfoLOBF: LineInfo = this.graphUtilService.createLineOfBestFitInfo(
+      xArray,
+      yArray
+    );
+    let positiveSlopeOfLOBF = InfoLOBF.slope >= 0;
 
     const scatterChartData = new PlotlyData({
       x: xArray,
@@ -238,18 +244,17 @@ export class GraphsComponent implements OnInit, DoCheck {
         xArray,
         yArray,
         errorXArray,
-        errorYArray
+        errorYArray,
+        positiveSlopeOfLOBF
       ),
       maxGradientInfo: this.graphUtilService.createMaxGradientInfo(
         xArray,
         yArray,
         errorXArray,
-        errorYArray
+        errorYArray,
+        positiveSlopeOfLOBF
       ),
-      lineOfBestFitInfo: this.graphUtilService.createLineOfBestFitInfo(
-        xArray,
-        yArray
-      ),
+      lineOfBestFitInfo: InfoLOBF,
     });
 
     // console.log('scatterChartData: ');
