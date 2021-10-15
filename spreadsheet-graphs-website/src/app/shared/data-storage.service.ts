@@ -32,7 +32,6 @@ export class DataStorageService {
       .pipe(
         take(1),
         mergeMap((user) => {
-          console.log(user);
           return this.http.post(API_URL + '/api/data-tables', dataTable, {
             headers: {
               Authorization: `Bearer ${user.token}`,
@@ -53,7 +52,6 @@ export class DataStorageService {
       .pipe(
         take(1),
         mergeMap((user) => {
-          console.log(user);
           let getDataByUidPathString = 'x';
           return this.http.get(
             API_URL + '/api/data-tables/' + getDataByUidPathString,
@@ -80,7 +78,6 @@ export class DataStorageService {
       .pipe(
         take(1),
         mergeMap((user) => {
-          console.log(user);
           return this.http.put(
             API_URL + '/api/data-tables/' + dataTable._id,
             dataTable,
@@ -105,7 +102,6 @@ export class DataStorageService {
       .pipe(
         take(1),
         mergeMap((user) => {
-          console.log(user);
           return this.http.delete(
             API_URL + '/api/data-tables/' + dataTable._id,
             {

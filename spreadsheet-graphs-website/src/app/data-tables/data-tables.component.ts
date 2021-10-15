@@ -84,48 +84,7 @@ export class DataTablesComponent implements OnInit {
         'Responding Variable',
         'Uncertainties for<br>Responding Variable',
       ],
-      columns: [
-        {
-          data: 'xUncertainty',
-          type: 'numeric',
-          numericFormat: {
-            pattern: {
-              mantissa: 2,
-            },
-          },
-          allowEmpty: false,
-        },
-        {
-          data: 'xCoord',
-          type: 'numeric',
-          numericFormat: {
-            pattern: {
-              mantissa: 2,
-            },
-          },
-          allowEmpty: false,
-        },
-        {
-          data: 'yCoord',
-          type: 'numeric',
-          numericFormat: {
-            pattern: {
-              mantissa: 2,
-            },
-          },
-          allowEmpty: false,
-        },
-        {
-          data: 'yUncertainty',
-          type: 'numeric',
-          numericFormat: {
-            pattern: {
-              mantissa: 2,
-            },
-          },
-          allowEmpty: false,
-        },
-      ],
+      columns: dataTableService.dataTableDefaultColumnValues,
 
       afterChange: (changes) => {
         this.validateHandsontable();
@@ -187,14 +146,8 @@ export class DataTablesComponent implements OnInit {
     this.dataTableService.getDataTableFromLoggedInUser().subscribe(
       (res) => {
         if (res['rawDataTable'] && res['processedDataTable']) {
-          this.rawData = res['rawDataTable']['dataTableData'];
-          this.rawDataTableSettings.data = this.rawData;
-          this.rawDataTable = res['rawDataTable'];
-          this.rawDataTable._id = res['rawDataTable']['_id'];
-          this.refreshRawDataTable(this.rawDataTableSettings);
-
-          this.processedDataTable = res['processedDataTable'];
-          this.createProcessedDataTableSettings(res['processedDataTable']);
+          this.setDataTableData(res);
+          this.loadFormData(res);
         }
       },
       (err) => {
@@ -558,5 +511,39 @@ export class DataTablesComponent implements OnInit {
       // default value for table without anything filled in yet
       this.invalidFormErrorMsg = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
     }
+  }
+
+  private setDataTableData(res): void {
+    this.rawData = res['rawDataTable']['dataTableData'];
+    this.rawDataTableSettings.data = this.rawData;
+    this.rawDataTable = res['rawDataTable'];
+    this.rawDataTable._id = res['rawDataTable']['_id'];
+    this.refreshRawDataTable(this.rawDataTableSettings);
+
+    this.processedDataTable = res['processedDataTable'];
+    this.createProcessedDataTableSettings(res['processedDataTable']);
+  }
+
+  private loadFormData(res): void {
+    let xCurveStraighteningInstructions =
+      res['rawDataTable']['xCurveStraighteningInstructions'];
+    let yCurveStraighteningInstructions =
+      res['rawDataTable']['yCurveStraighteningInstructions'];
+
+    if (xCurveStraighteningInstructions.constantPower) {
+      this.showXToConstantPower = true;
+    }
+    if (yCurveStraighteningInstructions.constantPower) {
+      this.showYToConstantPower = true;
+    }
+    this.curveStraighteningInstructionsForm.patchValue({
+      xCurveStraighteningInstructions:
+        xCurveStraighteningInstructions.functionClass,
+      yCurveStraighteningInstructions:
+        yCurveStraighteningInstructions.functionClass,
+      xToConstantPower: xCurveStraighteningInstructions.constantPower,
+      yToConstantPower: yCurveStraighteningInstructions.constantPower,
+    });
+    this.curveStraighteningInstructionsForm.updateValueAndValidity();
   }
 }

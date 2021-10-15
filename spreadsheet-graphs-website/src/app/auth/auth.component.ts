@@ -37,13 +37,13 @@ export class AuthComponent implements OnInit {
 
     authObs.subscribe(
       (res) => {
-        console.log(res);
+        // console.log(res);
         this.loading = false;
         this.error = null;
         this.router.navigate(['/']);
       },
       (error: string) => {
-        console.log(error);
+        // console.log(error);
         this.loading = false;
         this.error = error;
       }

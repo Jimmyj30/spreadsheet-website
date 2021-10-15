@@ -50,7 +50,11 @@ exports.processCoordinate = function (dataTable, index, coordVar) {
   if (!dataTable[`${coordVar}CurveStraighteningInstructions`]) {
     return dataTable.dataTableData[index][`${coordVar}Coord`];
   }
-  if (dataTable[`${coordVar}CurveStraighteningInstructions`].constantPower) {
+  if (
+    dataTable[`${coordVar}CurveStraighteningInstructions`].constantPower &&
+    dataTable[`${coordVar}CurveStraighteningInstructions`].functionClass ===
+      `${coordVar}^a`
+  ) {
     return returnRealValuesOnly(
       math.pow(
         dataTable.dataTableData[index][`${coordVar}Coord`],
@@ -93,7 +97,11 @@ exports.processUncertainty = function (dataTable, index, coordVar) {
   if (!dataTable[`${coordVar}CurveStraighteningInstructions`]) {
     return math.abs(dataTable.dataTableData[index][`${coordVar}Uncertainty`]);
   }
-  if (dataTable[`${coordVar}CurveStraighteningInstructions`].constantPower) {
+  if (
+    dataTable[`${coordVar}CurveStraighteningInstructions`].constantPower &&
+    dataTable[`${coordVar}CurveStraighteningInstructions`].functionClass ===
+      `${coordVar}^a`
+  ) {
     const processedCoordinateValue = returnRealValuesOnly(
       math.pow(
         dataTable.dataTableData[index][`${coordVar}Coord`],

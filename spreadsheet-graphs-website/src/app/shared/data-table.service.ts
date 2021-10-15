@@ -22,4 +22,47 @@ export class DataTableService {
   getDataTableFromLoggedInUser() {
     return this.api.getDataTableByFirebaseUid();
   }
+
+  dataTableDefaultColumnValues = [
+    {
+      data: 'xUncertainty',
+      type: 'numeric',
+      numericFormat: {
+        pattern: {
+          mantissa: 2,
+        },
+      },
+      allowEmpty: false,
+    },
+    {
+      data: 'xCoord',
+      type: 'numeric',
+      numericFormat: {
+        pattern: {
+          mantissa: 2,
+        },
+      },
+      allowEmpty: false,
+    },
+    {
+      data: 'yCoord',
+      type: 'numeric',
+      numericFormat: {
+        pattern: {
+          mantissa: 2,
+        },
+      },
+      allowEmpty: false,
+    },
+    {
+      data: 'yUncertainty',
+      type: 'numeric',
+      numericFormat: {
+        pattern: {
+          mantissa: 2,
+        },
+      },
+      allowEmpty: false,
+    },
+  ];
 }
