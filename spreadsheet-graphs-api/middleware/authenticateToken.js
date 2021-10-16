@@ -1,7 +1,13 @@
 //authenticateToken.js
 
 var admin = require("firebase-admin");
-var serviceAccount = require("./serviceAccount.json");
+var serviceAccount;
+
+if (process?.env?.GOOGLE_CREDENTIALS) {
+  serviceAccount = JSON.parse(process.env.GOOGLE_CREDENTIALS);
+} else {
+  serviceAccount = require("./serviceAccount.json");
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),

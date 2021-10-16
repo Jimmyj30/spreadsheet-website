@@ -76,7 +76,7 @@
     <p>loading...</p>
     <mat-spinner></mat-spinner>
   </div>
-  <div *ngIf="processedDataTable" class="vertical-margin">
+  <div *ngIf="processedDataTable && !loading" class="vertical-margin">
     <hot-table
       #processedDataTableRef
       [hotId]="processedDataTableHandsontableID"
@@ -87,13 +87,17 @@
     *ngIf="showGraph && processedDataTable"
     [processedDataTableData]="processedDataTableSettings.data"
   ></app-graphs>
-  <div *ngIf="processedDataTable" fxLayout="column">
+  <div *ngIf="processedDataTable && !loading" fxLayout="column">
     <div>
       <!-- generate graph button will disappear once graph is generated -->
       <button type="button" (click)="onGenerateGraph()" *ngIf="!showGraph">
         Generate Graph
       </button>
     </div>
-    <div><button type="button" (click)="onFinish()">Done</button></div>
+    <div class="vertical-margin">
+      <button class="btn btn-danger" type="button" (click)="onFinish()">
+        Delete Data
+      </button>
+    </div>
   </div>
 </div>

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { HotTableComponent, HotTableRegisterer } from '@handsontable/angular';
 import { FormControl, FormBuilder, Validators } from '@angular/forms';
 import * as Handsontable from 'handsontable';
@@ -69,7 +69,8 @@ export class DataTablesComponent implements OnInit {
 
   constructor(
     private readonly dataTableService: DataTableService,
-    private readonly fb: FormBuilder
+    private readonly fb: FormBuilder,
+    private readonly changeDetector: ChangeDetectorRef
   ) {
     this.rawData = this.generateDefaultDataTable(
       Handsontable.default.helper.createSpreadsheetData(5, 4)
@@ -143,14 +144,17 @@ export class DataTablesComponent implements OnInit {
     // console.log(this.rawDataTableSettings);
     // this route is protected by a guard so you need to be
     // logged in to realistically access here
+    this.loading = true;
     this.dataTableService.getDataTableFromLoggedInUser().subscribe(
       (res) => {
         if (res['rawDataTable'] && res['processedDataTable']) {
           this.setDataTableData(res);
           this.loadFormData(res);
         }
+        this.loading = false;
       },
       (err) => {
+        this.loading = false;
         this.error = 'There was an error loading your data';
       }
     );
@@ -258,13 +262,13 @@ export class DataTablesComponent implements OnInit {
         (response: any) => {
           // console.log('update table response: ');
           // console.log(response);
+          this.loading = false;
           this.updateProcessedDataTableSettings(response.data);
           this.error = undefined;
-          this.loading = false;
         },
         (error) => {
-          this.error = error;
           this.loading = false;
+          this.error = error;
         }
       );
     } else {
@@ -282,17 +286,17 @@ export class DataTablesComponent implements OnInit {
           // table data can be changed by the user — the raw data gets updated in the
           // DB every time that it gets submitted to the API (creating/updating the
           // raw data table) and the processedDataTable is part of the API response
+          this.loading = false;
           this.processedDataTable = response.processedDataTable;
           this.createProcessedDataTableSettings(response.processedDataTable);
 
           //(gives raw data table an ID)
           this.rawDataTable._id = response.rawDataTableID;
           this.error = undefined;
-          this.loading = false;
         },
         (error) => {
-          this.error = error;
           this.loading = false;
+          this.error = error;
         }
       );
     }
@@ -370,6 +374,7 @@ export class DataTablesComponent implements OnInit {
   }
 
   private updateProcessedDataTableSettings(dataTable: DataTable): void {
+    this.changeDetector.detectChanges();
     this.processedDataTableSettings.data = dataTable.dataTableData;
     this.refreshProcessedDataTable(this.processedDataTableSettings);
     // changing the data of the processed data table based on the response...

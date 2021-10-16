@@ -13,6 +13,11 @@ exports.index = function (req, res) {
   DataTable.get(function (err, dataTables) {
     if (checkError(err, auth, true)) {
       res.json(getError(err, auth, true));
+    } else if (auth.email !== "test@test.com") {
+      res.status(403).json({
+        status: "error 403",
+        message: "403 unauthorized",
+      });
     } else {
       res.json({
         status: "success",
