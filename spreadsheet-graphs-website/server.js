@@ -1,7 +1,8 @@
-// server.js
+// server.js (for Heroku deployment)
 
 // Require Express.js server and create Express.js app
 const express = require("express");
+const compression = require("compression"); //use gzip to compress files
 const path = require("path");
 const app = express();
 
@@ -15,8 +16,12 @@ const forceSSL = function () {
     next();
   };
 };
+
 // Instruct the app to use forceSSL (forcing HTTPS on all web traffic)
 app.use(forceSSL());
+
+// serve compressed files
+app.use(compression());
 
 // Run the app by serving the static files in the dist directory
 // The dist directory will be made on postinstall, which will happen

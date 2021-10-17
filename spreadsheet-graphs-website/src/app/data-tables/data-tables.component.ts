@@ -435,7 +435,6 @@ export class DataTablesComponent implements OnInit {
       this.hotRegisterer
         .getInstance(this[`${dataTableVar}HandsontableID`])
         .render();
-    } else {
     }
   }
 
