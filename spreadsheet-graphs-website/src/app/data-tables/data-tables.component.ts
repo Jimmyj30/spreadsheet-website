@@ -535,9 +535,15 @@ export class DataTablesComponent implements OnInit {
       res['rawDataTable']['yCurveStraighteningInstructions'];
 
     if (xCurveStraighteningInstructions.constantPower) {
+      this.curveStraighteningInstructionsForm.controls.xToConstantPower.setValidators(
+        [Validators.required, numberFractionValidator()]
+      );
       this.showXToConstantPower = true;
     }
     if (yCurveStraighteningInstructions.constantPower) {
+      this.curveStraighteningInstructionsForm.controls.yToConstantPower.setValidators(
+        [Validators.required, numberFractionValidator()]
+      );
       this.showYToConstantPower = true;
     }
     this.curveStraighteningInstructionsForm.patchValue({
