@@ -303,17 +303,23 @@ export class DataTablesComponent implements OnInit {
   }
 
   onFinish(): void {
-    if (this.rawDataTable && this.rawDataTable._id && this.processedDataTable) {
-      this.dataTableService.deleteDataTable(this.rawDataTable).subscribe(
-        () => {
-          console.log('data table(s) deleted');
-          window.location.reload();
-        },
-        (error) => {
-          this.error = error;
-          this.loading = false;
-        }
-      );
+    if (confirm('Are you sure you want to delete your data?')) {
+      if (
+        this.rawDataTable &&
+        this.rawDataTable._id &&
+        this.processedDataTable
+      ) {
+        this.dataTableService.deleteDataTable(this.rawDataTable).subscribe(
+          () => {
+            console.log('data table(s) deleted');
+            window.location.reload();
+          },
+          (error) => {
+            this.error = error;
+            this.loading = false;
+          }
+        );
+      }
     }
   }
 

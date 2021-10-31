@@ -7,12 +7,10 @@ const DataTable = require("./dataTableModel");
 exports.index = function (req, res) {
   const auth = req.currentUser;
 
-  // later: make this only for an "admin" account
-  // once the other user role stuff can be handled
-
   DataTable.get(function (err, dataTables) {
     if (checkError(err, auth, true)) {
-      res.json(getError(err, auth, true));
+      let error = getError(err, auth, true);
+      res.status(error.statusCode).json(error);
     } else if (auth.email !== "test@test.com") {
       res.status(403).json({
         status: "error 403",
@@ -40,7 +38,8 @@ exports.new = function (req, res) {
 
   DataTable.find({ firebase_uid: auth?.uid }, function (err, dataTables) {
     if (checkError(err, auth, true)) {
-      res.json(getError(err, auth, true));
+      let error = getError(err, auth, true);
+      res.status(error.statusCode).json(error);
     } else if (dataTables.length > 0) {
       // can't make a new data table if one already exists
       res.status(400).json({
@@ -80,7 +79,8 @@ exports.view = function (req, res) {
 
   DataTable.findOne(query, function (err, dataTable) {
     if (checkError(err, auth, dataTable, true, true)) {
-      res.json(getError(err, auth, dataTable, true, true));
+      let error = getError(err, auth, dataTable, true, true);
+      res.status(error.statusCode).json(error);
     } else {
       res.json({
         message: "data table details loading..",
@@ -103,7 +103,8 @@ exports.update = function (req, res) {
 
   DataTable.findById(req.params.dataTable_id, function (err, dataTable) {
     if (checkError(err, auth, dataTable, true, true)) {
-      res.json(getError(err, auth, dataTable, true, true));
+      let error = getError(err, auth, dataTable, true, true);
+      res.status(error.statusCode).json(error);
     } else {
       dataTable.dataTableData = req.body.dataTableData;
 
@@ -137,7 +138,8 @@ exports.delete = function (req, res) {
 
   DataTable.findById(req.params.dataTable_id, function (err, dataTable) {
     if (checkError(err, auth, dataTable, true, true)) {
-      res.json(getError(err, auth, dataTable, true, true));
+      let error = getError(err, auth, dataTable, true, true);
+      res.status(error.statusCode).json(error);
     } else {
       DataTable.deleteOne(
         {
@@ -221,6 +223,7 @@ function getError(
   }
 
   return {
+    statusCode: statusCode,
     status: "error " + statusCode,
     message: statusMessage,
   };
