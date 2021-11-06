@@ -25,7 +25,7 @@
     "@angular/router": "~11.2.6",
     "@handsontable/angular": "^7.0.0",
     "angular-plotly.js": "^3.1.0",
-    "bootstrap": "^3.4.1",
+    "bootstrap": "^4.6.1",
     "compression": "^1.7.4",
     "express": "^4.17.1",
     "handsontable": "^8.3.2",
