@@ -15,8 +15,12 @@
   margin-right: 10px;
 }
 
+.select-input {
+  width: auto;
+}
+
 .number-input {
-  width: 110px;
+  width: 120px;
 }
 
 .error-message {

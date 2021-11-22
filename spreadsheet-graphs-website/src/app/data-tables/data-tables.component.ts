@@ -5,7 +5,6 @@ import * as Handsontable from 'handsontable';
 
 import { DataTableService } from '../shared/data-table.service';
 import { DataTable } from './models/data-table.model';
-import { DataPoint } from './models/data-point.model';
 import { numberFractionValidator } from '../shared/number-fraction.directive';
 
 const FILL_OUT_SPREADSHEET_FULLY_MESSAGE =
@@ -72,7 +71,7 @@ export class DataTablesComponent implements OnInit {
     private readonly fb: FormBuilder,
     private readonly changeDetector: ChangeDetectorRef
   ) {
-    this.rawData = this.generateDefaultDataTable(
+    this.rawData = this.dataTableService.generateDefaultDataTable(
       Handsontable.default.helper.createSpreadsheetData(5, 4)
     );
     // add context menu for cells: https://handsontable.com/docs/8.3.2/demo-context-menu.html
@@ -469,53 +468,16 @@ export class DataTablesComponent implements OnInit {
     return false;
   }
 
-  private generateDefaultDataTable(dataTableArray: any[]): DataTable[] {
-    let defaultDataTable = [];
-    for (var i = 0; i < dataTableArray.length; ++i) {
-      let row = new DataPoint({
-        xUncertainty: dataTableArray[i][0],
-        xCoord: dataTableArray[i][1],
-        yCoord: dataTableArray[i][2],
-        yUncertainty: dataTableArray[i][3],
-      });
-      defaultDataTable.push(row);
-    }
-    // console.log('default data table data');
-    // console.log(defaultDataTable);
-    return defaultDataTable;
-  }
-
-  // https://handsontable.com/docs/8.3.2/frameworks-wrapper-for-angular-hot-reference.html
-  // dataArray is a 2D array of strings
-  private isHandsontableValid(dataArray): boolean {
-    // go through all the entries and determine if they are real numbers
-    if (dataArray) {
-      let rowCount = dataArray.length;
-      let colCount = dataArray[0].length;
-      for (var i = 0; i < rowCount; ++i) {
-        for (var j = 0; j < colCount; ++j) {
-          let value = Number(dataArray[i][j]);
-          // if value is a falsy value except the number 0, or if value is not a real number
-          if (
-            (dataArray[i][j] !== 0 && !dataArray[i][j]) ||
-            !(typeof value === 'number' && !isNaN(value) && isFinite(value))
-          ) {
-            return false;
-          }
-        }
-      }
-      return true;
-    }
-    return false;
-  }
-
   private validateHandsontable() {
     let dataArray = this.hotRegisterer
       .getInstance(this.rawDataTableHandsontableID)
       .getData();
 
     let minRows = 5; // data table should only have 5+ rows
-    if (this.isHandsontableValid(dataArray) && dataArray.length >= minRows) {
+    if (
+      this.dataTableService.isHandsontableValid(dataArray) &&
+      dataArray.length >= minRows
+    ) {
       this.invalidFormErrorMsg = undefined;
     } else {
       // default value for table without anything filled in yet
