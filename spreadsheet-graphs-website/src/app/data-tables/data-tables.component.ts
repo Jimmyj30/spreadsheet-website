@@ -62,6 +62,7 @@ export class DataTablesComponent implements OnInit {
   rawDataTableRef: HotTableComponent;
 
   error: string; //general error message
+  errorClass: string;
   invalidFormErrorMsg: string = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
   loading: boolean = false;
   showGraph: boolean = false;
@@ -154,7 +155,20 @@ export class DataTablesComponent implements OnInit {
       },
       (err) => {
         this.loading = false;
-        this.error = 'There was an error loading your data';
+        if (err.match(/404 /g)) {
+          this.error =
+            "You don't have a data table saved yet—you can fill out the empty one above";
+          this.errorClass = 'alert-primary';
+        } else if (err.match(/4[0-9][0-9] /g)) {
+          this.error = 'The request failed-please try again';
+          this.errorClass = 'alert-danger';
+        } else if (err.match(/5[0-9][0-9] /g)) {
+          this.error = 'There was an error loading your data';
+          this.errorClass = 'alert-danger';
+        } else {
+          this.error = 'An unknown error occurred';
+          this.errorClass = 'alert-danger';
+        }
       }
     );
   }
@@ -217,32 +231,11 @@ export class DataTablesComponent implements OnInit {
 
   onSubmit(): void {
     // form instructions...
-    this.rawDataTable = new DataTable({
-      dataTableData: this.rawData,
-
-      xCurveStraighteningInstructions: {
-        functionClass: this.removeFirstWord(
-          this.curveStraighteningInstructionsForm.value
-            .xCurveStraighteningInstructions
-        ),
-        constantPower: this.curveStraighteningInstructionsForm.value
-          .xToConstantPower
-          ? this.curveStraighteningInstructionsForm.value.xToConstantPower
-          : undefined,
-      },
-      yCurveStraighteningInstructions: {
-        functionClass: this.removeFirstWord(
-          this.curveStraighteningInstructionsForm.value
-            .yCurveStraighteningInstructions
-        ),
-        constantPower: this.curveStraighteningInstructionsForm.value
-          .yToConstantPower
-          ? this.curveStraighteningInstructionsForm.value.yToConstantPower
-          : undefined,
-      },
-
-      _id: this.rawDataTable ? this.rawDataTable._id : undefined,
-    });
+    this.rawDataTable = this.dataTableService.generateRawDataTable(
+      this.rawData,
+      this.curveStraighteningInstructionsForm,
+      this.rawDataTable
+    );
     // console.log('rawDataTable: ');
     // console.log(this.rawDataTable);
 

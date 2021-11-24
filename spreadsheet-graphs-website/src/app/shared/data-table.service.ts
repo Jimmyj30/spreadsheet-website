@@ -64,6 +64,37 @@ export class DataTableService {
     return false;
   }
 
+  generateRawDataTable(
+    rawData,
+    curveStraighteningInstructionsForm,
+    rawDataTable
+  ) {
+    return new DataTable({
+      dataTableData: rawData,
+
+      xCurveStraighteningInstructions: {
+        functionClass: this.removeFirstWord(
+          curveStraighteningInstructionsForm.value
+            .xCurveStraighteningInstructions
+        ),
+        constantPower:
+          curveStraighteningInstructionsForm.value.xToConstantPower ||
+          undefined,
+      },
+      yCurveStraighteningInstructions: {
+        functionClass: this.removeFirstWord(
+          curveStraighteningInstructionsForm.value
+            .yCurveStraighteningInstructions
+        ),
+        constantPower:
+          curveStraighteningInstructionsForm.value.yToConstantPower ||
+          undefined,
+      },
+
+      _id: rawDataTable ? rawDataTable._id || undefined : undefined,
+    });
+  }
+
   dataTableDefaultColumnValues = [
     {
       data: 'xUncertainty',
@@ -106,4 +137,8 @@ export class DataTableService {
       allowEmpty: false,
     },
   ];
+
+  private removeFirstWord(string: string): string {
+    return string.substring(string.indexOf(' ') + 1);
+  }
 }
