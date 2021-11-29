@@ -16,7 +16,7 @@
       <!-- "y" curve straightening instructions -->
       <span>Plot </span>
       <select
-        class="custom-select"
+        class="select-input custom-select"
         (change)="changeYOption($event)"
         formControlName="yCurveStraighteningInstructions"
       >
@@ -36,7 +36,7 @@
       <span> as a function of </span>
       <!-- "x" curve straightening instructions -->
       <select
-        class="custom-select"
+        class="select-input custom-select"
         (change)="changeXOption($event)"
         formControlName="xCurveStraighteningInstructions"
       >
@@ -55,8 +55,8 @@
     </form>
   </div>
   <div class="vertical-margin">
-    <div class="alert alert-danger error-message" *ngIf="error">
-      <p>{{ error }}</p>
+    <div class="alert error-message" [ngClass]="errorClass" *ngIf="error">
+      {{ error }}
     </div>
     <button
       type="submit"
@@ -64,7 +64,7 @@
       [disabled]="
         !curveStraighteningInstructionsForm.valid || invalidFormErrorMsg
       "
-      class="btn"
+      class="btn btn-light"
     >
       Submit
     </button>
@@ -90,8 +90,8 @@
   <div *ngIf="processedDataTable && !loading" fxLayout="column">
     <div>
       <!-- generate graph button will disappear once graph is generated -->
-      <button type="button" (click)="onGenerateGraph()" *ngIf="!showGraph">
-        Generate Graph
+      <button class="btn btn-light" type="button" (click)="onToggleGraph()">
+        {{ showGraph ? "Hide Graph" : "Show Graph" }}
       </button>
     </div>
     <div class="vertical-margin">

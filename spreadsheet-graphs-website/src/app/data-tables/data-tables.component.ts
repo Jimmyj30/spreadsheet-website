@@ -5,7 +5,6 @@ import * as Handsontable from 'handsontable';
 
 import { DataTableService } from '../shared/data-table.service';
 import { DataTable } from './models/data-table.model';
-import { DataPoint } from './models/data-point.model';
 import { numberFractionValidator } from '../shared/number-fraction.directive';
 
 const FILL_OUT_SPREADSHEET_FULLY_MESSAGE =
@@ -63,6 +62,7 @@ export class DataTablesComponent implements OnInit {
   rawDataTableRef: HotTableComponent;
 
   error: string; //general error message
+  errorClass: string;
   invalidFormErrorMsg: string = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
   loading: boolean = false;
   showGraph: boolean = false;
@@ -72,7 +72,7 @@ export class DataTablesComponent implements OnInit {
     private readonly fb: FormBuilder,
     private readonly changeDetector: ChangeDetectorRef
   ) {
-    this.rawData = this.generateDefaultDataTable(
+    this.rawData = this.dataTableService.generateDefaultDataTable(
       Handsontable.default.helper.createSpreadsheetData(5, 4)
     );
     // add context menu for cells: https://handsontable.com/docs/8.3.2/demo-context-menu.html
@@ -155,7 +155,20 @@ export class DataTablesComponent implements OnInit {
       },
       (err) => {
         this.loading = false;
-        this.error = 'There was an error loading your data';
+        if (err.match(/404 /g)) {
+          this.error =
+            "You don't have a data table saved yet—you can fill out the empty one above";
+          this.errorClass = 'alert-primary';
+        } else if (err.match(/4[0-9][0-9] /g)) {
+          this.error = 'The request failed-please try again';
+          this.errorClass = 'alert-danger';
+        } else if (err.match(/5[0-9][0-9] /g)) {
+          this.error = 'There was an error loading your data';
+          this.errorClass = 'alert-danger';
+        } else {
+          this.error = 'An unknown error occurred';
+          this.errorClass = 'alert-danger';
+        }
       }
     );
   }
@@ -218,32 +231,11 @@ export class DataTablesComponent implements OnInit {
 
   onSubmit(): void {
     // form instructions...
-    this.rawDataTable = new DataTable({
-      dataTableData: this.rawData,
-
-      xCurveStraighteningInstructions: {
-        functionClass: this.removeFirstWord(
-          this.curveStraighteningInstructionsForm.value
-            .xCurveStraighteningInstructions
-        ),
-        constantPower: this.curveStraighteningInstructionsForm.value
-          .xToConstantPower
-          ? this.curveStraighteningInstructionsForm.value.xToConstantPower
-          : undefined,
-      },
-      yCurveStraighteningInstructions: {
-        functionClass: this.removeFirstWord(
-          this.curveStraighteningInstructionsForm.value
-            .yCurveStraighteningInstructions
-        ),
-        constantPower: this.curveStraighteningInstructionsForm.value
-          .yToConstantPower
-          ? this.curveStraighteningInstructionsForm.value.yToConstantPower
-          : undefined,
-      },
-
-      _id: this.rawDataTable ? this.rawDataTable._id : undefined,
-    });
+    this.rawDataTable = this.dataTableService.generateRawDataTable(
+      this.rawData,
+      this.curveStraighteningInstructionsForm,
+      this.rawDataTable
+    );
     // console.log('rawDataTable: ');
     // console.log(this.rawDataTable);
 
@@ -323,8 +315,8 @@ export class DataTablesComponent implements OnInit {
     }
   }
 
-  onGenerateGraph(): void {
-    this.showGraph = true;
+  onToggleGraph(): void {
+    this.showGraph = !this.showGraph;
   }
 
   private createProcessedDataTableSettings(
@@ -404,7 +396,6 @@ export class DataTablesComponent implements OnInit {
   // you can shift the decimal place left as many
   // times as you want so there is no validity check
   // for this operation
-  // TODO: separate mantissas for processed and
   private shiftDecimalPlaceLeft(columnIndex, dataTable) {
     let dataTableVar;
     if (dataTable === 'rawDataTable') {
@@ -469,53 +460,16 @@ export class DataTablesComponent implements OnInit {
     return false;
   }
 
-  private generateDefaultDataTable(dataTableArray: any[]): DataTable[] {
-    let defaultDataTable = [];
-    for (var i = 0; i < dataTableArray.length; ++i) {
-      let row = new DataPoint({
-        xUncertainty: dataTableArray[i][0],
-        xCoord: dataTableArray[i][1],
-        yCoord: dataTableArray[i][2],
-        yUncertainty: dataTableArray[i][3],
-      });
-      defaultDataTable.push(row);
-    }
-    // console.log('default data table data');
-    // console.log(defaultDataTable);
-    return defaultDataTable;
-  }
-
-  // https://handsontable.com/docs/8.3.2/frameworks-wrapper-for-angular-hot-reference.html
-  // dataArray is a 2D array of strings
-  private isHandsontableValid(dataArray): boolean {
-    // go through all the entries and determine if they are real numbers
-    if (dataArray) {
-      let rowCount = dataArray.length;
-      let colCount = dataArray[0].length;
-      for (var i = 0; i < rowCount; ++i) {
-        for (var j = 0; j < colCount; ++j) {
-          let value = Number(dataArray[i][j]);
-          // if value is a falsy value except the number 0, or if value is not a real number
-          if (
-            (dataArray[i][j] !== 0 && !dataArray[i][j]) ||
-            !(typeof value === 'number' && !isNaN(value) && isFinite(value))
-          ) {
-            return false;
-          }
-        }
-      }
-      return true;
-    }
-    return false;
-  }
-
   private validateHandsontable() {
     let dataArray = this.hotRegisterer
       .getInstance(this.rawDataTableHandsontableID)
       .getData();
 
     let minRows = 5; // data table should only have 5+ rows
-    if (this.isHandsontableValid(dataArray) && dataArray.length >= minRows) {
+    if (
+      this.dataTableService.isHandsontableValid(dataArray) &&
+      dataArray.length >= minRows
+    ) {
       this.invalidFormErrorMsg = undefined;
     } else {
       // default value for table without anything filled in yet

@@ -1,14 +1,9 @@
 <div class="row">
-  <div class="col-xs-12">
-    <div class="alert alert-danger" *ngIf="error">
-      <p>{{ error }}</p>
+  <div class="col-sm-12 auth-component">
+    <div class="alert alert-danger" role="alert" *ngIf="error">
+      {{ error }}
     </div>
-    <form
-      #authForm="ngForm"
-      (ngSubmit)="onSubmit(authForm)"
-      class="auth-form"
-      *ngIf="!loading"
-    >
+    <form #authForm="ngForm" (ngSubmit)="onSubmit(authForm)" *ngIf="!loading">
       <div class="form-group">
         <label for="email">Email</label>
         <input

@@ -31,6 +31,7 @@ const uri =
   process.env.MONGODB_URI || "mongodb://localhost/spreadsheet-graphs-api";
 mongoose.connect(uri, {
   useNewUrlParser: true,
+  useUnifiedTopology: true,
 });
 var db = mongoose.connection;
 

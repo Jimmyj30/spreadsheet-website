@@ -12,5 +12,22 @@
     [layout]="scatterChart.layout"
     [config]="scatterChart.config"
     [useResizeHandler]="true"
+    [divId]="'graph'"
   ></plotly-plot>
+  <div class="settings">
+    <button
+      type="button"
+      class="btn btn-outline-secondary"
+      (click)="onToggleTrendlines()"
+    >
+      {{ showTrendline ? "Hide Trendlines" : "Show Trendlines" }}
+    </button>
+    <button
+      type="button"
+      class="btn btn-outline-secondary"
+      (click)="onToggleUncertainties()"
+    >
+      {{ showUncertainties ? "Hide Uncertainties" : "Show Uncertainties" }}
+    </button>
+  </div>
 </div>
