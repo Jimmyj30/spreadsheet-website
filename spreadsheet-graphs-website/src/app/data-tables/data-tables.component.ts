@@ -315,8 +315,8 @@ export class DataTablesComponent implements OnInit {
     }
   }
 
-  onGenerateGraph(): void {
-    this.showGraph = true;
+  onToggleGraph(): void {
+    this.showGraph = !this.showGraph;
   }
 
   private createProcessedDataTableSettings(
@@ -396,7 +396,6 @@ export class DataTablesComponent implements OnInit {
   // you can shift the decimal place left as many
   // times as you want so there is no validity check
   // for this operation
-  // TODO: separate mantissas for processed and
   private shiftDecimalPlaceLeft(columnIndex, dataTable) {
     let dataTableVar;
     if (dataTable === 'rawDataTable') {

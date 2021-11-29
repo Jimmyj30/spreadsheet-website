@@ -6,6 +6,7 @@ import {
   KeyValueDiffers,
   KeyValueDiffer,
 } from '@angular/core';
+import { PlotlyModule } from 'angular-plotly.js';
 import { GraphUtilService } from 'src/app/shared/graph-util.service';
 import { DataPoint } from '../models/data-point.model';
 import { LineInfo } from '../models/line.model';
@@ -38,6 +39,8 @@ export class GraphsComponent implements OnInit, DoCheck {
   objDiffers: Array<KeyValueDiffer<string, any>>;
 
   scatterChart;
+  showTrendline: boolean = true;
+  showUncertainties: boolean = true;
 
   constructor(
     private differs: KeyValueDiffers,
@@ -106,6 +109,7 @@ export class GraphsComponent implements OnInit, DoCheck {
               width: 2,
               dash: 'dot',
             },
+            visible: true,
           },
 
           // max gradient
@@ -120,6 +124,7 @@ export class GraphsComponent implements OnInit, DoCheck {
               width: 2,
               dash: 'dot',
             },
+            visible: true,
           },
 
           // line of best fit
@@ -134,6 +139,7 @@ export class GraphsComponent implements OnInit, DoCheck {
               width: 2,
               dash: 'dot',
             },
+            visible: true,
           },
         ],
         annotations: [
@@ -142,6 +148,7 @@ export class GraphsComponent implements OnInit, DoCheck {
             text: this.generateMinGradientAnnotationText(scatterChartData),
             x: scatterChartData.minGradientInfo.x1,
             y: scatterChartData.minGradientInfo.y1,
+            visible: true,
           },
 
           // max gradient
@@ -149,6 +156,7 @@ export class GraphsComponent implements OnInit, DoCheck {
             text: this.generateMaxGradientAnnotationText(scatterChartData),
             x: scatterChartData.maxGradientInfo.x1,
             y: scatterChartData.maxGradientInfo.y1,
+            visible: true,
           },
 
           // line of best fit
@@ -156,6 +164,7 @@ export class GraphsComponent implements OnInit, DoCheck {
             text: this.generateLineOfBestFitAnnotationText(scatterChartData),
             x: scatterChartData.lineOfBestFitInfo.x1,
             y: scatterChartData.lineOfBestFitInfo.y1,
+            visible: true,
           },
         ],
         showlegend: true,
@@ -184,6 +193,12 @@ export class GraphsComponent implements OnInit, DoCheck {
     const currentScatterChartData = this.scatterChart.data[0];
     let updateScatterChartData: boolean = false;
 
+    let diffLengths =
+      this.processedDataTableData.length !== currentScatterChartData.x.length;
+    if (diffLengths) {
+      updateScatterChartData = true;
+    }
+
     // update differs array for each ngDoCheck
     this.processedDataTableData.forEach((dataPoint, index) => {
       // if the index is originally of bounds
@@ -209,8 +224,38 @@ export class GraphsComponent implements OnInit, DoCheck {
       let updatedScatterChartData = this.createScatterChartData(
         this.processedDataTableData
       );
+      console.log('update graph');
       this.setScatterChartData(updatedScatterChartData);
     }
+  }
+
+  onToggleTrendlines() {
+    let shapes = this.scatterChart.layout.shapes;
+    let annotations = this.scatterChart.layout.annotations;
+
+    let update = {
+      'shapes[0].visible': !shapes[0].visible,
+      'shapes[1].visible': !shapes[1].visible,
+      'shapes[2].visible': !shapes[2].visible,
+      'annotations[0].visible': !annotations[0].visible,
+      'annotations[1].visible': !annotations[1].visible,
+      'annotations[2].visible': !annotations[2].visible,
+    };
+
+    this.showTrendline = !this.showTrendline;
+    PlotlyModule.plotlyjs.relayout('graph', update);
+  }
+
+  onToggleUncertainties() {
+    let data = this.scatterChart.data[0];
+
+    let update = {
+      'error_x.visible': !data.error_x.visible,
+      'error_y.visible': !data.error_y.visible,
+    };
+
+    this.showUncertainties = !this.showUncertainties;
+    PlotlyModule.plotlyjs.restyle('graph', update, 0);
   }
 
   private createScatterChartData(

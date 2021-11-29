@@ -1,4 +1,12 @@
 .graph {
   width: 80%;
   max-width: 800px;
+  display: flex;
+  flex-direction: row;
+}
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }

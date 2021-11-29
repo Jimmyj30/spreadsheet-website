@@ -90,13 +90,8 @@
   <div *ngIf="processedDataTable && !loading" fxLayout="column">
     <div>
       <!-- generate graph button will disappear once graph is generated -->
-      <button
-        class="btn btn-light"
-        type="button"
-        (click)="onGenerateGraph()"
-        *ngIf="!showGraph"
-      >
-        Generate Graph
+      <button class="btn btn-light" type="button" (click)="onToggleGraph()">
+        {{ showGraph ? "Hide Graph" : "Show Graph" }}
       </button>
     </div>
     <div class="vertical-margin">
