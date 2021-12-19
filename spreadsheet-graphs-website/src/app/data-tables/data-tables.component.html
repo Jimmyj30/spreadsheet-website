@@ -9,50 +9,13 @@
   <div class="vertical-margin">
     <div>Curve straightening instructions for processed data table:</div>
     <div>(y: responding, x: manipulated)</div>
-    <form
-      [formGroup]="curveStraighteningInstructionsForm"
-      (ngSubmit)="onSubmit()"
-    >
-      <!-- "y" curve straightening instructions -->
-      <span>Plot </span>
-      <select
-        class="select-input custom-select"
-        (change)="changeYOption($event)"
-        formControlName="yCurveStraighteningInstructions"
-      >
-        <option *ngFor="let option of yOptions" [ngValue]="option">
-          {{ option }}
-        </option>
-      </select>
-      <span class="left-margin" *ngIf="showYToConstantPower">a=</span>
-      <input
-        type="text"
-        formControlName="yToConstantPower"
-        *ngIf="showYToConstantPower"
-        class="number-input"
-        placeholder="eg: 1.23 or -5/3"
-      />
-
-      <span> as a function of </span>
-      <!-- "x" curve straightening instructions -->
-      <select
-        class="select-input custom-select"
-        (change)="changeXOption($event)"
-        formControlName="xCurveStraighteningInstructions"
-      >
-        <option *ngFor="let option of xOptions" [ngValue]="option">
-          {{ option }}
-        </option>
-      </select>
-      <span class="left-margin" *ngIf="showXToConstantPower">a=</span>
-      <input
-        type="text"
-        formControlName="xToConstantPower"
-        *ngIf="showXToConstantPower"
-        class="number-input"
-        placeholder="eg: 1.23 or -5/3"
-      />
-    </form>
+    <app-data-table-form
+      [(curveStraighteningInstructionsForm)]="
+        curveStraighteningInstructionsForm
+      "
+      [showXToConstantPower]="showXToConstantPower"
+      [showYToConstantPower]="showYToConstantPower"
+    ></app-data-table-form>
   </div>
   <div class="vertical-margin">
     <div class="alert error-message" [ngClass]="errorClass" *ngIf="error">
@@ -83,15 +46,19 @@
       [settings]="processedDataTableSettings"
     ></hot-table>
   </div>
-  <app-graphs
-    *ngIf="showGraph && processedDataTable"
-    [processedDataTableData]="processedDataTableSettings.data"
-  ></app-graphs>
+  <div *ngIf="processedDataTable">
+    <!-- to avoid processedDataTableSettings being undefined, we will 
+      use ngIf so this div won't exist in this case -->
+    <app-graphs
+      [hidden]="!showGraph"
+      [processedDataTableData]="processedDataTableSettings.data"
+    ></app-graphs>
+  </div>
   <div *ngIf="processedDataTable && !loading" fxLayout="column">
     <div>
       <!-- generate graph button will disappear once graph is generated -->
       <button class="btn btn-light" type="button" (click)="onToggleGraph()">
-        {{ showGraph ? "Delete Graph" : "Generate Graph" }}
+        {{ showGraph ? "Hide Graph" : "Show Graph" }}
       </button>
     </div>
     <div class="vertical-margin">
