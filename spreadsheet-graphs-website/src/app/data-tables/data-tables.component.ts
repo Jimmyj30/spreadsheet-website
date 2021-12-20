@@ -1,6 +1,11 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { HotTableComponent, HotTableRegisterer } from '@handsontable/angular';
-import { FormControl, FormBuilder, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormBuilder,
+  Validators,
+  FormGroup,
+} from '@angular/forms';
 import * as Handsontable from 'handsontable';
 
 import { DataTableService } from '../shared/data-table.service';
@@ -16,21 +21,6 @@ const FILL_OUT_SPREADSHEET_FULLY_MESSAGE =
   styleUrls: ['./data-tables.component.css'],
 })
 export class DataTablesComponent implements OnInit {
-  // https://handsontable.com/docs/8.3.2/tutorial-data-sources.html
-  // (Object data source with custom data schema section)
-
-  // https://stackoverflow.com/questions/46007985/refresh-handsontable-angular-4
-  // use @ViewChild and refresh the new handsontable....
-
-  // https://www.positronx.io/angular-7-select-dropdown-examples-with-reactive-forms/
-  // https://angular.io/guide/form-validation#defining-custom-validators
-
-  // https://developer.okta.com/blog/2019/10/03/painless-node-authentication
-  // https://medium.com/swlh/set-up-an-express-js-app-with-passport-js-and-mongodb-for-password-authentication-6ea05d95335c
-
-  // to run locally: ng serve --proxy-config proxy.conf.json
-  // https://medium.com/@ryanchenkie_40935/angular-cli-deployment-host-your-angular-2-app-on-heroku-3f266f13f352
-
   private hotRegisterer = new HotTableRegisterer();
 
   rawData: any[];
@@ -45,10 +35,10 @@ export class DataTablesComponent implements OnInit {
 
   showXToConstantPower: boolean;
   showYToConstantPower: boolean;
-  xOptions: any = ['x', 'ln(x)', 'log_10(x)', 'x^a'];
+  xOptions: any = ['x', 'ln(x)', 'log_10(x)', 'x^a']; // move things like this to a constants file
   yOptions: any = ['y', 'ln(y)', 'log_10(y)', 'y^a'];
 
-  curveStraighteningInstructionsForm = this.fb.group({
+  curveStraighteningInstructionsForm: FormGroup = this.fb.group({
     xCurveStraighteningInstructions: new FormControl(this.xOptions[0], []),
     xToConstantPower: new FormControl('', []),
     yCurveStraighteningInstructions: new FormControl(this.yOptions[0], []),
@@ -63,7 +53,7 @@ export class DataTablesComponent implements OnInit {
 
   error: string; //general error message
   errorClass: string;
-  invalidFormErrorMsg: string = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
+  invalidTableErrorMsg: string = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
   loading: boolean = false;
   showGraph: boolean = false;
 
@@ -79,13 +69,8 @@ export class DataTablesComponent implements OnInit {
     this.rawDataTableSettings = {
       data: this.rawData,
       rowHeaders: true,
-      colHeaders: [
-        'Uncertainties for<br>Manipulated Variable',
-        'Manipulated Variable',
-        'Responding Variable',
-        'Uncertainties for<br>Responding Variable',
-      ],
-      columns: dataTableService.dataTableDefaultColumnValues,
+      colHeaders: this.dataTableService.rawDataTableColHeaders,
+      columns: this.dataTableService.dataTableDefaultColumnValues,
 
       afterChange: (changes) => {
         this.validateHandsontable();
@@ -114,23 +99,8 @@ export class DataTablesComponent implements OnInit {
           clear_column: {},
           alignment: {},
           sp1: { name: '---------' },
-          shiftDecimalLeft: {
-            name: 'Increase column decimal places by one', // can be string or function...
-            callback: (key, selection, clickEvent) => {
-              // selection[0].end.col  and selection[0].start.col should be the same
-              // as this dropdown menu can only select an entire column
-              this.shiftDecimalPlaceLeft(selection[0].end.col, 'rawDataTable');
-            },
-          },
-          shiftDecimalRight: {
-            name: 'Decrease column decimal places by one',
-            disabled: () => {
-              return !this.canShiftDecimalPlaceRight('rawDataTable');
-            },
-            callback: (key, selection, clickEvent) => {
-              this.shiftDecimalPlaceRight(selection[0].end.col, 'rawDataTable');
-            },
-          },
+          shiftDecimalLeft: this.generateShiftDecimalLeft('rawDataTable'),
+          shiftDecimalRight: this.generateShiftDecimalRight('rawDataTable'),
         },
       },
 
@@ -185,50 +155,6 @@ export class DataTablesComponent implements OnInit {
     );
   }
 
-  changeXOption(event) {
-    if (this.removeFirstWord(event.target.value) === 'x^a') {
-      // event.target.value will either equal "3: x^a" or "x^a"
-      this.showXToConstantPower = true;
-      this.curveStraighteningInstructionsForm.controls.xToConstantPower.setValidators(
-        [Validators.required, numberFractionValidator()]
-      );
-      this.curveStraighteningInstructionsForm.controls.xToConstantPower.updateValueAndValidity();
-    } else {
-      this.showXToConstantPower = false;
-      this.curveStraighteningInstructionsForm.patchValue({
-        xToConstantPower: undefined,
-      });
-      this.curveStraighteningInstructionsForm.controls.xToConstantPower.clearValidators();
-      this.curveStraighteningInstructionsForm.controls.xToConstantPower.updateValueAndValidity();
-    }
-
-    this.xCurveStraighteningInstructions.setValue(event.target.value, {
-      onlySelf: true,
-    });
-  }
-
-  changeYOption(event) {
-    if (this.removeFirstWord(event.target.value) === 'y^a') {
-      // event.target.value will either equal "3: y^a" or "y^a"
-      this.showYToConstantPower = true;
-      this.curveStraighteningInstructionsForm.controls.yToConstantPower.setValidators(
-        [Validators.required, numberFractionValidator()]
-      );
-      this.curveStraighteningInstructionsForm.controls.yToConstantPower.updateValueAndValidity();
-    } else {
-      this.showYToConstantPower = false;
-      this.curveStraighteningInstructionsForm.patchValue({
-        yToConstantPower: undefined,
-      });
-      this.curveStraighteningInstructionsForm.controls.yToConstantPower.clearValidators();
-      this.curveStraighteningInstructionsForm.controls.yToConstantPower.updateValueAndValidity();
-    }
-
-    this.yCurveStraighteningInstructions.setValue(event.target.value, {
-      onlySelf: true,
-    });
-  }
-
   onSubmit(): void {
     // form instructions...
     this.rawDataTable = this.dataTableService.generateRawDataTable(
@@ -239,11 +165,10 @@ export class DataTablesComponent implements OnInit {
     // console.log('rawDataTable: ');
     // console.log(this.rawDataTable);
 
-    // we send the raw data table using the API, and the API will store that raw data table (giving it an ID), and
-    // will also send a processed data table in the response as well...
+    // we send the raw data table using the API, and the API will store that raw data table (giving it an ID)
     // response might contain a message, a processedDataTable, and a rawDataTable id (_id) ...
     // we could then display the processedDataTable and give the rawDataTable an id
-    // that will need to be used if we want update the processed data table...
+    // that will need to be used if we want update the raw data table...
 
     // if the processedDataTable exists and rawDataTable has an ID then
     // rawDataTable has been saved to the database
@@ -252,8 +177,6 @@ export class DataTablesComponent implements OnInit {
       this.loading = true;
       this.dataTableService.updateDataTable(this.rawDataTable).subscribe(
         (response: any) => {
-          // console.log('update table response: ');
-          // console.log(response);
           this.loading = false;
           this.updateProcessedDataTableSettings(response.data);
           this.error = undefined;
@@ -267,22 +190,14 @@ export class DataTablesComponent implements OnInit {
       this.loading = true;
       this.dataTableService.createDataTable(this.rawDataTable).subscribe(
         (response: any) => {
-          // console.log('create table response: ');
-          // console.log(response);
-
-          // add an ID to the raw data table to indicate it is now stored in the database
-          // return a processed data table as the response....
-          // response contains a processedDataTable and a rawDataTableID
-
-          // this.processedDataTable is a plain object since only the raw data
-          // table data can be changed by the user — the raw data gets updated in the
-          // DB every time that it gets submitted to the API (creating/updating the
-          // raw data table) and the processedDataTable is part of the API response
+          // response contains a processedDataTable and a rawDataTableID...
+          // this.processedDataTable is a plain object since the raw data table the user submits
+          // can be used to calculate a processedDataTable that can then be sent as part of a request response
           this.loading = false;
           this.processedDataTable = response.processedDataTable;
           this.createProcessedDataTableSettings(response.processedDataTable);
 
-          //(gives raw data table an ID)
+          // add an ID to the raw data table to indicate it is now stored in the database
           this.rawDataTable._id = response.rawDataTableID;
           this.error = undefined;
         },
@@ -328,12 +243,8 @@ export class DataTablesComponent implements OnInit {
     this.processedDataTableSettings.data = processedDataTable.dataTableData;
     this.processedDataTableSettings.contextMenu = false;
 
-    this.processedDataTableSettings.colHeaders = [
-      'Uncertainties for Curve Straightened<br>Manipulated Variable',
-      'Curve Straightened<br>Manipulated Variable',
-      'Curve Straightened<br>Responding Variable',
-      'Uncertainties for Curve Straightened<br>Responding Variable',
-    ];
+    this.processedDataTableSettings.colHeaders =
+      this.dataTableService.processedDataTableColHeaders;
     // the processed data table will have an _id attached to it that should
     // not be displayed as a column, so we will specify which columns are displayed here
     for (var i = 0; i < this.processedDataTableSettings.columns.length; ++i) {
@@ -342,43 +253,18 @@ export class DataTablesComponent implements OnInit {
 
     this.processedDataTableSettings.dropdownMenu = {
       items: {
-        shiftDecimalLeft: {
-          name: 'Increase column decimal places by one', // can be string or function...
-          callback: (key, selection, clickEvent) => {
-            // selection[0].end.col  and selection[0].start.col should be the same
-            // as this dropdown menu can only select an entire column
-            this.shiftDecimalPlaceLeft(
-              selection[0].end.col,
-              'processedDataTable'
-            );
-          },
-        },
-        shiftDecimalRight: {
-          name: 'Decrease column decimal places by one',
-          disabled: () => {
-            return !this.canShiftDecimalPlaceRight('processedDataTable');
-          },
-          callback: (key, selection, clickEvent) => {
-            this.shiftDecimalPlaceRight(
-              selection[0].end.col,
-              'processedDataTable'
-            );
-          },
-        },
+        shiftDecimalLeft: this.generateShiftDecimalLeft('processedDataTable'),
+        shiftDecimalRight: this.generateShiftDecimalRight('processedDataTable'),
       },
     };
-    // console.log('processed data table settings: ');
-    // console.log(this.processedDataTableSettings);
+    // console.log('processed data table settings: ', this.processedDataTableSettings);
   }
 
   private updateProcessedDataTableSettings(dataTable: DataTable): void {
     this.changeDetector.detectChanges();
     this.processedDataTableSettings.data = dataTable.dataTableData;
     this.refreshProcessedDataTable(this.processedDataTableSettings);
-    // changing the data of the processed data table based on the response...
-
-    // console.log('updated data table: ');
-    // console.log(this.processedDataTable);
+    // console.log('updated data table: ', this.processedDataTable);
   }
 
   private refreshProcessedDataTable(settings): void {
@@ -389,20 +275,33 @@ export class DataTablesComponent implements OnInit {
     this.rawDataTableRef.updateHotTable(settings);
   }
 
-  private removeFirstWord(string: string): string {
-    return string.substring(string.indexOf(' ') + 1);
+  private generateShiftDecimalLeft(dataTableName: string) {
+    return {
+      name: 'Increase column decimal places by one', // can be string or function...
+      callback: (key, selection, clickEvent) => {
+        // selection[0].end.col  and selection[0].start.col should be the same
+        // as this dropdown menu can only select an entire column
+        this.shiftDecimalPlaceLeft(selection[0].end.col, dataTableName);
+      },
+    };
   }
 
-  // you can shift the decimal place left as many
-  // times as you want so there is no validity check
-  // for this operation
-  private shiftDecimalPlaceLeft(columnIndex, dataTable) {
-    let dataTableVar;
-    if (dataTable === 'rawDataTable') {
-      dataTableVar = 'rawDataTable';
-    } else if (dataTable === 'processedDataTable') {
-      dataTableVar = 'processedDataTable';
-    }
+  private generateShiftDecimalRight(dataTableName: string) {
+    return {
+      name: 'Decrease column decimal places by one',
+      disabled: () => {
+        return !this.canShiftDecimalPlaceRight(dataTableName);
+      },
+      callback: (key, selection, clickEvent) => {
+        this.shiftDecimalPlaceRight(selection[0].end.col, dataTableName);
+      },
+    };
+  }
+
+  // you can shift the decimal place left as many times as you want
+  // so there is no validity check for this operation
+  private shiftDecimalPlaceLeft(columnIndex, dataTable: string) {
+    let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
 
     this[`${dataTableVar}Settings`].columns[
       columnIndex
@@ -413,13 +312,8 @@ export class DataTablesComponent implements OnInit {
   }
 
   // dataTable param has to either be rawDataTable or processedDataTable
-  private shiftDecimalPlaceRight(columnIndex, dataTable) {
-    let dataTableVar;
-    if (dataTable === 'rawDataTable') {
-      dataTableVar = 'rawDataTable';
-    } else if (dataTable === 'processedDataTable') {
-      dataTableVar = 'processedDataTable';
-    }
+  private shiftDecimalPlaceRight(columnIndex, dataTable: string) {
+    let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
 
     let colMantissa =
       this[`${dataTableVar}Settings`].columns[columnIndex].numericFormat.pattern
@@ -435,13 +329,8 @@ export class DataTablesComponent implements OnInit {
     }
   }
 
-  private canShiftDecimalPlaceRight(dataTable) {
-    let dataTableVar;
-    if (dataTable === 'rawDataTable') {
-      dataTableVar = 'rawDataTable';
-    } else if (dataTable === 'processedDataTable') {
-      dataTableVar = 'processedDataTable';
-    }
+  private canShiftDecimalPlaceRight(dataTable: string) {
+    let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
 
     if (this[`${dataTableVar}Settings`]) {
       let colIndex = this.hotRegisterer
@@ -451,11 +340,7 @@ export class DataTablesComponent implements OnInit {
         this[`${dataTableVar}Settings`].columns[colIndex].numericFormat.pattern
           .mantissa;
 
-      if (colMantissa !== 0) {
-        return true;
-      } else {
-        return false;
-      }
+      return colMantissa >= 1; // we can shift right as long as mantissa is >= 1
     }
     return false;
   }
@@ -470,10 +355,10 @@ export class DataTablesComponent implements OnInit {
       this.dataTableService.isHandsontableValid(dataArray) &&
       dataArray.length >= minRows
     ) {
-      this.invalidFormErrorMsg = undefined;
+      this.invalidTableErrorMsg = undefined;
     } else {
-      // default value for table without anything filled in yet
-      this.invalidFormErrorMsg = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
+      // default error message for table without anything filled in yet
+      this.invalidTableErrorMsg = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
     }
   }
 
