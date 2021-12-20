@@ -53,7 +53,7 @@ export class DataTablesComponent implements OnInit {
 
   error: string; //general error message
   errorClass: string;
-  invalidFormErrorMsg: string = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
+  invalidTableErrorMsg: string = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
   loading: boolean = false;
   showGraph: boolean = false;
 
@@ -69,12 +69,7 @@ export class DataTablesComponent implements OnInit {
     this.rawDataTableSettings = {
       data: this.rawData,
       rowHeaders: true,
-      colHeaders: [
-        'Uncertainties for<br>Manipulated Variable',
-        'Manipulated Variable',
-        'Responding Variable',
-        'Uncertainties for<br>Responding Variable',
-      ],
+      colHeaders: this.dataTableService.rawDataTableColHeaders,
       columns: this.dataTableService.dataTableDefaultColumnValues,
 
       afterChange: (changes) => {
@@ -104,23 +99,8 @@ export class DataTablesComponent implements OnInit {
           clear_column: {},
           alignment: {},
           sp1: { name: '---------' },
-          shiftDecimalLeft: {
-            name: 'Increase column decimal places by one', // can be string or function...
-            callback: (key, selection, clickEvent) => {
-              // selection[0].end.col  and selection[0].start.col should be the same
-              // as this dropdown menu can only select an entire column
-              this.shiftDecimalPlaceLeft(selection[0].end.col, 'rawDataTable');
-            },
-          },
-          shiftDecimalRight: {
-            name: 'Decrease column decimal places by one',
-            disabled: () => {
-              return !this.canShiftDecimalPlaceRight('rawDataTable');
-            },
-            callback: (key, selection, clickEvent) => {
-              this.shiftDecimalPlaceRight(selection[0].end.col, 'rawDataTable');
-            },
-          },
+          shiftDecimalLeft: this.generateShiftDecimalLeft('rawDataTable'),
+          shiftDecimalRight: this.generateShiftDecimalRight('rawDataTable'),
         },
       },
 
@@ -263,12 +243,8 @@ export class DataTablesComponent implements OnInit {
     this.processedDataTableSettings.data = processedDataTable.dataTableData;
     this.processedDataTableSettings.contextMenu = false;
 
-    this.processedDataTableSettings.colHeaders = [
-      'Uncertainties for Curve Straightened<br>Manipulated Variable',
-      'Curve Straightened<br>Manipulated Variable',
-      'Curve Straightened<br>Responding Variable',
-      'Uncertainties for Curve Straightened<br>Responding Variable',
-    ];
+    this.processedDataTableSettings.colHeaders =
+      this.dataTableService.processedDataTableColHeaders;
     // the processed data table will have an _id attached to it that should
     // not be displayed as a column, so we will specify which columns are displayed here
     for (var i = 0; i < this.processedDataTableSettings.columns.length; ++i) {
@@ -277,41 +253,18 @@ export class DataTablesComponent implements OnInit {
 
     this.processedDataTableSettings.dropdownMenu = {
       items: {
-        shiftDecimalLeft: {
-          name: 'Increase column decimal places by one', // can be string or function...
-          callback: (key, selection, clickEvent) => {
-            // selection[0].end.col  and selection[0].start.col should be the same
-            // as this dropdown menu can only select an entire column
-            this.shiftDecimalPlaceLeft(
-              selection[0].end.col,
-              'processedDataTable'
-            );
-          },
-        },
-        shiftDecimalRight: {
-          name: 'Decrease column decimal places by one',
-          disabled: () => {
-            return !this.canShiftDecimalPlaceRight('processedDataTable');
-          },
-          callback: (key, selection, clickEvent) => {
-            this.shiftDecimalPlaceRight(
-              selection[0].end.col,
-              'processedDataTable'
-            );
-          },
-        },
+        shiftDecimalLeft: this.generateShiftDecimalLeft('processedDataTable'),
+        shiftDecimalRight: this.generateShiftDecimalRight('processedDataTable'),
       },
     };
-    // console.log('processed data table settings: ');
-    // console.log(this.processedDataTableSettings);
+    // console.log('processed data table settings: ', this.processedDataTableSettings);
   }
 
   private updateProcessedDataTableSettings(dataTable: DataTable): void {
     this.changeDetector.detectChanges();
     this.processedDataTableSettings.data = dataTable.dataTableData;
     this.refreshProcessedDataTable(this.processedDataTableSettings);
-    // console.log('updated data table: ');
-    // console.log(this.processedDataTable);
+    // console.log('updated data table: ', this.processedDataTable);
   }
 
   private refreshProcessedDataTable(settings): void {
@@ -322,15 +275,33 @@ export class DataTablesComponent implements OnInit {
     this.rawDataTableRef.updateHotTable(settings);
   }
 
+  private generateShiftDecimalLeft(dataTableName: string) {
+    return {
+      name: 'Increase column decimal places by one', // can be string or function...
+      callback: (key, selection, clickEvent) => {
+        // selection[0].end.col  and selection[0].start.col should be the same
+        // as this dropdown menu can only select an entire column
+        this.shiftDecimalPlaceLeft(selection[0].end.col, dataTableName);
+      },
+    };
+  }
+
+  private generateShiftDecimalRight(dataTableName: string) {
+    return {
+      name: 'Decrease column decimal places by one',
+      disabled: () => {
+        return !this.canShiftDecimalPlaceRight(dataTableName);
+      },
+      callback: (key, selection, clickEvent) => {
+        this.shiftDecimalPlaceRight(selection[0].end.col, dataTableName);
+      },
+    };
+  }
+
   // you can shift the decimal place left as many times as you want
   // so there is no validity check for this operation
-  private shiftDecimalPlaceLeft(columnIndex, dataTable) {
-    let dataTableVar;
-    if (dataTable === 'rawDataTable') {
-      dataTableVar = 'rawDataTable';
-    } else if (dataTable === 'processedDataTable') {
-      dataTableVar = 'processedDataTable';
-    }
+  private shiftDecimalPlaceLeft(columnIndex, dataTable: string) {
+    let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
 
     this[`${dataTableVar}Settings`].columns[
       columnIndex
@@ -341,13 +312,8 @@ export class DataTablesComponent implements OnInit {
   }
 
   // dataTable param has to either be rawDataTable or processedDataTable
-  private shiftDecimalPlaceRight(columnIndex, dataTable) {
-    let dataTableVar;
-    if (dataTable === 'rawDataTable') {
-      dataTableVar = 'rawDataTable';
-    } else if (dataTable === 'processedDataTable') {
-      dataTableVar = 'processedDataTable';
-    }
+  private shiftDecimalPlaceRight(columnIndex, dataTable: string) {
+    let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
 
     let colMantissa =
       this[`${dataTableVar}Settings`].columns[columnIndex].numericFormat.pattern
@@ -363,13 +329,8 @@ export class DataTablesComponent implements OnInit {
     }
   }
 
-  private canShiftDecimalPlaceRight(dataTable) {
-    let dataTableVar;
-    if (dataTable === 'rawDataTable') {
-      dataTableVar = 'rawDataTable';
-    } else if (dataTable === 'processedDataTable') {
-      dataTableVar = 'processedDataTable';
-    }
+  private canShiftDecimalPlaceRight(dataTable: string) {
+    let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
 
     if (this[`${dataTableVar}Settings`]) {
       let colIndex = this.hotRegisterer
@@ -379,11 +340,7 @@ export class DataTablesComponent implements OnInit {
         this[`${dataTableVar}Settings`].columns[colIndex].numericFormat.pattern
           .mantissa;
 
-      if (colMantissa !== 0) {
-        return true;
-      } else {
-        return false;
-      }
+      return colMantissa >= 1; // we can shift right as long as mantissa is >= 1
     }
     return false;
   }
@@ -398,10 +355,10 @@ export class DataTablesComponent implements OnInit {
       this.dataTableService.isHandsontableValid(dataArray) &&
       dataArray.length >= minRows
     ) {
-      this.invalidFormErrorMsg = undefined;
+      this.invalidTableErrorMsg = undefined;
     } else {
       // default error message for table without anything filled in yet
-      this.invalidFormErrorMsg = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
+      this.invalidTableErrorMsg = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
     }
   }
 

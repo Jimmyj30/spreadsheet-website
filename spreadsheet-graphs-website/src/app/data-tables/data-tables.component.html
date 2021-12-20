@@ -25,14 +25,14 @@
       type="submit"
       (click)="onSubmit()"
       [disabled]="
-        !curveStraighteningInstructionsForm.valid || invalidFormErrorMsg
+        !curveStraighteningInstructionsForm.valid || invalidTableErrorMsg
       "
       class="btn btn-light"
     >
       Submit
     </button>
-    <span class="left-margin" *ngIf="invalidFormErrorMsg"
-      >{{ invalidFormErrorMsg }}
+    <span class="left-margin" *ngIf="invalidTableErrorMsg"
+      >{{ invalidTableErrorMsg }}
     </span>
   </div>
   <div *ngIf="loading" class="vertical-margin">

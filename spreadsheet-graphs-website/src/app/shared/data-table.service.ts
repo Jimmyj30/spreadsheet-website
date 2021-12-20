@@ -2,11 +2,16 @@ import { Injectable } from '@angular/core';
 import { DataPoint } from '../data-tables/models/data-point.model';
 
 import { DataTable } from '../data-tables/models/data-table.model';
+import { Constants } from './constants';
 import { DataStorageService } from './data-storage.service';
 
 @Injectable({ providedIn: 'root' })
 export class DataTableService {
   constructor(private api: DataStorageService) {}
+
+  dataTableDefaultColumnValues = Constants.dataTableDefaultColumnValues;
+  rawDataTableColHeaders = Constants.rawDataTableColHeaders;
+  processedDataTableColHeaders = Constants.processedDataTableColHeaders;
 
   createDataTable(dataTable: DataTable) {
     return this.api.createDataTable(dataTable);
@@ -95,48 +100,13 @@ export class DataTableService {
     });
   }
 
-  dataTableDefaultColumnValues = [
-    {
-      data: 'xUncertainty',
-      type: 'numeric',
-      numericFormat: {
-        pattern: {
-          mantissa: 2,
-        },
-      },
-      allowEmpty: false,
-    },
-    {
-      data: 'xCoord',
-      type: 'numeric',
-      numericFormat: {
-        pattern: {
-          mantissa: 2,
-        },
-      },
-      allowEmpty: false,
-    },
-    {
-      data: 'yCoord',
-      type: 'numeric',
-      numericFormat: {
-        pattern: {
-          mantissa: 2,
-        },
-      },
-      allowEmpty: false,
-    },
-    {
-      data: 'yUncertainty',
-      type: 'numeric',
-      numericFormat: {
-        pattern: {
-          mantissa: 2,
-        },
-      },
-      allowEmpty: false,
-    },
-  ];
+  findDataTableVar(dataTable: string) {
+    if (dataTable === 'rawDataTable') {
+      return 'rawDataTable';
+    } else if (dataTable === 'processedDataTable') {
+      return 'processedDataTable';
+    }
+  }
 
   private removeFirstWord(string: string): string {
     return string.substring(string.indexOf(' ') + 1);
