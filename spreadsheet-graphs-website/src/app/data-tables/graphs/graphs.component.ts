@@ -7,7 +7,7 @@ import {
   KeyValueDiffer,
 } from '@angular/core';
 import { PlotlyModule } from 'angular-plotly.js';
-import { GraphUtilService } from 'src/app/shared/graph-util.service';
+import { GraphUtilService } from 'src/app/data-tables/graphs/graph-util.service';
 import { DataPoint } from '../models/data-point.model';
 import { LineInfo } from '../models/line.model';
 import { PlotlyData } from '../models/plotly-data.model';

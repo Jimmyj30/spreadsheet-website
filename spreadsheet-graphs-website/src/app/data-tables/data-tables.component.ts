@@ -8,7 +8,7 @@ import {
 } from '@angular/forms';
 import * as Handsontable from 'handsontable';
 
-import { DataTableService } from '../shared/data-table.service';
+import { DataTableService } from './data-table.service';
 import { DataTable } from './models/data-table.model';
 import { numberFractionValidator } from '../shared/number-fraction.directive';
 
