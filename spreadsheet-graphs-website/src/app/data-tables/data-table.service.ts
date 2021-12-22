@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { DataPoint } from '../data-tables/models/data-point.model';
+import { DataPoint } from './models/data-point.model';
 
-import { DataTable } from '../data-tables/models/data-table.model';
-import { Constants } from './constants';
-import { DataStorageService } from './data-storage.service';
+import { DataTable } from './models/data-table.model';
+import { Constants } from '../shared/constants';
+import { DataStorageService } from '../shared/data-storage.service';
 
 @Injectable({ providedIn: 'root' })
 export class DataTableService {

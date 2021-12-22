@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { LineInfo } from '../data-tables/models/line.model';
+import { LineInfo } from '../models/line.model';
 import * as regression from 'regression';
 @Injectable({ providedIn: 'root' })
 export class GraphUtilService {
