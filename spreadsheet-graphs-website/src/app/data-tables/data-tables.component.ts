@@ -11,9 +11,8 @@ import * as Handsontable from 'handsontable';
 import { DataTableService } from './data-table.service';
 import { DataTable } from './models/data-table.model';
 import { numberFractionValidator } from '../shared/number-fraction.directive';
-
-const FILL_OUT_SPREADSHEET_FULLY_MESSAGE =
-  'Please fully fill out the above spreadsheet with real numbers.';
+import { ErrorHandlingService } from '../shared/error-handling.service';
+import { Constants } from '../shared/constants';
 
 @Component({
   selector: 'app-data-tables',
@@ -35,8 +34,8 @@ export class DataTablesComponent implements OnInit {
 
   showXToConstantPower: boolean;
   showYToConstantPower: boolean;
-  xOptions: any = ['x', 'ln(x)', 'log_10(x)', 'x^a']; // move things like this to a constants file
-  yOptions: any = ['y', 'ln(y)', 'log_10(y)', 'y^a'];
+  xOptions: string[] = ['x', 'ln(x)', 'log_10(x)', 'x^a']; // move things like this to a constants file
+  yOptions: string[] = ['y', 'ln(y)', 'log_10(y)', 'y^a'];
 
   curveStraighteningInstructionsForm: FormGroup = this.fb.group({
     xCurveStraighteningInstructions: new FormControl(this.xOptions[0], []),
@@ -53,14 +52,15 @@ export class DataTablesComponent implements OnInit {
 
   error: string; //general error message
   errorClass: string;
-  invalidTableErrorMsg: string = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
+  invalidTableErrorMsg: string = Constants.FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
   loading: boolean = false;
   showGraph: boolean = false;
 
   constructor(
     private readonly dataTableService: DataTableService,
     private readonly fb: FormBuilder,
-    private readonly changeDetector: ChangeDetectorRef
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly errorService: ErrorHandlingService
   ) {
     this.rawData = this.dataTableService.generateDefaultDataTable(
       Handsontable.default.helper.createSpreadsheetData(5, 4)
@@ -72,17 +72,9 @@ export class DataTablesComponent implements OnInit {
       colHeaders: this.dataTableService.rawDataTableColHeaders,
       columns: this.dataTableService.dataTableDefaultColumnValues,
 
-      afterChange: (changes) => {
-        this.validateHandsontable();
-      },
-
-      afterRemoveRow: (changes) => {
-        this.validateHandsontable();
-      },
-
-      afterCreateRow: (changes) => {
-        this.validateHandsontable();
-      },
+      afterChange: (changes) => this.validateHandsontable(),
+      afterRemoveRow: (changes) => this.validateHandsontable(),
+      afterCreateRow: (changes) => this.validateHandsontable(),
 
       filters: true,
       fillHandle: {
@@ -99,8 +91,8 @@ export class DataTablesComponent implements OnInit {
           clear_column: {},
           alignment: {},
           sp1: { name: '---------' },
-          shiftDecimalLeft: this.generateShiftDecimalLeft('rawDataTable'),
-          shiftDecimalRight: this.generateShiftDecimalRight('rawDataTable'),
+          increaseMantissa: this.generateIncreaseMantissa('rawDataTable'),
+          decreaseMantissa: this.generateDecreaseMantissa('rawDataTable'),
         },
       },
 
@@ -125,20 +117,9 @@ export class DataTablesComponent implements OnInit {
       },
       (err) => {
         this.loading = false;
-        if (err.match(/404 /g)) {
-          this.error =
-            "You don't have a data table saved yet—you can fill out the empty one above";
-          this.errorClass = 'alert-primary';
-        } else if (err.match(/4[0-9][0-9] /g)) {
-          this.error = 'The request failed-please try again';
-          this.errorClass = 'alert-danger';
-        } else if (err.match(/5[0-9][0-9] /g)) {
-          this.error = 'There was an error loading your data';
-          this.errorClass = 'alert-danger';
-        } else {
-          this.error = 'An unknown error occurred';
-          this.errorClass = 'alert-danger';
-        }
+        const errorObj = this.errorService.findError(err);
+        this.error = errorObj.error;
+        this.errorClass = errorObj.errorClass;
       }
     );
   }
@@ -162,8 +143,7 @@ export class DataTablesComponent implements OnInit {
       this.curveStraighteningInstructionsForm,
       this.rawDataTable
     );
-    // console.log('rawDataTable: ');
-    // console.log(this.rawDataTable);
+    // console.log('rawDataTable: ', this.rawDataTable);
 
     // we send the raw data table using the API, and the API will store that raw data table (giving it an ID)
     // response might contain a message, a processedDataTable, and a rawDataTable id (_id) ...
@@ -253,8 +233,8 @@ export class DataTablesComponent implements OnInit {
 
     this.processedDataTableSettings.dropdownMenu = {
       items: {
-        shiftDecimalLeft: this.generateShiftDecimalLeft('processedDataTable'),
-        shiftDecimalRight: this.generateShiftDecimalRight('processedDataTable'),
+        increaseMantissa: this.generateIncreaseMantissa('processedDataTable'),
+        decreaseMantissa: this.generateDecreaseMantissa('processedDataTable'),
       },
     };
     // console.log('processed data table settings: ', this.processedDataTableSettings);
@@ -275,32 +255,32 @@ export class DataTablesComponent implements OnInit {
     this.rawDataTableRef.updateHotTable(settings);
   }
 
-  private generateShiftDecimalLeft(dataTableName: string) {
+  private generateIncreaseMantissa(dataTableName: string) {
     return {
       name: 'Increase column decimal places by one', // can be string or function...
       callback: (key, selection, clickEvent) => {
         // selection[0].end.col  and selection[0].start.col should be the same
         // as this dropdown menu can only select an entire column
-        this.shiftDecimalPlaceLeft(selection[0].end.col, dataTableName);
+        this.increaseMantissa(selection[0].end.col, dataTableName);
       },
     };
   }
 
-  private generateShiftDecimalRight(dataTableName: string) {
+  private generateDecreaseMantissa(dataTableName: string) {
     return {
       name: 'Decrease column decimal places by one',
       disabled: () => {
-        return !this.canShiftDecimalPlaceRight(dataTableName);
+        return !this.canDecreaseMantissa(dataTableName);
       },
       callback: (key, selection, clickEvent) => {
-        this.shiftDecimalPlaceRight(selection[0].end.col, dataTableName);
+        this.decreaseMantissa(selection[0].end.col, dataTableName);
       },
     };
   }
 
   // you can shift the decimal place left as many times as you want
   // so there is no validity check for this operation
-  private shiftDecimalPlaceLeft(columnIndex, dataTable: string) {
+  private increaseMantissa(columnIndex, dataTable: string) {
     let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
 
     this[`${dataTableVar}Settings`].columns[
@@ -312,7 +292,7 @@ export class DataTablesComponent implements OnInit {
   }
 
   // dataTable param has to either be rawDataTable or processedDataTable
-  private shiftDecimalPlaceRight(columnIndex, dataTable: string) {
+  private decreaseMantissa(columnIndex, dataTable: string) {
     let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
 
     let colMantissa =
@@ -329,7 +309,7 @@ export class DataTablesComponent implements OnInit {
     }
   }
 
-  private canShiftDecimalPlaceRight(dataTable: string) {
+  private canDecreaseMantissa(dataTable: string) {
     let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
 
     if (this[`${dataTableVar}Settings`]) {
@@ -358,7 +338,7 @@ export class DataTablesComponent implements OnInit {
       this.invalidTableErrorMsg = undefined;
     } else {
       // default error message for table without anything filled in yet
-      this.invalidTableErrorMsg = FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
+      this.invalidTableErrorMsg = Constants.FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
     }
   }
 

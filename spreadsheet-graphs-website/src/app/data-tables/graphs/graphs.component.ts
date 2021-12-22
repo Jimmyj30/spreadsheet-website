@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { PlotlyModule } from 'angular-plotly.js';
 import { GraphUtilService } from 'src/app/data-tables/graphs/graph-util.service';
+import { Constants } from 'src/app/shared/constants';
 import { DataPoint } from '../models/data-point.model';
 import { LineInfo } from '../models/line.model';
 import { PlotlyData } from '../models/plotly-data.model';
@@ -81,21 +82,8 @@ export class GraphsComponent implements OnInit, DoCheck {
       layout: {
         title: 'Click Here to Edit Chart Title',
         hovermode: 'closest',
-        xaxis: {
-          title: {
-            text: 'you can see how to add <sub>subscripts</sub>, <sup>superscripts</sup>, and<br>line breaks to graph labels/axes by clicking on this example',
-          },
-          rangemode: 'tozero',
-          autorange: true,
-          ticks: 'outside',
-          hoverformat: '.2f',
-        },
-        yaxis: {
-          rangemode: 'tozero',
-          autorange: true,
-          ticks: 'outside',
-          hoverformat: '.2f',
-        },
+        xaxis: Constants.graphXAxis,
+        yaxis: Constants.graphYAxis,
         shapes: [
           // min gradient
           {
@@ -224,7 +212,7 @@ export class GraphsComponent implements OnInit, DoCheck {
       let updatedScatterChartData = this.createScatterChartData(
         this.processedDataTableData
       );
-      console.log('update graph');
+      // console.log('update graph');
       this.setScatterChartData(updatedScatterChartData);
     }
   }
@@ -233,6 +221,7 @@ export class GraphsComponent implements OnInit, DoCheck {
     let shapes = this.scatterChart.layout.shapes;
     let annotations = this.scatterChart.layout.annotations;
 
+    // todo: change this depending if we have uncertainties on or not
     let update = {
       'shapes[0].visible': !shapes[0].visible,
       'shapes[1].visible': !shapes[1].visible,
