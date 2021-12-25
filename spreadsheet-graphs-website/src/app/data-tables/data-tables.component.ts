@@ -13,6 +13,7 @@ import { DataTable } from './models/data-table.model';
 import { numberFractionValidator } from '../shared/number-fraction.directive';
 import { ErrorHandlingService } from '../shared/error-handling.service';
 import { Constants } from '../shared/constants';
+import { DropdownMenuItem } from './models/dropdown-menu-item.model';
 
 @Component({
   selector: 'app-data-tables',
@@ -37,6 +38,7 @@ export class DataTablesComponent implements OnInit {
   xOptions: string[] = ['x', 'ln(x)', 'log_10(x)', 'x^a']; // move things like this to a constants file
   yOptions: string[] = ['y', 'ln(y)', 'log_10(y)', 'y^a'];
 
+  // we don't use validators for the form here as the first option is selected by default
   curveStraighteningInstructionsForm: FormGroup = this.fb.group({
     xCurveStraighteningInstructions: new FormControl(this.xOptions[0], []),
     xToConstantPower: new FormControl('', []),
@@ -255,7 +257,7 @@ export class DataTablesComponent implements OnInit {
     this.rawDataTableRef.updateHotTable(settings);
   }
 
-  private generateIncreaseMantissa(dataTableName: string) {
+  private generateIncreaseMantissa(dataTableName: string): DropdownMenuItem {
     return {
       name: 'Increase column decimal places by one', // can be string or function...
       callback: (key, selection, clickEvent) => {
@@ -266,7 +268,7 @@ export class DataTablesComponent implements OnInit {
     };
   }
 
-  private generateDecreaseMantissa(dataTableName: string) {
+  private generateDecreaseMantissa(dataTableName: string): DropdownMenuItem {
     return {
       name: 'Decrease column decimal places by one',
       disabled: () => {
@@ -291,7 +293,7 @@ export class DataTablesComponent implements OnInit {
       .render();
   }
 
-  // dataTable param has to either be rawDataTable or processedDataTable
+  // dataTable param has to either be "rawDataTable" or "processedDataTable"
   private decreaseMantissa(columnIndex, dataTable: string) {
     let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
 
@@ -309,7 +311,7 @@ export class DataTablesComponent implements OnInit {
     }
   }
 
-  private canDecreaseMantissa(dataTable: string) {
+  private canDecreaseMantissa(dataTable: string): boolean {
     let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
 
     if (this[`${dataTableVar}Settings`]) {
@@ -371,14 +373,9 @@ export class DataTablesComponent implements OnInit {
       );
       this.showYToConstantPower = true;
     }
-    this.curveStraighteningInstructionsForm.patchValue({
-      xCurveStraighteningInstructions:
-        xCurveStraighteningInstructions.functionClass,
-      yCurveStraighteningInstructions:
-        yCurveStraighteningInstructions.functionClass,
-      xToConstantPower: xCurveStraighteningInstructions.constantPower,
-      yToConstantPower: yCurveStraighteningInstructions.constantPower,
-    });
+    this.curveStraighteningInstructionsForm.patchValue(
+      this.dataTableService.generateNewFormValues(res)
+    );
     this.curveStraighteningInstructionsForm.updateValueAndValidity();
   }
 }

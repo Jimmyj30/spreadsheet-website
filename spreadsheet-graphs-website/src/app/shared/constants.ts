@@ -61,8 +61,8 @@ export class Constants {
 
   public static graphXAxis = {
     title: {
-      text: `you can see how to add <sub>subscripts</sub>, <sup>superscripts</sup>
-      , and<br>line breaks to graph labels/axes by clicking on this example`,
+      text: `you can see how to add <sub>subscripts</sub>, <sup>superscripts</sup>, and
+      <br> line breaks to graph labels/axes by clicking on this example`,
     },
     rangemode: 'tozero',
     autorange: true,

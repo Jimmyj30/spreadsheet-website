@@ -108,6 +108,29 @@ export class DataTableService {
     }
   }
 
+  generateNewFormValues(res): {
+    xCurveStraighteningInstructions: string;
+    yCurveStraighteningInstructions: string;
+    xToConstantPower: string;
+    yToConstantPower: string;
+  } {
+    let xCurveStraighteningInstructions =
+      res['rawDataTable']['xCurveStraighteningInstructions'];
+    let yCurveStraighteningInstructions =
+      res['rawDataTable']['yCurveStraighteningInstructions'];
+
+    let newFormVal = {
+      xCurveStraighteningInstructions:
+        xCurveStraighteningInstructions.functionClass,
+      yCurveStraighteningInstructions:
+        yCurveStraighteningInstructions.functionClass,
+      xToConstantPower: xCurveStraighteningInstructions.constantPower,
+      yToConstantPower: yCurveStraighteningInstructions.constantPower,
+    };
+
+    return newFormVal;
+  }
+
   private removeFirstWord(string: string): string {
     return string.substring(string.indexOf(' ') + 1);
   }
