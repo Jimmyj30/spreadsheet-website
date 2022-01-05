@@ -9,6 +9,4 @@
 
 ## Running the Project
 
-- You can run this backend (`spreadsheet-graphs-api`) locally by starting up a local mongoDB  
-  instance with `mongod`, changing directories into the backend (`spreadsheet-graphs-api`) folder  
-  (on another terminal) and then running `nodemon`.
+- You can run this backend (`spreadsheet-graphs-api`) locally by starting up a local mongoDB instance with `mongod`, changing directories into the backend (`spreadsheet-graphs-api`) folder (on another terminal) and then running `nodemon`.
