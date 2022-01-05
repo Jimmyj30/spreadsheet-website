@@ -1,6 +1,11 @@
-# SpreadsheetGraphsWebsite (Lab Data Processor)
+# Spreadsheet Graphs Website Frontend (Lab Data Processor)
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 11.2.5.
+
+## About
+
+- This project is the frontend for the lab data processor.
+- Additional information about running the project can be seen below.
 
 ## Development server
 
