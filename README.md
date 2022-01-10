@@ -8,6 +8,7 @@ I wanted to make a web page that is similar to Microsoft Excel and is geared tow
 
 - You can find a deployed version of this project [here](https://lab-data-processor.herokuapp.com).
 - The project is divided into frontend (`spreadsheet-graphs-website`) and backend (`spreadsheet-graphs-api`) folders.
+- Each of the frontend and backend folders have their own README files as well for additional details.
 
 ## Running the Project
 
