@@ -59,77 +59,13 @@ export class GraphsComponent implements OnInit, DoCheck {
     // https://codepen.io/etpinard/pen/PZgPKx
 
     this.scatterChart = {
-      data: [
-        {
-          x: scatterChartData.x,
-          y: scatterChartData.y,
-          error_x: {
-            type: 'data',
-            array: scatterChartData.errorXArray,
-            visible: true,
-          },
-          error_y: {
-            type: 'data',
-            array: scatterChartData.errorYArray,
-            visible: true,
-          },
-          mode: 'markers',
-          type: 'scatter',
-
-          name: 'Click Here to Edit<br>Trace Name',
-        },
-      ],
+      data: this.graphUtilService.createGraphData(scatterChartData),
       layout: {
         title: 'Click Here to Edit Chart Title',
         hovermode: 'closest',
         xaxis: Constants.graphXAxis,
         yaxis: Constants.graphYAxis,
-        shapes: [
-          // min gradient
-          {
-            type: 'line',
-            x0: scatterChartData.minGradientInfo.x0,
-            y0: scatterChartData.minGradientInfo.y0,
-            x1: scatterChartData.minGradientInfo.x1,
-            y1: scatterChartData.minGradientInfo.y1,
-            line: {
-              color: 'rgb(169,169,169)', //dark grey
-              width: 2,
-              dash: 'dot',
-            },
-            visible: true,
-          },
-
-          // max gradient
-          {
-            type: 'line',
-            x0: scatterChartData.maxGradientInfo.x0,
-            y0: scatterChartData.maxGradientInfo.y0,
-            x1: scatterChartData.maxGradientInfo.x1,
-            y1: scatterChartData.maxGradientInfo.y1,
-            line: {
-              color: 'rgb(255,140,0)', //dark orange
-              width: 2,
-              dash: 'dot',
-            },
-            visible: true,
-          },
-
-          // line of best fit
-          {
-            type: 'line',
-            x0: scatterChartData.lineOfBestFitInfo.x0,
-            y0: scatterChartData.lineOfBestFitInfo.y0,
-            x1: scatterChartData.lineOfBestFitInfo.x1,
-            y1: scatterChartData.lineOfBestFitInfo.y1,
-            line: {
-              color: 'rgb(0,120,177)', // ~cerulean blue (same colour as graph data points)
-              width: 2,
-              dash: 'dot',
-            },
-            visible: true,
-          },
-        ],
+        shapes: this.graphUtilService.createShapes(scatterChartData),
         annotations: [
           // min gradient
           {
@@ -218,33 +154,79 @@ export class GraphsComponent implements OnInit, DoCheck {
   }
 
   onToggleTrendlines() {
+    // shapes = [min gradient, max gradient, LOBF]
     let shapes = this.scatterChart.layout.shapes;
     let annotations = this.scatterChart.layout.annotations;
+    let data = this.scatterChart.data[0];
+    let update;
 
-    // todo: change this depending if we have uncertainties on or not
-    let update = {
-      'shapes[0].visible': !shapes[0].visible,
-      'shapes[1].visible': !shapes[1].visible,
-      'shapes[2].visible': !shapes[2].visible,
-      'annotations[0].visible': !annotations[0].visible,
-      'annotations[1].visible': !annotations[1].visible,
-      'annotations[2].visible': !annotations[2].visible,
-    };
+    // if any trendline is present
+    if (annotations[2].visible && shapes[2].visible) {
+      update = {
+        'shapes[0].visible': false,
+        'shapes[1].visible': false,
+        'shapes[2].visible': false,
+        'annotations[0].visible': false,
+        'annotations[1].visible': false,
+        'annotations[2].visible': false,
+      };
+    } else {
+      // if the trendlines are not present, update based on if there are uncertainties...
+      let showTrendline = data.error_x.visible && data.error_y.visible;
+      update = {
+        'shapes[0].visible': showTrendline,
+        'shapes[1].visible': showTrendline,
+        'shapes[2].visible': true,
+        'annotations[0].visible': showTrendline,
+        'annotations[1].visible': showTrendline,
+        'annotations[2].visible': true,
+      };
+    }
 
     this.showTrendline = !this.showTrendline;
     PlotlyModule.plotlyjs.relayout('graph', update);
   }
 
   onToggleUncertainties() {
+    // shapes = [min gradient, max gradient, LOBF]
     let data = this.scatterChart.data[0];
+    let shapes = this.scatterChart.layout.shapes;
+    let annotations = this.scatterChart.layout.annotations;
+    let update, layoutUpdate;
 
-    let update = {
-      'error_x.visible': !data.error_x.visible,
-      'error_y.visible': !data.error_y.visible,
-    };
+    // if we toggle off uncertainties, we also toggle off the min/max gradients
+    if (data.error_x.visible && data.error_y.visible) {
+      update = {
+        'error_x.visible': false,
+        'error_y.visible': false,
+      };
+      layoutUpdate = {
+        'shapes[0].visible': false,
+        'shapes[1].visible': false,
+        'annotations[0].visible': false,
+        'annotations[1].visible': false,
+      };
+    } else {
+      // toggling on uncertainties --> reshow min/max gradients
+      update = {
+        'error_x.visible': true,
+        'error_y.visible': true,
+      };
+      // shapes[2].visible is true if LOBF is showing...
+      let showGradients = shapes[2].visible && annotations[2].visible;
+      layoutUpdate = {
+        'shapes[0].visible': showGradients,
+        'shapes[1].visible': showGradients,
+        'annotations[0].visible': showGradients,
+        'annotations[1].visible': showGradients,
+      };
+    }
 
     this.showUncertainties = !this.showUncertainties;
     PlotlyModule.plotlyjs.restyle('graph', update, 0);
+    layoutUpdate
+      ? PlotlyModule.plotlyjs.relayout('graph', layoutUpdate)
+      : undefined;
   }
 
   private createScatterChartData(

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LineInfo } from '../models/line.model';
 import * as regression from 'regression';
+import { PlotlyData } from '../models/plotly-data.model';
 @Injectable({ providedIn: 'root' })
 export class GraphUtilService {
   constructor() {}
@@ -114,6 +115,78 @@ export class GraphUtilService {
       slope: slope,
       yIntercept: yIntercept,
     });
+  }
+
+  createShapes(scatterChartData: PlotlyData) {
+    return [
+      // min gradient
+      {
+        type: 'line',
+        x0: scatterChartData.minGradientInfo.x0,
+        y0: scatterChartData.minGradientInfo.y0,
+        x1: scatterChartData.minGradientInfo.x1,
+        y1: scatterChartData.minGradientInfo.y1,
+        line: {
+          color: 'rgb(169,169,169)', //dark grey
+          width: 2,
+          dash: 'dot',
+        },
+        visible: true,
+      },
+
+      // max gradient
+      {
+        type: 'line',
+        x0: scatterChartData.maxGradientInfo.x0,
+        y0: scatterChartData.maxGradientInfo.y0,
+        x1: scatterChartData.maxGradientInfo.x1,
+        y1: scatterChartData.maxGradientInfo.y1,
+        line: {
+          color: 'rgb(255,140,0)', //dark orange
+          width: 2,
+          dash: 'dot',
+        },
+        visible: true,
+      },
+
+      // line of best fit
+      {
+        type: 'line',
+        x0: scatterChartData.lineOfBestFitInfo.x0,
+        y0: scatterChartData.lineOfBestFitInfo.y0,
+        x1: scatterChartData.lineOfBestFitInfo.x1,
+        y1: scatterChartData.lineOfBestFitInfo.y1,
+        line: {
+          color: 'rgb(0,120,177)', // ~cerulean blue (same colour as graph data points)
+          width: 2,
+          dash: 'dot',
+        },
+        visible: true,
+      },
+    ];
+  }
+
+  createGraphData(scatterChartData: PlotlyData) {
+    return [
+      {
+        x: scatterChartData.x,
+        y: scatterChartData.y,
+        error_x: {
+          type: 'data',
+          array: scatterChartData.errorXArray,
+          visible: true,
+        },
+        error_y: {
+          type: 'data',
+          array: scatterChartData.errorYArray,
+          visible: true,
+        },
+        mode: 'markers',
+        type: 'scatter',
+
+        name: 'Click Here to Edit<br>Trace Name',
+      },
+    ];
   }
 
   // finds the index associated with the largest element
