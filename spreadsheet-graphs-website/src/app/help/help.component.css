@@ -1,5 +1,5 @@
 .webpage-instructions {
-  max-width: 500px;
+  max-width: max(80%, 500px);
   padding: 0px 10px 0px 10px;
   margin-bottom: 10px;
 }
