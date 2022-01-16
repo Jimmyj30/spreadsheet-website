@@ -6,7 +6,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule, Routes } from '@angular/router';
 import { HotTableModule } from '@handsontable/angular';
-import * as PlotlyJS from 'plotly.js/dist/plotly.js';
+import * as PlotlyJS from 'plotly.js/dist/plotly-cartesian.min.js';
 import { PlotlyModule } from 'angular-plotly.js';
 
 import { AppComponent } from './app.component';
