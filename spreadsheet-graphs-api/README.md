@@ -36,7 +36,7 @@
 - `<API_URL>/api/data-tables/<DATA_TABLE_ID>`
   - `PUT`
     - **Updates an existing data table**
-      - `<DATA_TABLE_ID>` specifies a table id to change (as long as you have permissions to do so).
+      - `<DATA_TABLE_ID>` specifies a table id to change (as long as the user have permissions to do so).
     - In headers:
       - `Authorization`: `Bearer <FIREBASE_TOKEN>`
     - In body:
@@ -48,7 +48,7 @@
         - `xCurveStraighteningInstructions` is an `instruction`
   - `GET`
     - **Gets a data table by id**
-      - you can also send a `GET` request to `<API_URL>/api/data-tables/x?view-by-firebase-uid=true` in order to get the data table corresponding to the user associated with the firebase token sent in the response headers.
+      - A `GET` request can also be sent to `<API_URL>/api/data-tables/x?view-by-firebase-uid=true` in order to get the data table corresponding to the user associated with the firebase token sent in the response headers.
     - In headers:
       - `Authorization`: `Bearer <FIREBASE_TOKEN>`
   - `DELETE`
@@ -58,4 +58,4 @@
 
 ## Running the Project
 
-- You can run this backend (`spreadsheet-graphs-api`) locally by starting up a local mongoDB instance with `mongod`, changing directories into the backend (`spreadsheet-graphs-api`) folder (on another terminal) and then running `nodemon`.
+- The backend (`spreadsheet-graphs-api`) can be run locally by starting up a local mongoDB instance with `mongod`, changing directories into the backend (`spreadsheet-graphs-api`) folder (on another terminal) and then running `nodemon`.

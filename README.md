@@ -4,16 +4,18 @@ This project is a lab data processor that can take in bivariate (x represented a
 
 I wanted to make a web page that is similar to Microsoft Excel and is geared towards basic analysis of data (such as for high school science labs). This project will be a work in progress for the forseeable future as I add features to it that I might find interesting--I might get to learn more about coding web pages along the way!
 
+![Image of lab data processor in use](data-processor-demo.png)
+
 ## About
 
-- You can find a deployed version of this project [here](https://lab-data-processor.herokuapp.com).
+- A deployed version of this project can be found [here](https://lab-data-processor.herokuapp.com).
 - The project is divided into frontend (`spreadsheet-graphs-website`) and backend (`spreadsheet-graphs-api`) folders.
 - Each of the frontend and backend folders have their own README files as well for additional details.
 
 ## Running the Project
 
-- You can run the frontend (`spreadsheet-graphs-website`) locally by changing directories into the frontend folder (`spreadsheet-graphs-website`) and running `ng serve`.
-- You can run the backend of this project (`spreadsheet-graphs-api`) locally by starting up a local mongoDB instance with `mongod`, changing directories into the backend (`spreadsheet-graphs-api`) folder (on another terminal) and then running `nodemon`.
+- The frontend (`spreadsheet-graphs-website`) can be run locally by changing directories into the frontend folder (`spreadsheet-graphs-website`) and running `ng serve`.
+- The backend (`spreadsheet-graphs-api`) can be run locally by starting up a local mongoDB instance with `mongod`, changing directories into the backend (`spreadsheet-graphs-api`) folder (on another terminal) and then running `nodemon`.
 
 ## Additional Info
 
