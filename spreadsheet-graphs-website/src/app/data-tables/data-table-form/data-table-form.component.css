@@ -5,3 +5,16 @@
 .left-margin {
   margin-left: 10px;
 }
+
+.form-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 5px;
+}
+
+.form-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
