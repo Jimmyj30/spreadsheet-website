@@ -4,7 +4,7 @@
     <span>Plot </span>
     <div class="form-child">
       <select
-        class="select-input custom-select"
+        class="custom-select"
         (change)="changeYOption($event)"
         formControlName="yCurveStraighteningInstructions"
       >
@@ -12,23 +12,21 @@
           {{ option }}
         </option>
       </select>
-      <div>
-        <span class="left-margin" *ngIf="showYToConstantPower">a=</span>
-        <input
-          type="text"
-          formControlName="yToConstantPower"
-          *ngIf="showYToConstantPower"
-          class="number-input"
-          placeholder="eg: 1.23 or -5/3"
-        />
-      </div>
+      <span class="left-margin" *ngIf="showYToConstantPower">a=</span>
+      <input
+        type="text"
+        formControlName="yToConstantPower"
+        *ngIf="showYToConstantPower"
+        class="number-input"
+        placeholder="eg: 1.23 or -5/3"
+      />
     </div>
     <span> as a function of </span>
 
     <div class="form-child">
       <!-- "x" curve straightening instructions -->
       <select
-        class="select-input custom-select"
+        class="custom-select"
         (change)="changeXOption($event)"
         formControlName="xCurveStraighteningInstructions"
       >
@@ -36,16 +34,14 @@
           {{ option }}
         </option>
       </select>
-      <div>
-        <span class="left-margin" *ngIf="showXToConstantPower">a=</span>
-        <input
-          type="text"
-          formControlName="xToConstantPower"
-          *ngIf="showXToConstantPower"
-          class="number-input"
-          placeholder="eg: 1.23 or -5/3"
-        />
-      </div>
+      <span class="left-margin" *ngIf="showXToConstantPower">a=</span>
+      <input
+        type="text"
+        formControlName="xToConstantPower"
+        *ngIf="showXToConstantPower"
+        class="number-input"
+        placeholder="eg: 1.23 or -5/3"
+      />
     </div>
   </div>
 </form>

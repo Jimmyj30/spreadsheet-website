@@ -1,5 +1,5 @@
-.select-input {
-  width: auto;
+.number-input {
+  width: 150px;
 }
 
 .left-margin {
@@ -15,6 +15,5 @@
 
 .form-child {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
 }

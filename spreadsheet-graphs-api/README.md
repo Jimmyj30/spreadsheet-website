@@ -29,14 +29,14 @@
         - `xCurveStraighteningInstructions` is an `instruction`
   - `GET`
     - **Gets all the data tables stored in the DB**
-      - Only the one "admin" account has the permissions to use this request.
+      - Only the "admin" accounts have the permissions to use this request.
     - In headers:
       - `Authorization`: `Bearer <FIREBASE_TOKEN>`
 
 - `<API_URL>/api/data-tables/<DATA_TABLE_ID>`
   - `PUT`
     - **Updates an existing data table**
-      - `<DATA_TABLE_ID>` specifies a table id to change (as long as the user have permissions to do so).
+      - `<DATA_TABLE_ID>` specifies a table id to change (as long as the user has permissions to do so).
     - In headers:
       - `Authorization`: `Bearer <FIREBASE_TOKEN>`
     - In body:
