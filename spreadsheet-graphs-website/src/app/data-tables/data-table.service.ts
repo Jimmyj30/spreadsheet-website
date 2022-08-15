@@ -29,7 +29,7 @@ export class DataTableService {
     return this.api.getDataTableByFirebaseUid();
   }
 
-  generateDefaultDataTable(dataTableArray: any[]): DataTable[] {
+  generateDefaultDataTable(dataTableArray: any[]): DataPoint[] {
     let defaultDataTable = [];
     for (var i = 0; i < dataTableArray.length; ++i) {
       let row = new DataPoint({

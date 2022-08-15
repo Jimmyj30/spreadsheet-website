@@ -14,6 +14,7 @@ import { numberFractionValidator } from '../shared/number-fraction.directive';
 import { ErrorHandlingService } from '../shared/error-handling.service';
 import { Constants } from '../shared/constants';
 import { DropdownMenuItem } from './models/dropdown-menu-item.model';
+import { DataPoint } from './models/data-point.model';
 
 @Component({
   selector: 'app-data-tables',
@@ -23,12 +24,12 @@ import { DropdownMenuItem } from './models/dropdown-menu-item.model';
 export class DataTablesComponent implements OnInit {
   private hotRegisterer = new HotTableRegisterer();
 
-  rawData: any[];
+  rawData: DataPoint[];
   rawDataTableSettings;
   rawDataTable: DataTable;
   rawDataTableHandsontableID = 'rawDataTable';
 
-  processedData: any[];
+  processedData: DataPoint[];
   processedDataTableSettings;
   processedDataTable: DataTable;
   processedDataTableHandsontableID = 'processedDataTable';
