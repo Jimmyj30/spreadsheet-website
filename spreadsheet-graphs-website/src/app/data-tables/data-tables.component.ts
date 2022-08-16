@@ -87,6 +87,7 @@ export class DataTablesComponent implements OnInit {
       manualColumnResize: true,
       manualRowResize: true,
       wordWrap: true,
+      preventOverflow: 'horizontal',
 
       contextMenu: ['row_above', 'row_below', 'remove_row'],
       dropdownMenu: {
