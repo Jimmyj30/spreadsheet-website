@@ -1,12 +1,24 @@
 .graph {
-  width: 80%;
-  max-width: 800px;
+  max-width: 1000px;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.plot {
+  min-width: 550px;
+  max-width: 800px;
 }
 
 .settings {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: fit-content;
+  position: sticky;
+  left: 0;
+}
+
+.setting-btn {
+  max-width: 200px;
 }

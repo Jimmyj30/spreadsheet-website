@@ -184,7 +184,7 @@ export class GraphUtilService {
         mode: 'markers',
         type: 'scatter',
 
-        name: 'Click Here to Edit<br>Trace Name',
+        name: 'Click Here to Edit<br>Trace Name<br>(I can be dragged<br>inside the graph!)',
       },
     ];
   }

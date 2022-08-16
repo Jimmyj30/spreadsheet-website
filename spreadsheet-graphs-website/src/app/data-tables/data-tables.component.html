@@ -1,5 +1,5 @@
 <div fxLayout="column" fxLayoutGap="20px" class="container">
-  <div class="vertical-margin">
+  <div class="vertical-margin right-outline">
     <hot-table
       #rawDataTableRef
       [hotId]="rawDataTableHandsontableID"
@@ -39,7 +39,10 @@
     <p>loading...</p>
     <mat-spinner></mat-spinner>
   </div>
-  <div *ngIf="processedDataTable && !loading" class="vertical-margin">
+  <div
+    *ngIf="processedDataTable && !loading"
+    class="vertical-margin right-outline"
+  >
     <hot-table
       #processedDataTableRef
       [hotId]="processedDataTableHandsontableID"
@@ -50,17 +53,10 @@
     <!-- to avoid processedDataTableSettings being undefined, we will 
       use ngIf so this div won't exist in this case -->
     <app-graphs
-      [hidden]="!showGraph"
       [processedDataTableData]="processedDataTableSettings.data"
     ></app-graphs>
   </div>
   <div *ngIf="processedDataTable && !loading" fxLayout="column">
-    <div>
-      <!-- generate graph button will disappear once graph is generated -->
-      <button class="btn btn-light" type="button" (click)="onToggleGraph()">
-        {{ showGraph ? "Hide Graph" : "Show Graph" }}
-      </button>
-    </div>
     <div class="vertical-margin">
       <button class="btn btn-danger" type="button" (click)="onFinish()">
         Delete Data

@@ -1,33 +1,51 @@
-<div class="graph" *ngIf="processedDataTableData">
-  <!-- <canvas
-    baseChart
-    [datasets]="scatterChartData"
-    [options]="scatterChartOptions"
-    [chartType]="scatterChartType"
-  >
-  </canvas> -->
-  <!-- using plotly for our graph -->
-  <plotly-plot
-    [data]="scatterChart.data"
-    [layout]="scatterChart.layout"
-    [config]="scatterChart.config"
-    [useResizeHandler]="true"
-    [divId]="'graph'"
-  ></plotly-plot>
-  <div class="settings">
-    <button
-      type="button"
-      class="btn btn-outline-secondary"
-      (click)="onToggleTrendlines()"
-    >
-      {{ showTrendline ? "Hide Trendlines" : "Show Trendlines" }}
-    </button>
-    <button
-      type="button"
-      class="btn btn-outline-secondary"
-      (click)="onToggleUncertainties()"
-    >
-      {{ showUncertainties ? "Hide Uncertainties" : "Show Uncertainties" }}
-    </button>
+<div class="collapse hide" id="graph-collapse">
+  <div class="card card-body mt-4 mb-2">
+    <div class="graph" *ngIf="processedDataTableData">
+      <!-- <canvas
+        baseChart
+        [datasets]="scatterChartData"
+        [options]="scatterChartOptions"
+        [chartType]="scatterChartType"
+      >
+      </canvas> -->
+      <!-- using plotly for our graph -->
+      <plotly-plot
+        [data]="scatterChart.data"
+        [layout]="scatterChart.layout"
+        [config]="scatterChart.config"
+        [useResizeHandler]="true"
+        [divId]="'graph'"
+        class="plot"
+      ></plotly-plot>
+      <div class="settings mt-2">
+        <button
+          type="button"
+          class="btn btn-outline-secondary setting-btn"
+          (click)="onToggleTrendlines()"
+        >
+          {{ showTrendline ? "Hide Trendlines" : "Show Trendlines" }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline-secondary setting-btn"
+          (click)="onToggleUncertainties()"
+        >
+          {{ showUncertainties ? "Hide Uncertainties" : "Show Uncertainties" }}
+        </button>
+      </div>
+    </div>
   </div>
 </div>
+<p>
+  <button
+    class="btn btn-primary"
+    type="button"
+    data-toggle="collapse"
+    data-target="#graph-collapse"
+    aria-expanded="false"
+    aria-controls="graphCollapse"
+    (click)="onToggleGraph()"
+  >
+    {{ showGraph ? "Hide Graph" : "Show Graph" }}
+  </button>
+</p>

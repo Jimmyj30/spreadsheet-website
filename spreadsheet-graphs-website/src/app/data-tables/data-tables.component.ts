@@ -57,7 +57,6 @@ export class DataTablesComponent implements OnInit {
   errorClass: string;
   invalidTableErrorMsg: string = Constants.FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
   loading: boolean = false;
-  showGraph: boolean = false;
 
   constructor(
     private readonly dataTableService: DataTableService,
@@ -212,10 +211,6 @@ export class DataTablesComponent implements OnInit {
         );
       }
     }
-  }
-
-  onToggleGraph(): void {
-    this.showGraph = !this.showGraph;
   }
 
   private createProcessedDataTableSettings(

@@ -42,6 +42,7 @@ export class GraphsComponent implements OnInit, DoCheck {
   scatterChart;
   showTrendline: boolean = true;
   showUncertainties: boolean = true;
+  showGraph: boolean = false;
 
   constructor(
     private differs: KeyValueDiffers,
@@ -66,6 +67,7 @@ export class GraphsComponent implements OnInit, DoCheck {
         xaxis: Constants.graphXAxis,
         yaxis: Constants.graphYAxis,
         shapes: this.graphUtilService.createShapes(scatterChartData),
+        autosize: true,
         annotations: [
           // min gradient
           {
@@ -227,6 +229,10 @@ export class GraphsComponent implements OnInit, DoCheck {
     layoutUpdate
       ? PlotlyModule.plotlyjs.relayout('graph', layoutUpdate)
       : undefined;
+  }
+
+  onToggleGraph() {
+    this.showGraph = !this.showGraph;
   }
 
   private createScatterChartData(
