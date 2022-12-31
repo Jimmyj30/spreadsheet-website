@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import { numberFractionValidator } from 'src/app/shared/number-fraction.directive';
 
 @Component({
@@ -8,12 +8,12 @@ import { numberFractionValidator } from 'src/app/shared/number-fraction.directiv
   styleUrls: ['./data-table-form.component.css'],
 })
 export class DataTableFormComponent implements OnInit {
-  @Input() curveStraighteningInstructionsForm: FormGroup;
+  @Input() curveStraighteningInstructionsForm: UntypedFormGroup;
   @Input() showXToConstantPower: boolean;
   @Input() showYToConstantPower: boolean;
 
   @Output() curveStraighteningInstructionsFormChange =
-    new EventEmitter<FormGroup>();
+    new EventEmitter<UntypedFormGroup>();
 
   xOptions: string[] = ['x', 'ln(x)', 'log_10(x)', 'x^a'];
   yOptions: string[] = ['y', 'ln(y)', 'log_10(y)', 'y^a'];

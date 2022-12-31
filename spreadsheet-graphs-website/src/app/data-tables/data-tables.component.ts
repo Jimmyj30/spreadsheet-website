@@ -1,10 +1,10 @@
 import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { HotTableComponent, HotTableRegisterer } from '@handsontable/angular';
 import {
-  FormControl,
-  FormBuilder,
+  UntypedFormControl,
+  UntypedFormBuilder,
   Validators,
-  FormGroup,
+  UntypedFormGroup,
 } from '@angular/forms';
 import * as Handsontable from 'handsontable';
 
@@ -40,11 +40,11 @@ export class DataTablesComponent implements OnInit {
   yOptions: string[] = ['y', 'ln(y)', 'log_10(y)', 'y^a'];
 
   // we don't use validators for the form here as the first option is selected by default
-  curveStraighteningInstructionsForm: FormGroup = this.fb.group({
-    xCurveStraighteningInstructions: new FormControl(this.xOptions[0], []),
-    xToConstantPower: new FormControl('', []),
-    yCurveStraighteningInstructions: new FormControl(this.yOptions[0], []),
-    yToConstantPower: new FormControl('', []),
+  curveStraighteningInstructionsForm: UntypedFormGroup = this.fb.group({
+    xCurveStraighteningInstructions: new UntypedFormControl(this.xOptions[0], []),
+    xToConstantPower: new UntypedFormControl('', []),
+    yCurveStraighteningInstructions: new UntypedFormControl(this.yOptions[0], []),
+    yToConstantPower: new UntypedFormControl('', []),
   });
 
   @ViewChild('processedDataTableRef', { static: false })
@@ -60,7 +60,7 @@ export class DataTablesComponent implements OnInit {
 
   constructor(
     private readonly dataTableService: DataTableService,
-    private readonly fb: FormBuilder,
+    private readonly fb: UntypedFormBuilder,
     private readonly changeDetector: ChangeDetectorRef,
     private readonly errorService: ErrorHandlingService
   ) {
