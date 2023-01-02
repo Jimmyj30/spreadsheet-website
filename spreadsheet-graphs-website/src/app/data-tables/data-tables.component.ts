@@ -41,9 +41,15 @@ export class DataTablesComponent implements OnInit {
 
   // we don't use validators for the form here as the first option is selected by default
   curveStraighteningInstructionsForm: UntypedFormGroup = this.fb.group({
-    xCurveStraighteningInstructions: new UntypedFormControl(this.xOptions[0], []),
+    xCurveStraighteningInstructions: new UntypedFormControl(
+      this.xOptions[0],
+      []
+    ),
     xToConstantPower: new UntypedFormControl('', []),
-    yCurveStraighteningInstructions: new UntypedFormControl(this.yOptions[0], []),
+    yCurveStraighteningInstructions: new UntypedFormControl(
+      this.yOptions[0],
+      []
+    ),
     yToConstantPower: new UntypedFormControl('', []),
   });
 
@@ -110,21 +116,21 @@ export class DataTablesComponent implements OnInit {
     // this route is protected by a guard so you need to be
     // logged in to realistically access here
     this.loading = true;
-    this.dataTableService.getDataTableFromLoggedInUser().subscribe(
-      (res) => {
+    this.dataTableService.getDataTableFromLoggedInUser().subscribe({
+      next: (res) => {
         if (res['rawDataTable'] && res['processedDataTable']) {
           this.setDataTableData(res);
           this.loadFormData(res);
         }
         this.loading = false;
       },
-      (err) => {
+      error: (err) => {
         this.loading = false;
         const errorObj = this.errorService.findError(err);
         this.error = errorObj.error;
         this.errorClass = errorObj.errorClass;
-      }
-    );
+      },
+    });
   }
 
   get xCurveStraighteningInstructions() {
@@ -158,21 +164,21 @@ export class DataTablesComponent implements OnInit {
     if (this.processedDataTable && this.rawDataTable._id) {
       // the API returns a processedDataTable along with the ID of the raw data table...
       this.loading = true;
-      this.dataTableService.updateDataTable(this.rawDataTable).subscribe(
-        (response: any) => {
+      this.dataTableService.updateDataTable(this.rawDataTable).subscribe({
+        next: (response: any) => {
           this.loading = false;
           this.updateProcessedDataTableSettings(response.data);
           this.error = undefined;
         },
-        (error) => {
+        error: (error) => {
           this.loading = false;
           this.error = error;
-        }
-      );
+        },
+      });
     } else {
       this.loading = true;
-      this.dataTableService.createDataTable(this.rawDataTable).subscribe(
-        (response: any) => {
+      this.dataTableService.createDataTable(this.rawDataTable).subscribe({
+        next: (response: any) => {
           // response contains a processedDataTable and a rawDataTableID...
           // this.processedDataTable is a plain object since the raw data table the user submits
           // can be used to calculate a processedDataTable that can then be sent as part of a request response
@@ -184,11 +190,11 @@ export class DataTablesComponent implements OnInit {
           this.rawDataTable._id = response.rawDataTableID;
           this.error = undefined;
         },
-        (error) => {
+        error: (error) => {
           this.loading = false;
           this.error = error;
-        }
-      );
+        },
+      });
     }
   }
 
@@ -199,16 +205,16 @@ export class DataTablesComponent implements OnInit {
         this.rawDataTable._id &&
         this.processedDataTable
       ) {
-        this.dataTableService.deleteDataTable(this.rawDataTable).subscribe(
-          () => {
+        this.dataTableService.deleteDataTable(this.rawDataTable).subscribe({
+          next: () => {
             console.log('data table(s) deleted');
             window.location.reload();
           },
-          (error) => {
+          error: (error) => {
             this.error = error;
             this.loading = false;
-          }
-        );
+          },
+        });
       }
     }
   }

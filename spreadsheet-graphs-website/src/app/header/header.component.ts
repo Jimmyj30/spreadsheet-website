@@ -20,7 +20,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   onLogout() {
-    this.authService.logout();
+    if (confirm('Are you sure you want to logout?')) {
+      this.authService.logout();
+    }
   }
 
   ngOnDestroy(): void {

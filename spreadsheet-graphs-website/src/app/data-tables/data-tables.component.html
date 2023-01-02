@@ -49,18 +49,16 @@
       [settings]="processedDataTableSettings"
     ></hot-table>
   </div>
-  <div *ngIf="processedDataTable">
+  <div class="vertical-margin" *ngIf="processedDataTable">
     <!-- to avoid processedDataTableSettings being undefined, we will 
       use ngIf so this div won't exist in this case -->
     <app-graphs
       [processedDataTableData]="processedDataTableSettings.data"
     ></app-graphs>
   </div>
-  <div *ngIf="processedDataTable && !loading" fxLayout="column">
-    <div class="vertical-margin">
-      <button class="btn btn-danger" type="button" (click)="onFinish()">
-        Delete Data
-      </button>
-    </div>
+  <div class="vertical-margin" *ngIf="processedDataTable && !loading">
+    <button class="btn btn-danger" type="button" (click)="onFinish()">
+      Delete Data
+    </button>
   </div>
 </div>

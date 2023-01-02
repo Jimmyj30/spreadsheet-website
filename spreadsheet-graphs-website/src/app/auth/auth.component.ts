@@ -35,19 +35,19 @@ export class AuthComponent implements OnInit {
       authObs = this.authService.signup(email, password);
     }
 
-    authObs.subscribe(
-      (res) => {
+    authObs.subscribe({
+      next: (res) => {
         // console.log(res);
         this.loading = false;
         this.error = null;
         this.router.navigate(['/']);
       },
-      (error: string) => {
+      error: (error: string) => {
         // console.log(error);
         this.loading = false;
         this.error = error;
-      }
-    );
+      },
+    });
 
     form.reset();
   }

@@ -1,33 +1,40 @@
-<nav
-  class="navbar navbar-expand-lg navbar-light bg-light justify-content-between"
->
-  <a class="navbar-brand" routerLink="/">Lab Data Processor</a>
-  <button
-    class="navbar-toggler"
-    type="button"
-    data-toggle="collapse"
-    data-target="#navbarText"
-    aria-controls="navbarText"
-    aria-expanded="false"
-    aria-label="Toggle navigation"
-  >
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarText">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item"><a class="nav-link" routerLink="/help">Help</a></li>
-      <li class="nav-item">
-        <a class="nav-link" routerLink="/auth" *ngIf="!isAuthenticated">
-          Login
-        </a>
-      </li>
-    </ul>
-    <ul class="navbar-nav">
-      <li>
-        <a style="cursor: pointer" *ngIf="isAuthenticated" (click)="onLogout()">
-          Logout
-        </a>
-      </li>
-    </ul>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" routerLink="/">Lab Data Processor</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarText"
+      aria-controls="navbarText"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarText">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/help">Help</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" routerLink="/auth" *ngIf="!isAuthenticated">
+            Login
+          </a>
+        </li>
+      </ul>
+      <ul class="d-flex navbar-nav">
+        <li>
+          <a
+            class="nav-link"
+            style="cursor: pointer"
+            *ngIf="isAuthenticated"
+            (click)="onLogout()"
+          >
+            Logout
+          </a>
+        </li>
+      </ul>
+    </div>
   </div>
 </nav>
