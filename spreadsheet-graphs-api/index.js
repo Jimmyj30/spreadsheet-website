@@ -8,6 +8,9 @@ let mongoose = require("mongoose");
 let app = express();
 app.use(cors());
 
+// Load env vars
+require("dotenv").config();
+
 // Import routes
 let apiRoutes = require("./api-routes");
 
@@ -27,17 +30,20 @@ app.use(
 app.use(decodeIDToken);
 
 // Connect to Mongoose and set connection variable
+const localhost = "127.0.0.1";
 const uri =
-  process.env.MONGODB_URI || "mongodb://localhost/spreadsheet-graphs-api";
+  process.env.MONGODB_URI ||
+  `mongodb://${localhost}:27017/spreadsheet-graphs-api`;
+mongoose.set("strictQuery", false);
 mongoose.connect(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
-var db = mongoose.connection;
 
 // Added check for DB connection
-if (!db) console.log("Error connecting db");
-else console.log("Db connected successfully");
+let db = mongoose.connection;
+db.on("connected", () => console.log("Connected"));
+db.on("error", (err) => console.log("Connection failed with - ", err));
 
 // Setup server port
 var port = process.env.PORT || 8080;
