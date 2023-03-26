@@ -2,6 +2,7 @@
 
 // Import data model
 const DataTable = require("./dataTableModel");
+let { checkError, getError } = require("./utils/httpUtils");
 
 // Handle index actions
 exports.index = function (req, res) {
@@ -11,18 +12,20 @@ exports.index = function (req, res) {
     if (checkError(err, auth, true)) {
       let error = getError(err, auth, true);
       res.status(error.statusCode).json(error);
+      return;
     } else if (auth.email !== "test@test.com") {
       res.status(403).json({
         status: "error 403",
         message: "403 unauthorized",
       });
-    } else {
-      res.json({
-        status: "success",
-        message: "Data retrieved successfully",
-        data: dataTables,
-      });
+      return;
     }
+
+    res.json({
+      status: "success",
+      message: "Data retrieved successfully",
+      data: dataTables,
+    });
   });
 };
 
@@ -30,7 +33,7 @@ exports.index = function (req, res) {
 exports.new = function (req, res) {
   // console.log(req.headers.authorization);
   const auth = req.currentUser;
-  console.log(auth);
+  console.log("auth: ", auth);
 
   let dataTable = new DataTable(req.body);
   dataTable.firebase_uid = auth?.uid;
@@ -40,26 +43,30 @@ exports.new = function (req, res) {
     if (checkError(err, auth, true)) {
       let error = getError(err, auth, true);
       res.status(error.statusCode).json(error);
+      return;
     } else if (dataTables.length > 0) {
       // can't make a new data table if one already exists
       res.status(400).json({
         status: "error 400",
         message: "400 bad request: data table already exists for this user",
       });
-    } else {
-      // save the data table and check for errors
-      dataTable.save(function (err) {
-        if (err) res.json(err);
-        else {
-          res.json({
-            // we send the processed data table to the front end
-            message: "New data table created!",
-            rawDataTableID: dataTable._id,
-            processedDataTable: processedDataTable,
-          });
-        }
-      });
+      return;
     }
+
+    // save the data table and check for errors
+    dataTable.save(function (err) {
+      if (err) {
+        res.json(err);
+        return;
+      }
+
+      res.json({
+        // we send the processed data table to the front end
+        message: "New data table created!",
+        rawDataTableID: dataTable._id,
+        processedDataTable: processedDataTable,
+      });
+    });
   });
 };
 
@@ -68,7 +75,7 @@ exports.view = function (req, res) {
   // console.log(req.headers.authorization);
   const auth = req.currentUser;
   let query;
-  console.log(auth);
+  console.log("auth: ", auth);
 
   if (req.params.dataTable_id) {
     query = { _id: req.params.dataTable_id };
@@ -81,13 +88,14 @@ exports.view = function (req, res) {
     if (checkError(err, auth, dataTable, true, true)) {
       let error = getError(err, auth, dataTable, true, true);
       res.status(error.statusCode).json(error);
-    } else {
-      res.json({
-        message: "data table details loading..",
-        rawDataTable: dataTable,
-        processedDataTable: dataTable.generateProcessedDataTable(dataTable),
-      });
+      return;
     }
+
+    res.json({
+      message: "data table details loading..",
+      rawDataTable: dataTable,
+      processedDataTable: dataTable.generateProcessedDataTable(dataTable),
+    });
   });
 };
 
@@ -99,34 +107,36 @@ exports.update = function (req, res) {
   // req.body is the latest version of the raw data table from the front-end
   // console.log(req.headers.authorization);
   const auth = req.currentUser;
-  console.log(auth);
+  console.log("auth: ", auth);
 
   DataTable.findById(req.params.dataTable_id, function (err, dataTable) {
     if (checkError(err, auth, dataTable, true, true)) {
       let error = getError(err, auth, dataTable, true, true);
       res.status(error.statusCode).json(error);
-    } else {
-      dataTable.dataTableData = req.body.dataTableData;
-
-      dataTable.xCurveStraighteningInstructions =
-        req.body.xCurveStraighteningInstructions;
-      dataTable.yCurveStraighteningInstructions =
-        req.body.yCurveStraighteningInstructions;
-
-      // make new processed data table from rawDataTable sent in request
-      let processedDataTable = dataTable.generateProcessedDataTable(req.body);
-
-      // save the updated data table and check for errors
-      dataTable.save(function (err) {
-        if (err) res.json(err);
-        else {
-          res.json({
-            message: "data table info updated",
-            data: processedDataTable,
-          });
-        }
-      });
+      return;
     }
+
+    dataTable.dataTableData = req.body.dataTableData;
+    dataTable.xCurveStraighteningInstructions =
+      req.body.xCurveStraighteningInstructions;
+    dataTable.yCurveStraighteningInstructions =
+      req.body.yCurveStraighteningInstructions;
+
+    // make new processed data table from rawDataTable sent in request
+    let processedDataTable = dataTable.generateProcessedDataTable(req.body);
+
+    // save the updated data table and check for errors
+    dataTable.save(function (err) {
+      if (err) {
+        res.json(err);
+        return;
+      }
+
+      res.json({
+        message: "data table info updated",
+        data: processedDataTable,
+      });
+    });
   });
 };
 
@@ -134,34 +144,36 @@ exports.update = function (req, res) {
 exports.delete = function (req, res) {
   // console.log(req.headers.authorization);
   const auth = req.currentUser;
-  console.log(auth);
+  console.log("auth:", auth);
 
   DataTable.findById(req.params.dataTable_id, function (err, dataTable) {
     if (checkError(err, auth, dataTable, true, true)) {
       let error = getError(err, auth, dataTable, true, true);
       res.status(error.statusCode).json(error);
-    } else {
-      DataTable.deleteOne(
-        {
-          _id: req.params.dataTable_id,
-          firebase_uid: auth.uid,
-        },
-        function (err, deleteResult) {
-          let dataTableNotFound = deleteResult.deletedCount === 0;
-          if (dataTableNotFound) {
-            res.status(404).json({
-              status: "error 404",
-              message: "404 data table not found",
-            });
-          } else {
-            res.json({
-              status: "success",
-              message: "data table deleted",
-            });
-          }
-        }
-      );
+      return;
     }
+
+    DataTable.deleteOne(
+      {
+        _id: req.params.dataTable_id,
+        firebase_uid: auth.uid,
+      },
+      function (err, deleteResult) {
+        let dataTableNotFound = deleteResult.deletedCount === 0;
+        if (dataTableNotFound) {
+          res.status(404).json({
+            status: "error 404",
+            message: "404 data table not found",
+          });
+          return;
+        }
+
+        res.json({
+          status: "success",
+          message: "data table deleted",
+        });
+      }
+    );
   });
 };
 
@@ -173,58 +185,3 @@ exports.delete = function (req, res) {
 // DELETE /data-tables/{id} will delete a single data table
 
 // - req and res mean request and response...
-
-// check if an error exists
-function checkError(
-  error,
-  auth,
-  dataTable,
-  checkDataTable = false,
-  matchUid = false
-) {
-  if (error || !auth) {
-    return true;
-  }
-  if (checkDataTable && !dataTable) {
-    return true;
-  }
-  if (matchUid && auth.uid !== dataTable?.firebase_uid) {
-    return true;
-  }
-  return false;
-}
-
-// send error responses
-function getError(
-  error,
-  auth,
-  dataTable,
-  checkDataTable = false,
-  matchUid = false
-) {
-  let statusCode;
-  let statusMessage;
-
-  if (!auth) {
-    statusCode = 401;
-    statusMessage = "401 unauthorized";
-  } else if (error) {
-    statusCode = 400;
-    statusMessage = error;
-  } else if (checkDataTable && !dataTable) {
-    statusCode = 404;
-    statusMessage = "404 data table not found";
-  } else if (matchUid && auth.uid !== dataTable?.firebase_uid) {
-    statusCode = 403;
-    statusMessage = "403 unauthorized";
-  } else {
-    statusCode = 500;
-    statusMessage = "500 internal server error";
-  }
-
-  return {
-    statusCode: statusCode,
-    status: "error " + statusCode,
-    message: statusMessage,
-  };
-}
