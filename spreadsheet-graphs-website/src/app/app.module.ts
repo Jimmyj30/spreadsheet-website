@@ -17,6 +17,7 @@ import { HelpComponent } from './help/help.component';
 import { AuthComponent } from './auth/auth.component';
 import { AuthGuard } from './auth/auth.guard';
 import { DataTableFormComponent } from './data-tables/data-table-form/data-table-form.component';
+import { DataTableComponent } from './data-tables/data-table/data-table.component';
 
 const appRoutes: Routes = [
   { path: '', component: DataTablesComponent, canActivate: [AuthGuard] },
@@ -36,6 +37,7 @@ PlotlyModule.plotlyjs = PlotlyJS;
     HelpComponent,
     AuthComponent,
     DataTableFormComponent,
+    DataTableComponent,
   ],
   imports: [
     BrowserModule,
