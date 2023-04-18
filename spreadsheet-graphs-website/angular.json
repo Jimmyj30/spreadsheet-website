@@ -57,6 +57,16 @@
                   "maximumError": "10kb"
                 }
               ]
+            },
+            "dev": {
+              "optimization": false,
+              "outputHashing": "all",
+              "sourceMap": true,
+              "namedChunks": false,
+              "aot": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": false
             }
           }
         },
@@ -68,6 +78,9 @@
           "configurations": {
             "production": {
               "browserTarget": "spreadsheet-graphs-website:build:production"
+            },
+            "dev": {
+              "browserTarget": "spreadsheet-graphs-website:build:dev"
             }
           }
         },
