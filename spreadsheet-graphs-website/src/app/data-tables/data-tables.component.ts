@@ -15,6 +15,8 @@ import { ErrorHandlingService } from '../shared/error-handling.service';
 import { Constants } from '../shared/constants';
 import { DropdownMenuItem } from './models/dropdown-menu-item.model';
 import { DataPoint } from './models/data-point.model';
+import { DataTableComponent } from './data-table/data-table.component';
+import { GridSettings } from 'handsontable/settings';
 
 @Component({
   selector: 'app-data-tables',
@@ -25,7 +27,7 @@ export class DataTablesComponent implements OnInit {
   private hotRegisterer = new HotTableRegisterer();
 
   rawData: DataPoint[];
-  rawDataTableSettings;
+  rawDataTableSettings: GridSettings;
   rawDataTable: DataTable;
   rawDataTableHandsontableID = 'rawDataTable';
 
@@ -52,6 +54,9 @@ export class DataTablesComponent implements OnInit {
     ),
     yToConstantPower: new UntypedFormControl('', []),
   });
+
+  @ViewChild('rawDataTableRefTest', { static: false })
+  rawDataTableRefTest: DataTableComponent;
 
   @ViewChild('processedDataTableRef', { static: false })
   processedDataTableRef: HotTableComponent;
@@ -257,7 +262,8 @@ export class DataTablesComponent implements OnInit {
   }
 
   private refreshRawDataTable(settings): void {
-    this.rawDataTableRef.updateHotTable(settings);
+    // this.rawDataTableRef.updateHotTable(settings);
+    this.rawDataTableRefTest.hotTableRef.updateHotTable(settings);
   }
 
   private generateIncreaseMantissa(dataTableName: string): DropdownMenuItem {
@@ -330,7 +336,7 @@ export class DataTablesComponent implements OnInit {
     return false;
   }
 
-  private validateHandsontable() {
+  private validateHandsontable(): void{
     let dataArray = this.hotRegisterer
       .getInstance(this.rawDataTableHandsontableID)
       .getData();
@@ -345,6 +351,8 @@ export class DataTablesComponent implements OnInit {
       // default error message for table without anything filled in yet
       this.invalidTableErrorMsg = Constants.FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
     }
+    
+    console.log(this.rawData)
   }
 
   private setDataTableData(res): void {

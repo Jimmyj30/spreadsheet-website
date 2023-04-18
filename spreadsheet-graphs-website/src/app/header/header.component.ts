@@ -21,7 +21,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   onLogout() {
-    this.authService.user.subscribe(user => (this.userEmail = user.email));
+    this.authService.user.subscribe(user => (this.userEmail = user?.email));
     if (confirm(`Are you sure you want to logout as user ${this.userEmail}?`)) {
       this.authService.logout();
     }
