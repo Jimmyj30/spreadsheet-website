@@ -1,13 +1,10 @@
 <div fxLayout="column" fxLayoutGap="20px" class="container">
   <div class="vertical-margin right-outline">
     <app-data-table
-      
+      #rawDataTableRefTest
+      [(hotId)]="rawDataTableHandsontableID"
+      [(hotSettings)]="rawDataTableSettings"
     ></app-data-table>
-    <hot-table
-      #rawDataTableRef
-      [hotId]="rawDataTableHandsontableID"
-      [settings]="rawDataTableSettings"
-    ></hot-table>
   </div>
   <div class="vertical-margin">
     <div>Curve straightening instructions for processed data table:</div>
