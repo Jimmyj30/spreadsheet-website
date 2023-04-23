@@ -9,7 +9,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import { HotTableComponent, HotTableRegisterer } from '@handsontable/angular';
-import { GridSettings } from 'handsontable/settings';
 import { DataTableService } from '../data-table.service';
 import { DropdownMenuItem } from '../models/dropdown-menu-item.model';
 
@@ -35,75 +34,66 @@ export class DataTableComponent implements OnInit {
 
   ngOnInit() {
     this.hotSettings.dropdownMenu.items.increaseMantissa =
-      this.generateIncreaseMantissa(this.hotId);
+      this.generateIncreaseMantissa();
     this.hotSettings.dropdownMenu.items.decreaseMantissa =
-      this.generateDecreaseMantissa(this.hotId);
+      this.generateDecreaseMantissa();
   }
 
-  private generateIncreaseMantissa(dataTableName: string): DropdownMenuItem {
+  private generateIncreaseMantissa(): DropdownMenuItem {
     return {
       name: 'Increase column decimal places by one', // can be string or function...
       callback: (key, selection, clickEvent) => {
         // selection[0].end.col  and selection[0].start.col should be the same
         // as this dropdown menu can only select an entire column
-        this.increaseMantissa(selection[0].end.col, dataTableName);
+        this.increaseMantissa(selection[0].end.col);
       },
     };
   }
 
-  private generateDecreaseMantissa(dataTableName: string): DropdownMenuItem {
+  private generateDecreaseMantissa(): DropdownMenuItem {
     return {
       name: 'Decrease column decimal places by one',
       disabled: () => {
-        return !this.canDecreaseMantissa(dataTableName);
+        return !this.canDecreaseMantissa();
       },
       callback: (key, selection, clickEvent) => {
-        this.decreaseMantissa(selection[0].end.col, dataTableName);
+        this.decreaseMantissa(selection[0].end.col);
       },
     };
   }
 
   // you can shift the decimal place left as many times as you want
   // so there is no validity check for this operation
-  private increaseMantissa(columnIndex, dataTable: string) {
-    console.log("increasing mantissa")
-    let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
-    this[`${dataTableVar}Settings`].columns[
-      columnIndex
-    ].numericFormat.pattern.mantissa += 1;
-    this.hotRegisterer
-      .getInstance(this.hotId)
-      .render();
+  private increaseMantissa(columnIndex) {
+    console.log('increasing mantissa');
+    this.hotSettings.columns[columnIndex].numericFormat.pattern.mantissa += 1;
+    this.hotRegisterer.getInstance(this.hotId).render();
   }
 
   // dataTable param has to either be "rawDataTable" or "processedDataTable"
-  private decreaseMantissa(columnIndex, dataTable: string) {
-    console.log("decreasing mantissa")
-    let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
+  private decreaseMantissa(columnIndex) {
+    console.log('decreasing mantissa');
 
     let colMantissa =
-      this[`${dataTableVar}Settings`].columns[columnIndex].numericFormat.pattern
-        .mantissa;
+      this.hotSettings.columns[columnIndex].numericFormat.pattern.mantissa;
 
     if (colMantissa !== 0) {
-      this[`${dataTableVar}Settings`].columns[
+      this.hotSettings.columns[
         columnIndex
       ].numericFormat.pattern.mantissa -= 1;
       this.hotRegisterer
-        .getInstance(this[`${dataTableVar}HandsontableID`])
+        .getInstance(this.hotId)
         .render();
     }
   }
 
-  private canDecreaseMantissa(dataTable: string): boolean {
-    let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
-
-    if (this[`${dataTableVar}Settings`]) {
+  private canDecreaseMantissa(): boolean {
+    if (this.hotSettings) {
       let colIndex = this.hotRegisterer
-        .getInstance(this[`${dataTableVar}HandsontableID`])
+        .getInstance(this.hotId)
         .getSelectedRangeLast().from.col;
       let colMantissa =
-        this[`${dataTableVar}Settings`].columns[colIndex].numericFormat.pattern
+        this.hotSettings.columns[colIndex].numericFormat.pattern
           .mantissa;
 
       return colMantissa >= 1; // we can shift right as long as mantissa is >= 1
