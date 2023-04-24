@@ -2,8 +2,8 @@
   <div class="vertical-margin right-outline">
     <app-data-table
       #rawDataTableRefTest
-      [(hotId)]="rawDataTableHandsontableID"
-      [(hotSettings)]="rawDataTableSettings"
+      [hotId]="rawDataTableHandsontableID"
+      [hotSettings]="rawDataTableSettings"
     ></app-data-table>
   </div>
   <div class="vertical-margin">
@@ -43,11 +43,11 @@
     *ngIf="processedDataTable && !loading"
     class="vertical-margin right-outline"
   >
-    <hot-table
-      #processedDataTableRef
+    <app-data-table
+      #processedDataTableRefTest
       [hotId]="processedDataTableHandsontableID"
-      [settings]="processedDataTableSettings"
-    ></hot-table>
+      [hotSettings]="processedDataTableSettings"
+    ></app-data-table>
   </div>
   <div class="vertical-margin" *ngIf="processedDataTable">
     <!-- to avoid processedDataTableSettings being undefined, we will 
