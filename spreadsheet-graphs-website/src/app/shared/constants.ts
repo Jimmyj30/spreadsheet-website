@@ -1,3 +1,6 @@
+import { Settings } from 'handsontable/plugins/contextMenu';
+import { Settings as AutofillSettings } from 'handsontable/plugins/autofill';
+
 export class Constants {
   public static dataTableDefaultColumnValues = [
     {
@@ -41,6 +44,19 @@ export class Constants {
       allowEmpty: false,
     },
   ];
+
+  public static dropdownMenuItems: Settings = {
+    items: {
+      clear_column: {},
+      alignment: {},
+      sp1: { name: '---------' },
+    },
+  };
+
+  public static fillHandleSettings: AutofillSettings = {
+    direction: 'vertical',
+    autoInsertRow: true,
+  };
 
   public static rawDataTableColHeaders: string[] = [
     'Uncertainties for<br>Manipulated Variable',

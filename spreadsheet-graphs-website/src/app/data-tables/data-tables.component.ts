@@ -37,20 +37,16 @@ export class DataTablesComponent implements OnInit {
 
   showXToConstantPower: boolean;
   showYToConstantPower: boolean;
-  
-  // move things like this to a constants file
-  xOptions: string[] = ['x', 'ln(x)', 'log_10(x)', 'x^a'];
-  yOptions: string[] = ['y', 'ln(y)', 'log_10(y)', 'y^a'];
 
   // we don't use validators for the form here as the first option is selected by default
   curveStraighteningInstructionsForm: UntypedFormGroup = this.fb.group({
     xCurveStraighteningInstructions: new UntypedFormControl(
-      this.xOptions[0],
+      this.dataTableService.dataTableFormXOptions[0],
       []
     ),
     xToConstantPower: new UntypedFormControl('', []),
     yCurveStraighteningInstructions: new UntypedFormControl(
-      this.yOptions[0],
+      this.dataTableService.dataTableFormYOptions[0],
       []
     ),
     yToConstantPower: new UntypedFormControl('', []),
@@ -91,29 +87,11 @@ export class DataTablesComponent implements OnInit {
       afterChange: (changes) => this.validateHandsontable(),
       afterRemoveRow: (changes) => this.validateHandsontable(),
       afterCreateRow: (changes) => this.validateHandsontable(),
+    };
 
-      filters: true,
-      fillHandle: {
-        direction: 'vertical',
-        autoInsertRow: true,
-      },
-      manualColumnResize: true,
-      manualRowResize: true,
-      wordWrap: true,
-      preventOverflow: 'horizontal',
-
-      contextMenu: ['row_above', 'row_below', 'remove_row'],
-      dropdownMenu: {
-        items: {
-          clear_column: {},
-          alignment: {},
-          sp1: { name: '---------' }
-        },
-      },
-
-      minRows: 5,
-      maxCols: 4,
-      licenseKey: 'non-commercial-and-evaluation',
+    this.rawDataTableSettings = {
+      ...this.rawDataTableSettings,
+      ...this.dataTableService.dataTableStaticSettings,
     };
   }
 
@@ -151,7 +129,8 @@ export class DataTablesComponent implements OnInit {
     );
   }
 
-  onSubmit(): void { // form instructions on submit...
+  // instructions for what to do on form submit...
+  onSubmit(): void {
     this.rawDataTable = this.dataTableService.generateRawDataTable(
       this.rawData,
       this.curveStraighteningInstructionsForm,
@@ -261,7 +240,7 @@ export class DataTablesComponent implements OnInit {
     this.rawDataTableRefTest.hotTableRef.updateHotTable(settings);
   }
 
-  private validateHandsontable(): void{
+  private validateHandsontable(): void {
     let dataArray = this.hotRegisterer
       .getInstance(this.rawDataTableHandsontableID)
       .getData();
@@ -276,7 +255,7 @@ export class DataTablesComponent implements OnInit {
       // default error message for table without anything filled in yet
       this.invalidTableErrorMsg = Constants.FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
     }
-    
+
     // console.log("rawdata", this.rawData)
   }
 
