@@ -121,6 +121,6 @@ export class DataStorageService {
 
   private handleError(error: Response | any) {
     console.error('DataStorageService::handleError', error);
-    return throwError(error.message);
+    return throwError(() => error.message);
   }
 }
