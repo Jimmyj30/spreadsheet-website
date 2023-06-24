@@ -1,10 +1,10 @@
 <div fxLayout="column" fxLayoutGap="20px" class="container">
   <div class="vertical-margin right-outline">
-    <hot-table
-      #rawDataTableRef
+    <app-data-table
+      #rawDataTableRefTest
       [hotId]="rawDataTableHandsontableID"
-      [settings]="rawDataTableSettings"
-    ></hot-table>
+      [hotSettings]="rawDataTableSettings"
+    ></app-data-table>
   </div>
   <div class="vertical-margin">
     <div>Curve straightening instructions for processed data table:</div>
@@ -43,11 +43,11 @@
     *ngIf="processedDataTable && !loading"
     class="vertical-margin right-outline"
   >
-    <hot-table
-      #processedDataTableRef
+    <app-data-table
+      #processedDataTableRefTest
       [hotId]="processedDataTableHandsontableID"
-      [settings]="processedDataTableSettings"
-    ></hot-table>
+      [hotSettings]="processedDataTableSettings"
+    ></app-data-table>
   </div>
   <div class="vertical-margin" *ngIf="processedDataTable">
     <!-- to avoid processedDataTableSettings being undefined, we will 

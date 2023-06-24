@@ -59,7 +59,7 @@ export class AuthService {
 
   logout() {
     localStorage.clear();
-    this.user.next(null);
+    this.user.next(null); // using .next() on a BehaviorSubject sets its value
     this.router.navigate(['/auth']);
 
     if (this.tokenExpirationTimer) {

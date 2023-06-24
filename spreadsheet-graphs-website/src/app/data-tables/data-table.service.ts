@@ -4,6 +4,7 @@ import { DataPoint } from './models/data-point.model';
 import { DataTable } from './models/data-table.model';
 import { Constants } from '../shared/constants';
 import { DataStorageService } from '../shared/data-storage.service';
+import { GridSettings } from 'handsontable/settings';
 
 @Injectable({ providedIn: 'root' })
 export class DataTableService {
@@ -12,6 +13,28 @@ export class DataTableService {
   dataTableDefaultColumnValues = Constants.dataTableDefaultColumnValues;
   rawDataTableColHeaders = Constants.rawDataTableColHeaders;
   processedDataTableColHeaders = Constants.processedDataTableColHeaders;
+
+  dataTableFormXOptions: string[] = ['x', 'ln(x)', 'log_10(x)', 'x^a'];
+  dataTableFormYOptions: string[] = ['y', 'ln(y)', 'log_10(y)', 'y^a'];
+
+  // "static" configuration settings
+  // for the raw data table (and the processed one too)
+  // in data-tables.component.ts
+  dataTableStaticSettings: GridSettings = {
+    filters: true,
+    fillHandle: Constants.fillHandleSettings,
+    manualColumnResize: true,
+    manualRowResize: true,
+    wordWrap: true,
+    preventOverflow: 'horizontal',
+
+    contextMenu: ['row_above', 'row_below', 'remove_row'],
+    dropdownMenu: Constants.dropdownMenuItems,
+
+    minRows: 5,
+    maxCols: 4,
+    licenseKey: 'non-commercial-and-evaluation',
+  };
 
   createDataTable(dataTable: DataTable) {
     return this.api.createDataTable(dataTable);

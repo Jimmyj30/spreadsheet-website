@@ -1,7 +1,9 @@
+import Core from "handsontable/core";
+
 export class DropdownMenuItem {
   name: string;
-  disabled?: Function;
-  callback: Function;
+  disabled?: (this: Core) => boolean;
+  callback: (key: any, selection: any, clickEvent: any) => void;
 
   constructor(values: Object = {}) {
     Object.assign(this, values);

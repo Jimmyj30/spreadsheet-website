@@ -10,6 +10,7 @@ import { AuthService } from '../auth/auth.service';
 export class HeaderComponent implements OnInit, OnDestroy {
   private userSub: Subscription;
   isAuthenticated = false;
+  userEmail = undefined;
 
   constructor(private authService: AuthService) {}
 
@@ -20,7 +21,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   onLogout() {
-    if (confirm('Are you sure you want to logout?')) {
+    this.authService.user.subscribe(user => (this.userEmail = user?.email));
+    if (confirm(`Are you sure you want to logout as user ${this.userEmail}?`)) {
       this.authService.logout();
     }
   }

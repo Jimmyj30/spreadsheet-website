@@ -13,8 +13,9 @@ import { DataTable } from './models/data-table.model';
 import { numberFractionValidator } from '../shared/number-fraction.directive';
 import { ErrorHandlingService } from '../shared/error-handling.service';
 import { Constants } from '../shared/constants';
-import { DropdownMenuItem } from './models/dropdown-menu-item.model';
 import { DataPoint } from './models/data-point.model';
+import { DataTableComponent } from './data-table/data-table.component';
+import { GridSettings } from 'handsontable/settings';
 
 @Component({
   selector: 'app-data-tables',
@@ -25,7 +26,7 @@ export class DataTablesComponent implements OnInit {
   private hotRegisterer = new HotTableRegisterer();
 
   rawData: DataPoint[];
-  rawDataTableSettings;
+  rawDataTableSettings: GridSettings;
   rawDataTable: DataTable;
   rawDataTableHandsontableID = 'rawDataTable';
 
@@ -36,28 +37,31 @@ export class DataTablesComponent implements OnInit {
 
   showXToConstantPower: boolean;
   showYToConstantPower: boolean;
-  xOptions: string[] = ['x', 'ln(x)', 'log_10(x)', 'x^a']; // move things like this to a constants file
-  yOptions: string[] = ['y', 'ln(y)', 'log_10(y)', 'y^a'];
 
   // we don't use validators for the form here as the first option is selected by default
   curveStraighteningInstructionsForm: UntypedFormGroup = this.fb.group({
     xCurveStraighteningInstructions: new UntypedFormControl(
-      this.xOptions[0],
+      this.dataTableService.dataTableFormXOptions[0],
       []
     ),
     xToConstantPower: new UntypedFormControl('', []),
     yCurveStraighteningInstructions: new UntypedFormControl(
-      this.yOptions[0],
+      this.dataTableService.dataTableFormYOptions[0],
       []
     ),
     yToConstantPower: new UntypedFormControl('', []),
   });
 
-  @ViewChild('processedDataTableRef', { static: false })
-  processedDataTableRef: HotTableComponent;
+  @ViewChild('rawDataTableRefTest', { static: false })
+  rawDataTableRefTest: DataTableComponent;
 
-  @ViewChild('rawDataTableRef', { static: false })
-  rawDataTableRef: HotTableComponent;
+  @ViewChild('processedDataTableRefTest', { static: false })
+  processedDataTableRefTest: DataTableComponent;
+
+  // @ViewChild('processedDataTableRef', { static: false })
+  //    processedDataTableRef: HotTableComponent;
+  // @ViewChild('rawDataTableRef', { static: false })
+  //    rawDataTableRef: HotTableComponent;
 
   error: string; //general error message
   errorClass: string;
@@ -83,31 +87,11 @@ export class DataTablesComponent implements OnInit {
       afterChange: (changes) => this.validateHandsontable(),
       afterRemoveRow: (changes) => this.validateHandsontable(),
       afterCreateRow: (changes) => this.validateHandsontable(),
+    };
 
-      filters: true,
-      fillHandle: {
-        direction: 'vertical',
-        autoInsertRow: true,
-      },
-      manualColumnResize: true,
-      manualRowResize: true,
-      wordWrap: true,
-      preventOverflow: 'horizontal',
-
-      contextMenu: ['row_above', 'row_below', 'remove_row'],
-      dropdownMenu: {
-        items: {
-          clear_column: {},
-          alignment: {},
-          sp1: { name: '---------' },
-          increaseMantissa: this.generateIncreaseMantissa('rawDataTable'),
-          decreaseMantissa: this.generateDecreaseMantissa('rawDataTable'),
-        },
-      },
-
-      minRows: 5,
-      maxCols: 4,
-      licenseKey: 'non-commercial-and-evaluation',
+    this.rawDataTableSettings = {
+      ...this.rawDataTableSettings,
+      ...this.dataTableService.dataTableStaticSettings,
     };
   }
 
@@ -145,8 +129,8 @@ export class DataTablesComponent implements OnInit {
     );
   }
 
+  // instructions for what to do on form submit...
   onSubmit(): void {
-    // form instructions...
     this.rawDataTable = this.dataTableService.generateRawDataTable(
       this.rawData,
       this.curveStraighteningInstructionsForm,
@@ -227,21 +211,15 @@ export class DataTablesComponent implements OnInit {
     );
     this.processedDataTableSettings.data = processedDataTable.dataTableData;
     this.processedDataTableSettings.contextMenu = false;
-
     this.processedDataTableSettings.colHeaders =
       this.dataTableService.processedDataTableColHeaders;
+
     // the processed data table will have an _id attached to it that should
     // not be displayed as a column, so we will specify which columns are displayed here
+    // through the <DATA TABLE SETTINGS>.columns field
     for (var i = 0; i < this.processedDataTableSettings.columns.length; ++i) {
       this.processedDataTableSettings.columns[i].readOnly = true;
     }
-
-    this.processedDataTableSettings.dropdownMenu = {
-      items: {
-        increaseMantissa: this.generateIncreaseMantissa('processedDataTable'),
-        decreaseMantissa: this.generateDecreaseMantissa('processedDataTable'),
-      },
-    };
     // console.log('processed data table settings: ', this.processedDataTableSettings);
   }
 
@@ -253,84 +231,16 @@ export class DataTablesComponent implements OnInit {
   }
 
   private refreshProcessedDataTable(settings): void {
-    this.processedDataTableRef.updateHotTable(settings);
+    // this.processedDataTableRef.updateHotTable(settings);
+    this.processedDataTableRefTest.hotTableRef.updateHotTable(settings);
   }
 
   private refreshRawDataTable(settings): void {
-    this.rawDataTableRef.updateHotTable(settings);
+    // this.rawDataTableRef.updateHotTable(settings);
+    this.rawDataTableRefTest.hotTableRef.updateHotTable(settings);
   }
 
-  private generateIncreaseMantissa(dataTableName: string): DropdownMenuItem {
-    return {
-      name: 'Increase column decimal places by one', // can be string or function...
-      callback: (key, selection, clickEvent) => {
-        // selection[0].end.col  and selection[0].start.col should be the same
-        // as this dropdown menu can only select an entire column
-        this.increaseMantissa(selection[0].end.col, dataTableName);
-      },
-    };
-  }
-
-  private generateDecreaseMantissa(dataTableName: string): DropdownMenuItem {
-    return {
-      name: 'Decrease column decimal places by one',
-      disabled: () => {
-        return !this.canDecreaseMantissa(dataTableName);
-      },
-      callback: (key, selection, clickEvent) => {
-        this.decreaseMantissa(selection[0].end.col, dataTableName);
-      },
-    };
-  }
-
-  // you can shift the decimal place left as many times as you want
-  // so there is no validity check for this operation
-  private increaseMantissa(columnIndex, dataTable: string) {
-    let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
-
-    this[`${dataTableVar}Settings`].columns[
-      columnIndex
-    ].numericFormat.pattern.mantissa += 1;
-    this.hotRegisterer
-      .getInstance(this[`${dataTableVar}HandsontableID`])
-      .render();
-  }
-
-  // dataTable param has to either be "rawDataTable" or "processedDataTable"
-  private decreaseMantissa(columnIndex, dataTable: string) {
-    let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
-
-    let colMantissa =
-      this[`${dataTableVar}Settings`].columns[columnIndex].numericFormat.pattern
-        .mantissa;
-
-    if (colMantissa !== 0) {
-      this[`${dataTableVar}Settings`].columns[
-        columnIndex
-      ].numericFormat.pattern.mantissa -= 1;
-      this.hotRegisterer
-        .getInstance(this[`${dataTableVar}HandsontableID`])
-        .render();
-    }
-  }
-
-  private canDecreaseMantissa(dataTable: string): boolean {
-    let dataTableVar = this.dataTableService.findDataTableVar(dataTable);
-
-    if (this[`${dataTableVar}Settings`]) {
-      let colIndex = this.hotRegisterer
-        .getInstance(this[`${dataTableVar}HandsontableID`])
-        .getSelectedRangeLast().from.col;
-      let colMantissa =
-        this[`${dataTableVar}Settings`].columns[colIndex].numericFormat.pattern
-          .mantissa;
-
-      return colMantissa >= 1; // we can shift right as long as mantissa is >= 1
-    }
-    return false;
-  }
-
-  private validateHandsontable() {
+  private validateHandsontable(): void {
     let dataArray = this.hotRegisterer
       .getInstance(this.rawDataTableHandsontableID)
       .getData();
@@ -345,6 +255,8 @@ export class DataTablesComponent implements OnInit {
       // default error message for table without anything filled in yet
       this.invalidTableErrorMsg = Constants.FILL_OUT_SPREADSHEET_FULLY_MESSAGE;
     }
+
+    // console.log("rawdata", this.rawData)
   }
 
   private setDataTableData(res): void {
